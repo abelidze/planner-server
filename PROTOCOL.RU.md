@@ -79,6 +79,7 @@ API GCM на данный момент могло обновиться, поэт
 | event_id    | uint, required      | ID события                       |
 | type        | char, required      | Тип правила: RRULE[0], EXRULE[1] |
 | year        | int, optional       | Год, cron-формат                 |
+| weekday     | int, optional       | День недели, cron-формат         |
 | month       | int, optional       | Месяц, cron-формат               |
 | day         | int, optional       | День, cron-формат                |
 | hour        | int, optional       | Час, cron-формат                 |
