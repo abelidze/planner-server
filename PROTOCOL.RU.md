@@ -12,9 +12,12 @@ Content-Type: application/json и application/x-www-form-urlencoded <br />
 ### Аутентификация
 - OAuth 2.0, для предоставления доступа к API необходимо авторизовать приложение и получить сервисный ключ. <br />
 Подробнее про OAuth2: [docs](https://oauth.net/2/), [habr](https://habr.com/ru/company/mailru/blog/115163/)
-- Альтернатива - использовать вечный API-token на приложение (клиент)
+- Альтернатива - использовать вечный API-токен на приложение (клиент)
 - Для авторизации пользователей в клиенте можно использовать OAuth Google, [habr](https://habr.com/ru/post/325518/), [docs](https://developers.google.com/identity/protocols/OAuth2), [example](https://developers.google.com/identity/sign-in/android/backend-auth). <br />
 Что будет для iOS - дискас.
+- Получив API-токен, его необходимо добавлять в header каждого запроса к API: <br />
+`Authorization: Bearer <access_token>`
+
 
 **User** - пользователь
 
@@ -27,7 +30,8 @@ Content-Type: application/json и application/x-www-form-urlencoded <br />
 | email | string, email, optional | Почта пользователя, используется при добавлении участников задач          |
 
 ### Напоминания
-- Используют Google Cloud Messaging [GCM]. Для общего понимания можно почитать:
+Используют Google Cloud Messaging [GCM]. Для общего понимания можно почитать:
+
 * https://javapapers.com/android/google-cloud-messaging-gcm-for-android-and-push-notifications
 * https://code.tutsplus.com/ru/tutorials/how-to-get-started-with-push-notifications-on-android--cms-25870
 
@@ -39,7 +43,7 @@ API GCM на данный момент могло обновиться, поэт
 Для лучшего понимания архитектуры и внесения обоснованных изменений рекомендуется ознакомиться со
 [спецификацией iCalendar](https://www.kanzaki.com/docs/ical/).
 
-Для периодических событий используется cron-формат (арифметические операции не поддерживаются).
+Для периодических событий используется CRON-формат (с полной поддержкой арифметических операций).
 
 
 **Task** - задача
@@ -49,7 +53,7 @@ API GCM на данный момент могло обновиться, поэт
 | id          | uint, required      | Уникальный ID задачи                     |
 | name        | string, optional    | Название задачи                          |
 | details     | string, optional    | Описание задачи                          |
-| status      | int, required       | Текущий статус задачи, enum              |
+| status      | char, required      | Текущий статус задачи, enum              |
 | event_id    | uint, optional      | ID события, за которым закреплена задача |
 | parent_id   | uint, optional      | ID родительской задачи                   |
 | deadline_at | timestamp, required | Крайний срок выполнения задачи           |
@@ -65,7 +69,7 @@ API GCM на данный момент могло обновиться, поэт
 | owner_id   | uint, required      | ID создателя события          |
 | name       | string, optional    | Название события              |
 | details    | string, optional    | Описание события              |
-| status     | int, required       | Текущий статус события, enum  |
+| status     | char, required      | Текущий статус события, enum  |
 | location   | string, optional    | Место события                 |
 | created_at | timestamp, optional | Дата-время создания события   |
 | updated_at | timestamp, optional | Дата-время обновления события |
@@ -73,24 +77,33 @@ API GCM на данный момент могло обновиться, поэт
 
 **EventPattern** - описывает RRULE, RDATE, EXRULE и EXDATE правила для события
 
-| Name        | Type                | Description                      |
-|-------------|---------------------|----------------------------------|
-| id          | uint, required      | Уникальный ID правила            |
-| event_id    | uint, required      | ID события                       |
-| type        | char, required      | Тип правила: RRULE[0], EXRULE[1] |
-| year        | int, optional       | Год, cron-формат                 |
-| weekday     | int, optional       | День недели, cron-формат         |
-| month       | int, optional       | Месяц, cron-формат               |
-| day         | int, optional       | День, cron-формат                |
-| hour        | int, optional       | Час, cron-формат                 |
-| minute      | int, optional       | Минута, cron-формат              |
-| started_at  | timestamp, optional | Час, cron-формат                 |
-| finished_at | timestamp, optional | Минута, cron-формат              |
-| created_at  | timestamp, optional | Дата-время создания правила      |
-| updated_at  | timestamp, optional | Дата-время обновления правила    |
+| Name        | Type                | Description                                                                      |
+|-------------|---------------------|----------------------------------------------------------------------------------|
+| id          | uint, required      | Уникальный ID правила                                                            |
+| event_id    | uint, required      | ID события                                                                       |
+| type        | char, required      | Тип правила: RRULE[0], EXRULE[1]                                                 |
+| year        | string, optional    | Год, CRON-формат                                                                 |
+| weekday     | string, optional    | День недели, CRON-формат                                                         |
+| month       | string, optional    | Месяц, CRON-формат                                                               |
+| day         | string, optional    | День, CRON-формат                                                                |
+| hour        | string, optional    | Час, CRON-формат                                                                 |
+| minute      | string, optional    | Минута, CRON-формат                                                              |
+| duration    | timestamp, optional | Продолжительность события. Если NULL, то равна времени, оставшемуся до конца дня |
+| started_at  | timestamp, optional | Дата-время начала события, NULL если задан CRON-формат                           |
+| created_at  | timestamp, optional | Дата-время создания правила                                                      |
+| updated_at  | timestamp, optional | Дата-время обновления правила                                                    |
 
 
 **Tag** - теги событий (задач?)
+
+| Name       | Type                | Description                              |
+|------------|---------------------|------------------------------------------|
+| id         | uint, required      | Уникальный ID тега                       |
+| name       | string, required    | Название тега                            |
+| slug       | string, required    | Уникальное ключевое слово тега, латиница |
+| created_at | timestamp, optional | Дата-время создания тега                 |
+| updated_at | timestamp, optional | Дата-время обновления тега               |
+
 
 **EventToTag** - m2m связь событий и тегов
 
@@ -110,6 +123,8 @@ API GCM на данный момент могло обновиться, поэт
 > Авторизует пользователя с помощью полученного от Google Sign-In токена (альтернативные сервисы на рассмотрении).
 > Ключ будет проверен на валидность.
 > В случае успеха вернет OAuth-ключ для доступа к API.
+> Полученный `access_token` необходимо передавать в header каждого API-запроса в виде:<br />
+> `Authorization: Bearer <access_token>`
 
 **Параметры**
 
@@ -131,7 +146,85 @@ API GCM на данный момент могло обновиться, поэт
 ----------------------------------------------------------------------------------------------------------------------
 
 
-`GET|POST|PUT|DELETE /api/events`
+`GET /api/events`
+> Возвращает коллекцию событий, поддерживает пагинацию.
+
+**Параметры**
+
+| Field        | Type                | Description                                                              |
+|--------------|---------------------|--------------------------------------------------------------------------|
+| id           | uint[], optional    | Массив из ID событий, которые необходимо рассмотреть                     |
+| parent_id    | uint, optional      | ID события-родителя. Будут возвращены только дети указанного события     |
+| user_id      | uint, optional      | ID пользователя, которому события принадлежат                            |
+| tags         | string[], optional  | Теги, которым события принадлежат (дискас - пересечение или объединение) |
+| count        | uint, optional      | Количество событий, которое необходимо вернуть. По умолчанию: 100.       |
+| offset       | uint, optinal       | Количество событий, которое необходимо пропустить. По умолчанию: 0.      |
+| started_from | timestamp, optional | Дата-время, после которого события начнутся (включительно)               |
+| started_to   | timestamp, optional | Дата-время, до которого события начнутся (включительно)                  |
+| created_from | timestamp, optional | Дата-время, после которого события были созданы (включительно)           |
+| created_to   | timestamp, optional | Дата-время, до которого события были созданы (включительно)              |
+| updated_from | timestamp, optional | Дата-время, после которого события были обновлены (включительно)         |
+| updated_to   | timestamp, optional | Дата-время, до которого события были обновлены (включительно)            |
+
+**HTTP 200**
+```
+{
+   "result":
+   [
+      {
+         "id": "...",
+         "owner_id": "...",
+         "name": "...",
+         "details": "...",
+         "status": "...",
+         "location": "...",
+         "tags": [ "tagslug", ... ],
+         "created_at": "...",
+         "updated_at": "...",
+      },
+      ...
+   ],
+   "count": 2,
+   "offset": 0
+}
+```
+
+----------------------------------------------------------------------------------------------------------------------
+
+
+`POST /api/events`
+> Создание новых событий.
+
+**Параметры**
+
+| Field    | Type                     | Description                                                     |
+|----------|--------------------------|-----------------------------------------------------------------|
+| name     | string, optional         | Название события                                                |
+| details  | string, optional         | Описание события                                                |
+| location | string, optional         | Место события                                                   |
+| tags     | Tag[], optional          | Теги события. В случае, если тег отсутствует - он будет создан  |
+| patterns | EventPattern[], optional | Экземпляры EventPattern, которые необходимо создать для события |
+
+**HTTP 200**
+```
+{
+   "result":
+   [
+      {
+         "id": 1,
+         "status": "...",
+         "created_at": "..."
+      },
+      ...
+   ],
+   "count": 10
+}
+```
+
+----------------------------------------------------------------------------------------------------------------------
+
+
+`PUT|DELETE /api/events`
 > ...
 
 **Параметры**
@@ -207,7 +300,7 @@ API GCM на данный момент могло обновиться, поэт
 ----------------------------------------------------------------------------------------------------------------------
 
 
-`POST /api/tag/subscribe`
+`GET /api/tags`
 > ...
 
 **Параметры**
@@ -226,8 +319,27 @@ API GCM на данный момент могло обновиться, поэт
 ----------------------------------------------------------------------------------------------------------------------
 
 
-`POST /api/tag/unsubscribe`
-> ...
+`GET /api/tags/subscribe`
+> Подписка пользователя на переданные теги
+
+**Параметры**
+
+| Field   | Type             | Description                                 |
+|---------|------------------|---------------------------------------------|
+| ...     | string, required | ...                                         |
+
+**HTTP 200**
+```
+{
+   "...": "..."
+}
+```
+
+----------------------------------------------------------------------------------------------------------------------
+
+
+`GET /api/tags/unsubscribe`
+> Отписка пользователя от переданных тегов
 
 **Параметры**
 
