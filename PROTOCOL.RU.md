@@ -155,9 +155,10 @@ API GCM на данный момент могло обновиться, поэт
 
 **Параметры**
 
-| Field         | Type             | Description                                 |
-|---------------|------------------|---------------------------------------------|
-| refresh_token | string, required | ID-токен для аутентификации                 |
+| Field         | Type             | Description                    |
+|---------------|------------------|--------------------------------|
+| access_token  | string, required | Старый `access_token`          |
+| refresh_token | string, required | `refresh_token` для обновления |
 
 **HTTP 200**
 ```
