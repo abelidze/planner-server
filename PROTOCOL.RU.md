@@ -90,8 +90,8 @@ API GCM на данный момент могло обновиться, поэт
 | hour        | string, optional    | Час, CRON-формат                                                                 |
 | minute      | string, optional    | Минута, CRON-формат                                                              |
 | duration    | timestamp, optional | Продолжительность события. Если NULL, то равна времени, оставшемуся до конца дня |
-| started_at  | timestamp, optional | Дата-время начала события / начала повтора событий                               |
-| ended_at    | timestamp, optional | Дата-время конца события / конца повтора событий                                 |
+| started_at  | timestamp, optional | Дата-время начала события / правила                                              |
+| ended_at    | timestamp, optional | Дата-время конца события / правила                                               |
 | created_at  | timestamp, optional | Дата-время создания правила                                                      |
 | updated_at  | timestamp, optional | Дата-время обновления правила                                                    |
 
