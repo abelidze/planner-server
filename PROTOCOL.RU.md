@@ -1,6 +1,6 @@
 # API-reference для приложения-календаря
 
-TODO: request examples
+TODO: request examples<br />
 TODO: work with timezones
 
 Работа с API будет проходить с помощью HTTP-запросов <br />
