@@ -1,14 +1,14 @@
 package com.skillmasters.server.model;
 
-// import lombok.Data;
+import lombok.Data;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
-// @Data
+@Data
 @Entity
-class Task
+public class Task
 {
   private @Id @GeneratedValue Long id;
   private Long eventId;

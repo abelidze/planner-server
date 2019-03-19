@@ -1,5 +1,8 @@
 package com.skillmasters.server.controller;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -7,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -17,36 +20,42 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
+import com.skillmasters.server.repository.EventRepository;
+import com.skillmasters.server.model.Event;
+
 @RestController
 @RequestMapping("/api/v1")
 @Api(tags="Events", description="planer's events")
 public class EventController
 {
-  @ApiOperation(value = "Get a list of available events", response = String.class)
+  @Autowired
+  EventRepository repository;
+
+  @ApiOperation(value = "Get a list of available events", response = Event.class, responseContainer="List")
   @GetMapping("/events")
-  public String retrieve(@RequestParam(value="id", defaultValue="0") Integer id)
+  public List<Event> retrieve(@RequestParam(value="ids", defaultValue="") List<Long> ids)
   {
-    return "retrieve";
+    return repository.all();
   }
 
-  @ApiOperation(value = "Create event", response = String.class)
+  @ApiOperation(value = "Create event", response = Event.class)
   @PostMapping("/events")
-  public String create(@RequestParam(value="id", defaultValue="0") Integer id)
+  public Event create(@RequestBody Event event)
   {
-    return "create";
+    return repository.add(event);
   }
 
-  @ApiOperation(value = "Update event", response = String.class)
-  @PatchMapping("/events")
-  public String update(@RequestParam(value="id", defaultValue="0") Integer id)
+  @ApiOperation(value = "Update event", response = Event.class)
+  @PutMapping("/events")
+  public Event update(@RequestParam(value="id") Long id, Event event)
   {
-    return "update";
+    return repository.update(id, event);
   }
 
-  @ApiOperation(value = "Delete event", response = String.class)
+  @ApiOperation(value = "Delete event")
   @DeleteMapping("/events")
-  public String delete(@RequestParam(value="id", defaultValue="0") Integer id)
+  public void delete(@RequestParam(value="id") Long id)
   {
-    return "delete";
+    repository.delete(id);
   }
 }

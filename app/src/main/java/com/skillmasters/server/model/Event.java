@@ -1,16 +1,21 @@
 package com.skillmasters.server.model;
 
-// import lombok.Data;
+import lombok.Data;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
-// @Data
+import io.swagger.annotations.ApiModelProperty;
+
+@Data
 @Entity
-class Event
+public class Event
 {
-  private @Id @GeneratedValue Long id;
+  @Id
+  @GeneratedValue
+  @ApiModelProperty(hidden=true)
+  private Long id;
   private Long ownerId;
   private String name;
   private String details;
@@ -19,8 +24,17 @@ class Event
   // private Date createdAt;
   // private Date updatedAt;
 
-  Event(String name)
+  Event()
   {
+    // default
+  }
+
+  Event(Long ownerId, String name, String details, String status, String location)
+  {
+    this.ownerId = ownerId;
     this.name = name;
+    this.details = details;
+    this.status = status;
+    this.location = location;
   }
 }

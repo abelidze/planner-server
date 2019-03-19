@@ -53,7 +53,7 @@ public class ServerApplication
   {
     SpringApplication.run(ServerApplication.class, args);
   }
-  
+
   @Autowired
   private TypeResolver typeResolver;
 
