@@ -6,11 +6,16 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
+import io.swagger.annotations.ApiModelProperty;
+
 @Data
 @Entity
 public class Task
 {
-  private @Id @GeneratedValue Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @ApiModelProperty(hidden=true)
+  private Long id;
   private Long eventId;
   private Long parentId;
   private String name;
@@ -20,8 +25,17 @@ public class Task
   // private Date createdAt;
   // private Date updatedAt;
 
-  Task(String name)
+  Task()
   {
+    // default
+  }
+
+  Task(Long eventId, Long parentId, String name, String details, String status)
+  {
+    this.eventId = eventId;
+    this.parentId = parentId;
     this.name = name;
+    this.details = details;
+    this.status = status;
   }
 }

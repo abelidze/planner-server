@@ -1,8 +1,9 @@
-package com.skillmasters.server.controller;
+package com.skillmasters.server.http.controller;
 
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -46,15 +47,15 @@ public class EventController
   }
 
   @ApiOperation(value = "Update event", response = Event.class)
-  @PutMapping("/events")
-  public Event update(@RequestParam(value="id") Long id, Event event)
+  @PutMapping("/events/{id}")
+  public Event update(@PathVariable Long id, Event event)
   {
     return repository.update(id, event);
   }
 
   @ApiOperation(value = "Delete event")
-  @DeleteMapping("/events")
-  public void delete(@RequestParam(value="id") Long id)
+  @DeleteMapping("/events/{id}")
+  public void delete(@PathVariable Long id)
   {
     repository.delete(id);
   }

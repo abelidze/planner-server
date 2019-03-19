@@ -1,4 +1,4 @@
-package com.skillmasters.server.controllers;
+package com.skillmasters.server.http.controllers;
 
 import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,7 +22,7 @@ import io.swagger.annotations.ApiResponses;
 @RestController
 @RequestMapping("/api/v1")
 @Api(tags="Testing", description="Some description about testing...")
-public class SimpleController
+public class TestController
 {
     private static final String template = "Hello, %s!";
     private final AtomicLong counter = new AtomicLong();

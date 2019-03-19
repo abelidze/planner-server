@@ -12,26 +12,31 @@ import com.skillmasters.server.model.Task;
 public class TaskRepository
 {
   private List<Task> tasks = new ArrayList<Task>();
-  
+
+  public List<Task> all()
+  {
+    return tasks;
+  }
+
   public Task add(Task task)
   {
     task.setId((long) (tasks.size()+1));
     tasks.add(task);
     return task;
   }
-  
+
   public Task update(Task task)
   {
     tasks.set(task.getId().intValue() - 1, task);
     return task;
   }
-  
+
   public Task update(Long id, Task task)
   {
     tasks.set(id.intValue() - 1, task);
     return task;
   }
-  
+
   public Task findById(Long id)
   {
     Optional<Task> task = tasks.stream().filter(a -> a.getId().equals(id)).findFirst();
@@ -41,7 +46,7 @@ public class TaskRepository
       return null;
     }
   }
-  
+
   public void delete(Long id)
   {
     tasks.remove(id.intValue());

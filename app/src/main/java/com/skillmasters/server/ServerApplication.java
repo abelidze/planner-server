@@ -63,7 +63,7 @@ public class ServerApplication
     return new Docket(DocumentationType.SWAGGER_2)
         .groupName("api-v1")
         .select()
-          .apis(RequestHandlerSelectors.basePackage("com.skillmasters.server"))
+          .apis(RequestHandlerSelectors.basePackage("com.skillmasters.server.http"))
           .paths(PathSelectors.regex("/api/v1.*"))
           .build()
         .apiInfo(new ApiInfoBuilder()
