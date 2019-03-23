@@ -4,7 +4,7 @@ import lombok.Data;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
+//import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -14,7 +14,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class Event
 {
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @GeneratedValue//(strategy = GenerationType.IDENTITY)
   @ApiModelProperty(hidden=true)
   private Long id;
   private Long ownerId;

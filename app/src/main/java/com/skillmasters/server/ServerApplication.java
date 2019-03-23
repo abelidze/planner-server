@@ -5,6 +5,9 @@ import java.util.HashSet;
 import java.util.List;
 import com.fasterxml.classmate.TypeResolver;
 
+import javax.sql.DataSource;
+
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -15,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.request.async.DeferredResult;
+import org.springframework.boot.jdbc.DataSourceBuilder;
 
 import static springfox.documentation.schema.AlternateTypeRules.newRule;
 import springfox.documentation.schema.WildcardType;
@@ -135,6 +139,25 @@ public class ServerApplication
     return Arrays.asList(
         new SecurityReference("mykey", authorizationScopes)
       );
+  }
+
+  @Bean
+  public DataSource dataSource()
+  {
+//    DriverManagerDataSource dataSource = new DriverManagerDataSource();
+//    dataSource.setDriverClassName("org.sqlite.JDBC");
+//    dataSource.setUsername("user");
+//    dataSource.setPassword("pass");
+//    dataSource.setUrl("jdbc:sqlite:memory:myDb?cache=shared");
+//    return dataSource;
+
+    DataSourceBuilder dataSourceBuilder = DataSourceBuilder.create();
+    dataSourceBuilder.driverClassName("org.sqlite.JDBC");
+//    dataSourceBuilder.username("root");
+//    dataSourceBuilder.password("");
+    dataSourceBuilder.url("jdbc:sqlite:database.sqlite");
+//    dataSourceBuilder.url("jdbc:sqlite:memory:myDb?cache=shared");
+    return dataSourceBuilder.build();
   }
 
   @Bean

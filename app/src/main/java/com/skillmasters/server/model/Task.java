@@ -13,7 +13,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class Task
 {
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @GeneratedValue
   @ApiModelProperty(hidden=true)
   private Long id;
   private Long eventId;

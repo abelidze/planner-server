@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -36,27 +37,28 @@ public class EventPatternController
   @GetMapping("/patterns")
   public List<EventPattern> retrieve(@RequestParam(value="ids", defaultValue="") List<Long> ids)
   {
-    return repository.all();
+    return repository.findAll();
   }
 
   @ApiOperation(value = "Create pattern", response = EventPattern.class)
   @PostMapping("/patterns")
   public EventPattern create(@RequestBody EventPattern pattern)
   {
-    return repository.add(pattern);
+    return repository.save(pattern);
   }
 
   @ApiOperation(value = "Update pattern", response = EventPattern.class)
   @PutMapping("/patterns/{id}")
   public EventPattern update(@PathVariable Long id, @RequestBody EventPattern pattern)
   {
-    return repository.update(id, pattern);
+    pattern.setId(id);
+    return repository.save(pattern);
   }
 
   @ApiOperation(value = "Delete pattern")
   @DeleteMapping("/patterns/{id}")
   public void delete(@PathVariable Long id)
   {
-    repository.delete(id);
+    repository.deleteById(id);
   }
 }

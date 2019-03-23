@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -36,27 +37,28 @@ public class TaskController
   @GetMapping("/tasks")
   public List<Task> retrieve(@RequestParam(value="ids", defaultValue="") List<Long> ids)
   {
-    return repository.all();
+    return repository.findAll();
   }
 
   @ApiOperation(value = "Create task", response = Task.class)
   @PostMapping("/tasks")
   public Task create(@RequestBody Task task)
   {
-    return repository.add(task);
+    return repository.save(task);
   }
 
   @ApiOperation(value = "Update task", response = Task.class)
   @PutMapping("/tasks/{id}")
   public Task update(@PathVariable Long id, @RequestBody Task task)
   {
-    return repository.update(id, task);
+    task.setId(id);
+    return repository.save(task);
   }
 
   @ApiOperation(value = "Delete task")
   @DeleteMapping("/tasks/{id}")
   public void delete(@PathVariable Long id)
   {
-    repository.delete(id);
+    repository.deleteById(id);
   }
 }
