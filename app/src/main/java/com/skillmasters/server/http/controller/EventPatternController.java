@@ -23,7 +23,9 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
 import com.skillmasters.server.repository.EventPatternRepository;
+import com.skillmasters.server.repository.EventRepository;
 import com.skillmasters.server.model.EventPattern;
+import com.skillmasters.server.model.Event;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -32,6 +34,9 @@ public class EventPatternController
 {
   @Autowired
   EventPatternRepository repository;
+
+  @Autowired
+  EventRepository eventRepository;
 
   @ApiOperation(value = "Get a list of available patterns", response = EventPattern.class, responseContainer="List")
   @GetMapping("/patterns")
