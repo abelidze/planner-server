@@ -88,25 +88,26 @@ public class ServerApplication
                 typeResolver.resolve(ResponseEntity.class, WildcardType.class)),
                 typeResolver.resolve(WildcardType.class)))
         .useDefaultResponseMessages(false)
-        .globalResponseMessage(RequestMethod.GET,
-            Arrays.asList(
-              new ResponseMessageBuilder()
-                .code(200)
-                .message("OK")
-                .build()
-              // new ResponseMessageBuilder()
-              //   .code(400)
-              //   .message("Bad Request")
-              //   .build(),
-              // new ResponseMessageBuilder() 
-              //   .code(403)
-              //   .message("Forbidden")
-              //   .build(),
-              // new ResponseMessageBuilder()
-              //   .code(500)
-              //   .message("Internal Error")
-              //   .build()
-            ))
+        // .globalResponseMessage(
+        //     RequestMethod.GET,
+        //     Arrays.asList(
+        //       new ResponseMessageBuilder()
+        //         .code(200)
+        //         .message("OK")
+        //         .build(),
+        //       new ResponseMessageBuilder()
+        //         .code(400)
+        //         .message("Bad Request")
+        //         .build(),
+        //       new ResponseMessageBuilder() 
+        //         .code(403)
+        //         .message("Forbidden")
+        //         .build(),
+        //       new ResponseMessageBuilder()
+        //         .code(500)
+        //         .message("Internal Error")
+        //         .build()
+        //     ))
         .securitySchemes(Arrays.asList(apiKey()))
         .securityContexts(Arrays.asList(securityContext()))
         .enableUrlTemplating(false);
