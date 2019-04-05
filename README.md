@@ -1,4 +1,4 @@
-# Planer-Server
+# Planner-Server
 
 API-reference [[ru](PROTOCOL.RU.md) | [en](PROTOCOL.EN.md)]
 
