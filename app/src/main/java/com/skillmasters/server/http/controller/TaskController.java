@@ -1,5 +1,6 @@
 package com.skillmasters.server.http.controller;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
+import com.skillmasters.server.http.response.TaskResponse;
 import com.skillmasters.server.repository.TaskRepository;
 import com.skillmasters.server.model.Task;
 
@@ -33,26 +35,26 @@ public class TaskController
   @Autowired
   TaskRepository repository;
 
-  @ApiOperation(value = "Get a list of available tasks", response = Task.class, responseContainer="List")
+  @ApiOperation(value = "Get a list of available tasks", response = TaskResponse.class)
   @GetMapping("/tasks")
-  public List<Task> retrieve(@RequestParam(value="ids", defaultValue="") List<Long> ids)
+  public TaskResponse retrieve(@RequestParam(value="ids", defaultValue="") List<Long> ids)
   {
-    return repository.findAll();
+    return new TaskResponse().success( repository.findAll() );
   }
 
-  @ApiOperation(value = "Create task", response = Task.class)
+  @ApiOperation(value = "Create task", response = TaskResponse.class)
   @PostMapping("/tasks")
-  public Task create(@RequestBody Task task)
+  public TaskResponse create(@RequestBody Task task)
   {
-    return repository.save(task);
+    return new TaskResponse().success( Arrays.asList(repository.save(task)) );
   }
 
-  @ApiOperation(value = "Update task", response = Task.class)
+  @ApiOperation(value = "Update task", response = TaskResponse.class)
   @PutMapping("/tasks/{id}")
-  public Task update(@PathVariable Long id, @RequestBody Task task)
+  public TaskResponse update(@PathVariable Long id, @RequestBody Task task)
   {
     task.setId(id);
-    return repository.save(task);
+    return new TaskResponse().success( Arrays.asList(repository.save(task)) );
   }
 
   @ApiOperation(value = "Delete task")

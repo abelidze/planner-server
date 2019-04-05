@@ -1,5 +1,6 @@
 package com.skillmasters.server.http.controller;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
+import com.skillmasters.server.http.response.EventResponse;
 import com.skillmasters.server.repository.EventRepository;
 import com.skillmasters.server.model.Event;
 
@@ -33,26 +35,26 @@ public class EventController
   @Autowired
   EventRepository repository;
 
-  @ApiOperation(value = "Get a list of available events", response = Event.class, responseContainer="List")
+  @ApiOperation(value = "Get a list of available events", response = EventResponse.class)
   @GetMapping("/events")
-  public List<Event> retrieve(@RequestParam(value="ids", defaultValue="") List<Long> ids)
+  public EventResponse retrieve(@RequestParam(value="ids", defaultValue="") List<Long> ids)
   {
-    return repository.findAll();
+    return new EventResponse().success( repository.findAll() );
   }
 
-  @ApiOperation(value = "Create event", response = Event.class)
+  @ApiOperation(value = "Create event", response = EventResponse.class)
   @PostMapping("/events")
-  public Event create(@RequestBody Event event)
+  public EventResponse create(@RequestBody Event event)
   {
-    return repository.save(event);
+    return new EventResponse().success( Arrays.asList(repository.save(event)) );
   }
 
-  @ApiOperation(value = "Update event", response = Event.class)
+  @ApiOperation(value = "Update event", response = EventResponse.class)
   @PutMapping("/events/{id}")
-  public Event update(@PathVariable Long id, @RequestBody  Event event)
+  public EventResponse update(@PathVariable Long id, @RequestBody Event event)
   {
     event.setId(id);
-    return repository.save(event);
+    return new EventResponse().success( Arrays.asList(repository.save(event)) );
   }
 
   @ApiOperation(value = "Delete event")
