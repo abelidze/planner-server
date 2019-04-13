@@ -53,7 +53,7 @@ public class TaskController
   @PutMapping("/tasks/{id}")
   public TaskResponse update(@PathVariable Long id, @RequestBody Task task)
   {
-    task.setId(id);
+    // task.setId(id);
     return new TaskResponse().success( Arrays.asList(repository.save(task)) );
   }
 

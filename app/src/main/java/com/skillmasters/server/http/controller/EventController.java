@@ -53,7 +53,7 @@ public class EventController
   @PutMapping("/events/{id}")
   public EventResponse update(@PathVariable Long id, @RequestBody Event event)
   {
-    event.setId(id);
+    // event.setId(id);
     return new EventResponse().success( Arrays.asList(repository.save(event)) );
   }
 
