@@ -61,7 +61,7 @@ public class EventPatternController
   @PutMapping("/patterns/{id}")
   public EventPatternResponse update(@PathVariable Long id, @RequestBody EventPattern pattern)
   {
-    pattern.setId(id);
+    // pattern.setId(id);
     return new EventPatternResponse().success(Arrays.asList( repository.save(pattern) ));
   }
 

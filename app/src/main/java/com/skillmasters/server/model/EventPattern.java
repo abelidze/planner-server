@@ -4,12 +4,14 @@ import lombok.Data;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.JoinColumn;
 import javax.validation.constraints.NotNull;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -18,13 +20,14 @@ import io.swagger.annotations.ApiModelProperty;
 public class EventPattern
 {
   @Id
-  @GeneratedValue
+  @GeneratedValue(strategy = GenerationType.AUTO)
   @ApiModelProperty(hidden=true)
   private Long id;
 
   @ManyToOne
   @JoinColumn(name = "event_id", nullable = false)
   @OnDelete(action = OnDeleteAction.CASCADE)
+  @JsonBackReference
   private Event eventId;
   private String type;
   private String year;

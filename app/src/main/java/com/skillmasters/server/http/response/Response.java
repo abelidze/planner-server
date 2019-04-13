@@ -6,10 +6,12 @@ import java.util.HashMap;
 import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Data
 public class Response<T extends Response<?>>
 {
+  @JsonBackReference
   protected final T self;
 
   protected Boolean success;

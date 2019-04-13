@@ -27,8 +27,8 @@ public class EventResponse extends Response<EventResponse>
 
   public EventResponse success(List<Event> objects)
   {
-    // EventResponse response = (EventResponse) Response.success();
-    // response.setData(objects);
+    super.success();
+    this.setData(objects);
     return self;
   }
 }
