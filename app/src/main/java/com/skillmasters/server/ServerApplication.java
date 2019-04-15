@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.request.async.DeferredResult;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import static springfox.documentation.schema.AlternateTypeRules.newRule;
 import springfox.documentation.schema.WildcardType;
@@ -55,6 +56,11 @@ public class ServerApplication
 
   @Autowired
   private TypeResolver typeResolver;
+
+  @Bean
+  public BCryptPasswordEncoder bCryptPasswordEncoder() {
+    return new BCryptPasswordEncoder();
+  }
 
   @Bean
   public Docket apiVersion1()
