@@ -64,31 +64,31 @@ public class SQLiteDialect extends Dialect
     registerFunction( "substr", new StandardSQLFunction( "substr", StandardBasicTypes.STRING ) );
     registerFunction( "substring", new StandardSQLFunction( "substr", StandardBasicTypes.STRING ) );
     registerFunction( "trim", new AbstractAnsiTrimEmulationFunction() {
-      protected  SQLFunction resolveBothSpaceTrimFunction() {
+      protected SQLFunction resolveBothSpaceTrimFunction() {
         return new SQLFunctionTemplate( StandardBasicTypes.STRING, "trim(?1)" );
       }
 
-      protected  SQLFunction resolveBothSpaceTrimFromFunction() {
+      protected SQLFunction resolveBothSpaceTrimFromFunction() {
         return new SQLFunctionTemplate( StandardBasicTypes.STRING, "trim(?2)" );
       }
 
-      protected  SQLFunction resolveLeadingSpaceTrimFunction() {
+      protected SQLFunction resolveLeadingSpaceTrimFunction() {
         return new SQLFunctionTemplate( StandardBasicTypes.STRING, "ltrim(?1)" );
       }
 
-      protected  SQLFunction resolveTrailingSpaceTrimFunction() {
+      protected SQLFunction resolveTrailingSpaceTrimFunction() {
         return new SQLFunctionTemplate( StandardBasicTypes.STRING, "rtrim(?1)" );
       }
 
-      protected  SQLFunction resolveBothTrimFunction() {
+      protected SQLFunction resolveBothTrimFunction() {
         return new SQLFunctionTemplate( StandardBasicTypes.STRING, "trim(?1, ?2)" );
       }
 
-      protected  SQLFunction resolveLeadingTrimFunction() {
+      protected SQLFunction resolveLeadingTrimFunction() {
         return new SQLFunctionTemplate( StandardBasicTypes.STRING, "ltrim(?1, ?2)" );
       }
 
-      protected  SQLFunction resolveTrailingTrimFunction() {
+      protected SQLFunction resolveTrailingTrimFunction() {
         return new SQLFunctionTemplate( StandardBasicTypes.STRING, "rtrim(?1, ?2)" );
       }
     } );

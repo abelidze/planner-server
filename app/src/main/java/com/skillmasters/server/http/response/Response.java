@@ -18,12 +18,22 @@ public class Response<T extends Response<?>>
   protected Integer code;
   @JsonInclude(Include.NON_NULL)
   protected String message;
+  @JsonInclude(Include.NON_NULL)
   protected Integer count;
+  @JsonInclude(Include.NON_NULL)
   protected Integer offset;
 
   protected Response(final Class<T> selfClass)
   {
     this.self = selfClass.cast(this);
+  }
+
+  public T ok(String message)
+  {
+    this.setSuccess(true);
+    this.setCode(200);
+    this.setMessage(message);
+    return self;
   }
 
   public T success()
