@@ -3,6 +3,7 @@ package com.skillmasters.server.http.controller;
 import java.util.Arrays;
 import java.util.List;
 
+import com.skillmasters.server.model.EventPattern;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,6 +40,9 @@ public class EventController
   @PostMapping("/events")
   public EventResponse create(@RequestBody Event event)
   {
+    for (EventPattern r : event.getPatterns()) {
+      r.setEvent(event);
+    }
     return new EventResponse().success( Arrays.asList(repository.save(event)) );
   }
 

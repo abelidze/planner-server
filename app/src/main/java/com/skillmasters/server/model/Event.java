@@ -56,4 +56,16 @@ public class Event
     this.location = location;
     this.patterns = patterns;
   }
+
+  @Override
+  public String toString() {
+    // event pattern calls event.toString(), which calls eventPatter[].toString();
+    return "";
+  }
+
+  public int hashCode() {
+    // same as prev
+    return id.intValue();
+  }
+
 }
