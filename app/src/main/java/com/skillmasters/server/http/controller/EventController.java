@@ -3,6 +3,7 @@ package com.skillmasters.server.http.controller;
 import java.util.Arrays;
 import java.util.List;
 
+import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,14 +15,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 
 import com.skillmasters.server.http.response.EventResponse;
 import com.skillmasters.server.repository.EventRepository;
@@ -35,21 +28,21 @@ public class EventController
   @Autowired
   EventRepository repository;
 
-  @ApiOperation(value = "Get a list of available events", response = EventResponse.class)
+  @ApiOperation(value = "Get a list of available events", response = EventResponse.class, authorizations = {@Authorization(value = "access_token")})
   @GetMapping("/events")
   public EventResponse retrieve(@RequestParam(value="ids", defaultValue="") List<Long> ids)
   {
     return new EventResponse().success( repository.findAll() );
   }
 
-  @ApiOperation(value = "Create event", response = EventResponse.class)
+  @ApiOperation(value = "Create event", response = EventResponse.class, authorizations = {@Authorization(value = "access_token")})
   @PostMapping("/events")
   public EventResponse create(@RequestBody Event event)
   {
     return new EventResponse().success( Arrays.asList(repository.save(event)) );
   }
 
-  @ApiOperation(value = "Update event", response = EventResponse.class)
+  @ApiOperation(value = "Update event", response = EventResponse.class, authorizations = {@Authorization(value = "access_token")})
   @PutMapping("/events/{id}")
   public EventResponse update(@PathVariable Long id, @RequestBody Event event)
   {
@@ -57,7 +50,7 @@ public class EventController
     return new EventResponse().success( Arrays.asList(repository.save(event)) );
   }
 
-  @ApiOperation(value = "Delete event")
+  @ApiOperation(value = "Delete event", authorizations = {@Authorization(value = "access_token")})
   @DeleteMapping("/events/{id}")
   public void delete(@PathVariable Long id)
   {

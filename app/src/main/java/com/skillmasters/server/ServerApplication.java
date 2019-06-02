@@ -1,10 +1,17 @@
 package com.skillmasters.server;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import com.fasterxml.classmate.TypeResolver;
 
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.skillmasters.server.http.middleware.security.FirebaseAuthenticationTokenFilter;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -12,6 +19,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.request.async.DeferredResult;
@@ -99,7 +107,7 @@ public class ServerApplication
         //         .code(400)
         //         .message("Bad Request")
         //         .build(),
-        //       new ResponseMessageBuilder() 
+        //       new ResponseMessageBuilder()
         //         .code(403)
         //         .message("Forbidden")
         //         .build(),
@@ -112,11 +120,28 @@ public class ServerApplication
         .securityContexts(Arrays.asList(securityContext()))
         .enableUrlTemplating(false);
         // .tags(new Tag("Service", "All apis relating to ..."));
+
+  }
+
+  @Bean
+  public FirebaseAuth firebaseAuth() throws IOException {
+//  TODO: change before push
+    FileInputStream serviceAccount = new FileInputStream(
+            "/srv/app/test-calendar-241815-firebase-adminsdk-qmnbz-da6760f32a.json");
+
+    FirebaseOptions options = new FirebaseOptions.Builder()
+            .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+            .setDatabaseUrl("https://test-calendar-241815.firebaseio.com")
+            .build();
+
+    FirebaseApp.initializeApp(options);
+
+    return FirebaseAuth.getInstance();
   }
 
   private ApiKey apiKey()
   {
-    return new ApiKey("access_token", "api_key", "header");
+    return new ApiKey("access_token", FirebaseAuthenticationTokenFilter.TOKEN_HEADER, "header");
   }
 
   private SecurityContext securityContext()
@@ -133,7 +158,7 @@ public class ServerApplication
     AuthorizationScope[] authorizationScopes = new AuthorizationScope[1];
     authorizationScopes[0] = authorizationScope;
     return Arrays.asList(
-        new SecurityReference("mykey", authorizationScopes)
+        new SecurityReference("access_token", authorizationScopes)
       );
   }
 
