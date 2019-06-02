@@ -127,7 +127,7 @@ public class ServerApplication
   public FirebaseAuth firebaseAuth() throws IOException {
 //  TODO: change before push
     FileInputStream serviceAccount = new FileInputStream(
-            "/srv/app/test-calendar-241815-firebase-adminsdk-qmnbz-da6760f32a.json");
+            "/srv/test-calendar-241815-firebase-adminsdk-qmnbz-da6760f32a.json");
 
     FirebaseOptions options = new FirebaseOptions.Builder()
             .setCredentials(GoogleCredentials.fromStream(serviceAccount))
