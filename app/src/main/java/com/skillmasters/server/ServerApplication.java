@@ -153,15 +153,17 @@ public class ServerApplication
   public FirebaseAuth firebaseAuth() throws IOException
   {
     // TODO: change before push
-    ClassLoader loader = getClass().getClassLoader();
-    InputStream serviceAccount = loader.getResourceAsStream("service_account.json");
+    if (FirebaseApp.getApps().size() == 0) {
+      ClassLoader loader = ServerApplication.class.getClassLoader();
+      InputStream serviceAccount = loader.getResourceAsStream("service_account.json");
 
-    FirebaseOptions options = new FirebaseOptions.Builder()
-        .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-        .setDatabaseUrl("https://test-calendar-241815.firebaseio.com")
-        .build();
+      FirebaseOptions options = new FirebaseOptions.Builder()
+          .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+          .setDatabaseUrl("https://test-calendar-241815.firebaseio.com")
+          .build();
 
-    FirebaseApp.initializeApp(options);
+      FirebaseApp.initializeApp(options);
+    }
     return FirebaseAuth.getInstance();
   }
 
@@ -189,13 +191,13 @@ public class ServerApplication
   }
 
   @Bean
-  RecurrenceRuleScribe rruleScribe()
+  public RecurrenceRuleScribe rruleScribe()
   {
     return new RecurrenceRuleScribe();
   }
 
   @Bean
-  ParseContext beweeklyContext()
+  public ParseContext beweeklyContext()
   {
     ParseContext ctx = new ParseContext();
     ctx.setVersion(ICalVersion.V2_0);
@@ -203,7 +205,7 @@ public class ServerApplication
   }
 
   @Bean
-  SecurityConfiguration security()
+  public SecurityConfiguration security()
   {
     return SecurityConfigurationBuilder.builder()
         .clientId("test-app-client-id")
@@ -217,7 +219,7 @@ public class ServerApplication
   }
 
   @Bean
-  UiConfiguration uiConfig()
+  public UiConfiguration uiConfig()
   {
     return UiConfigurationBuilder.builder()
         .deepLinking(true)
