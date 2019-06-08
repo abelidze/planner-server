@@ -13,19 +13,21 @@ import org.springframework.security.web.authentication.AbstractAuthenticationPro
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-public class FirebaseAuthenticationTokenFilter extends AbstractAuthenticationProcessingFilter {
-
+public class FirebaseAuthenticationTokenFilter extends AbstractAuthenticationProcessingFilter
+{
   public final static String TOKEN_HEADER = "X-Firebase-Auth";
 
-  public FirebaseAuthenticationTokenFilter() {
+  public FirebaseAuthenticationTokenFilter()
+  {
     super("/api/v1/**");
   }
 
   @Override
-  public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) {
+  public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
+  {
     final String authToken = request.getHeader(TOKEN_HEADER);
     if (Strings.isNullOrEmpty(authToken)) {
-      throw new RuntimeException("Invaild auth token");
+      throw new RuntimeException("Invalid auth token");
     }
 
     return getAuthenticationManager().authenticate(new FirebaseAuthenticationToken(authToken));
@@ -42,8 +44,13 @@ public class FirebaseAuthenticationTokenFilter extends AbstractAuthenticationPro
    * @throws ServletException
    */
   @Override
-  protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult)
-          throws IOException, ServletException {
+  protected void successfulAuthentication(
+    HttpServletRequest request,
+    HttpServletResponse response,
+    FilterChain chain,
+    Authentication authResult
+  ) throws IOException, ServletException
+  {
     super.successfulAuthentication(request, response, chain, authResult);
 
     // As this authentication is in HTTP header, after success we need to continue the request normally

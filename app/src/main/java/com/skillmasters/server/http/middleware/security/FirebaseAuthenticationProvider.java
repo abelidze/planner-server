@@ -16,30 +16,33 @@ import org.springframework.stereotype.Component;
 import java.util.concurrent.ExecutionException;
 
 @Component
-public class FirebaseAuthenticationProvider extends AbstractUserDetailsAuthenticationProvider {
-
+public class FirebaseAuthenticationProvider extends AbstractUserDetailsAuthenticationProvider
+{
   @Autowired
   private FirebaseAuth firebaseAuth;
 
   @Override
-  public boolean supports(Class<?> authentication) {
+  public boolean supports(Class<?> authentication)
+  {
     return (FirebaseAuthenticationToken.class.isAssignableFrom(authentication));
   }
 
   @Override
-  protected void additionalAuthenticationChecks(UserDetails userDetails,
-                                                UsernamePasswordAuthenticationToken authentication) throws AuthenticationException {
-  }
+  protected void additionalAuthenticationChecks(
+    UserDetails userDetails,
+    UsernamePasswordAuthenticationToken authentication
+  ) throws AuthenticationException { }
 
   @Override
   protected UserDetails retrieveUser(String username, UsernamePasswordAuthenticationToken authentication)
-          throws AuthenticationException {
-
+      throws AuthenticationException
+  {
     final FirebaseAuthenticationToken authenticationToken = (FirebaseAuthenticationToken) authentication;
 
     // backdoor. Request by Sergey
-    if (((FirebaseAuthenticationToken) authentication).getToken().equals("serega_mem"))
+    if (((FirebaseAuthenticationToken) authentication).getToken().equals("serega_mem")) {
       return new FirebaseUserDetails("sergo@zink.ovic", "227");
+    }
 
     ApiFuture<FirebaseToken> task = firebaseAuth.verifyIdTokenAsync(authenticationToken.getToken());
     try {
