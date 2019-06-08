@@ -19,4 +19,4 @@ services:
       - "8080"
     volumes:
       - ./app:/srv:rw
-    command: gradle clean bootJar && java -jar /srv/build/libs/server-0.0.1.jar
+    command: sh -c "gradle clean bootJar ; java -jar /srv/build/libs/server-0.0.1.jar"
