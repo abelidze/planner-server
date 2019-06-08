@@ -23,6 +23,7 @@ import springfox.documentation.builders.ParameterBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.builders.ResponseMessageBuilder;
+import springfox.documentation.service.ResponseMessage;
 import springfox.documentation.service.ApiKey;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.AuthorizationScope;
@@ -88,30 +89,49 @@ public class ServerApplication
                 typeResolver.resolve(ResponseEntity.class, WildcardType.class)),
                 typeResolver.resolve(WildcardType.class)))
         .useDefaultResponseMessages(false)
-        // .globalResponseMessage(
-        //     RequestMethod.GET,
-        //     Arrays.asList(
-        //       new ResponseMessageBuilder()
-        //         .code(200)
-        //         .message("OK")
-        //         .build(),
-        //       new ResponseMessageBuilder()
-        //         .code(400)
-        //         .message("Bad Request")
-        //         .build(),
-        //       new ResponseMessageBuilder() 
-        //         .code(403)
-        //         .message("Forbidden")
-        //         .build(),
-        //       new ResponseMessageBuilder()
-        //         .code(500)
-        //         .message("Internal Error")
-        //         .build()
-        //     ))
+        .globalResponseMessage(RequestMethod.GET, globalResponses())
+        .globalResponseMessage(RequestMethod.POST, globalResponses())
+        .globalResponseMessage(RequestMethod.PUT, globalResponses())
+        .globalResponseMessage(RequestMethod.PATCH, globalResponses())
+        .globalResponseMessage(RequestMethod.DELETE, globalResponses())
         .securitySchemes(Arrays.asList(apiKey()))
         .securityContexts(Arrays.asList(securityContext()))
         .enableUrlTemplating(false);
         // .tags(new Tag("Service", "All apis relating to ..."));
+  }
+
+  private List<ResponseMessage> globalResponses()
+  {
+    return Arrays.asList(
+        new ResponseMessageBuilder()
+          .code(200)
+          .message("OK")
+          .build(),
+        new ResponseMessageBuilder()
+          .code(204)
+          .message("No content")
+          .build(),
+        new ResponseMessageBuilder()
+          .code(400)
+          .message("Bad request")
+          .build(),
+        new ResponseMessageBuilder()
+          .code(401)
+          .message("You are not authorized to view the resource")
+          .build(),
+        new ResponseMessageBuilder() 
+          .code(403)
+          .message("Accessing the resource you were trying to reach is forbidden")
+          .build(),
+        new ResponseMessageBuilder() 
+          .code(404)
+          .message("The resource you were trying to reach is not found")
+          .build(),
+        new ResponseMessageBuilder()
+          .code(500)
+          .message("Internal error")
+          .build()
+      );
   }
 
   private ApiKey apiKey()
