@@ -17,7 +17,7 @@ public class Response<M, T extends Response<M, ?>>
   protected final T self;
 
   protected Boolean success;
-  protected Integer code;
+  protected Integer status;
   @JsonInclude(Include.NON_NULL)
   protected String message;
   @JsonInclude(Include.NON_NULL)
@@ -35,7 +35,7 @@ public class Response<M, T extends Response<M, ?>>
   public T ok(String message)
   {
     this.setSuccess(true);
-    this.setCode(200);
+    this.setStatus(200);
     this.setMessage(message);
     return self;
   }
@@ -43,7 +43,7 @@ public class Response<M, T extends Response<M, ?>>
   public T success()
   {
     this.setSuccess(true);
-    this.setCode(200);
+    this.setStatus(200);
     return self;
   }
 
@@ -63,14 +63,14 @@ public class Response<M, T extends Response<M, ?>>
   public T empty()
   {
     this.setSuccess(true);
-    this.setCode(204);
+    this.setStatus(204);
     return self;
   }
 
   public T error(String errorMessage)
   {
     this.setSuccess(true);
-    this.setCode(400);
+    this.setStatus(400);
     this.setMessage(errorMessage);
     return self;
   }
