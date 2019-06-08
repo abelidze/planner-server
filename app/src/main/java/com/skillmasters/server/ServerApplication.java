@@ -6,6 +6,10 @@ import java.util.HashSet;
 import java.util.List;
 import com.fasterxml.classmate.TypeResolver;
 
+import biweekly.ICalVersion;
+import biweekly.io.ParseContext;
+import biweekly.io.scribe.property.RecurrenceRuleScribe;
+
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -157,6 +161,20 @@ public class ServerApplication
     return Arrays.asList(
         new SecurityReference("mykey", authorizationScopes)
       );
+  }
+
+  @Bean
+  RecurrenceRuleScribe rruleScribe()
+  {
+    return new RecurrenceRuleScribe();
+  }
+
+  @Bean
+  ParseContext beweeklyContext()
+  {
+    ParseContext ctx = new ParseContext();
+    ctx.setVersion(ICalVersion.V2_0);
+    return ctx;
   }
 
   @Bean
