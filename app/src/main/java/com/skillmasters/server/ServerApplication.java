@@ -1,6 +1,6 @@
 package com.skillmasters.server;
 
-import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Arrays;
@@ -150,18 +150,18 @@ public class ServerApplication
   }
 
   @Bean
-  public FirebaseAuth firebaseAuth() throws IOException {
-//  TODO: change before push
-    FileInputStream serviceAccount = new FileInputStream(
-            "/srv/test-calendar-241815-firebase-adminsdk-qmnbz-da6760f32a.json");
+  public FirebaseAuth firebaseAuth() throws IOException
+  {
+    // TODO: change before push
+    ClassLoader loader = getClass().getClassLoader();
+    InputStream serviceAccount = loader.getResourceAsStream("service_account.json");
 
     FirebaseOptions options = new FirebaseOptions.Builder()
-            .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-            .setDatabaseUrl("https://test-calendar-241815.firebaseio.com")
-            .build();
+        .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+        .setDatabaseUrl("https://test-calendar-241815.firebaseio.com")
+        .build();
 
     FirebaseApp.initializeApp(options);
-
     return FirebaseAuth.getInstance();
   }
 
@@ -178,7 +178,7 @@ public class ServerApplication
         .build();
   }
 
-  List<SecurityReference> defaultAuth()
+  private List<SecurityReference> defaultAuth()
   {
     AuthorizationScope authorizationScope = new AuthorizationScope("global", "accessEverything");
     AuthorizationScope[] authorizationScopes = new AuthorizationScope[1];
