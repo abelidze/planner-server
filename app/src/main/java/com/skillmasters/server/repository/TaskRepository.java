@@ -6,50 +6,11 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 
 import com.skillmasters.server.model.Task;
 
 @Repository
-public interface TaskRepository extends JpaRepository<Task, Long>
+public interface TaskRepository extends JpaRepository<Task, Long>, QuerydslPredicateExecutor<Task>
 {
-//  private List<Task> tasks = new ArrayList<Task>();
-//
-//  public List<Task> all()
-//  {
-//    return tasks;
-//  }
-//
-//  public Task add(Task task)
-//  {
-//    task.setId((long) (tasks.size()+1));
-//    tasks.add(task);
-//    return task;
-//  }
-//
-//  public Task update(Task task)
-//  {
-//    tasks.set(task.getId().intValue() - 1, task);
-//    return task;
-//  }
-//
-//  public Task update(Long id, Task task)
-//  {
-//    tasks.set(id.intValue() - 1, task);
-//    return task;
-//  }
-//
-//  public Task findById(Long id)
-//  {
-//    Optional<Task> task = tasks.stream().filter(a -> a.getId().equals(id)).findFirst();
-//    if (task.isPresent()) {
-//      return task.get();
-//    } else {
-//      return null;
-//    }
-//  }
-//
-//  public void delete(Long id)
-//  {
-//    tasks.remove(id.intValue());
-//  }
 }
