@@ -27,7 +27,7 @@ public class TaskController
   @Autowired
   TaskRepository repository;
 
-  @ApiOperation(value = "Get a list of available tasks", response = TaskResponse.class)
+  @ApiOperation(value = "Get a list of available tasks", response = TaskResponse.class, authorizations = {@Authorization(value = "access_token")})
   @GetMapping("/tasks")
   public TaskResponse retrieve(
     @RequestParam(value="id", defaultValue="") List<Long> id,
@@ -69,7 +69,7 @@ public class TaskController
     return new TaskResponse().success( repository.findAll(query, new OffsetPageRequest(offset, count)) );
   }
 
-  @ApiOperation(value = "Create task", response = TaskResponse.class)
+  @ApiOperation(value = "Create task", response = TaskResponse.class, authorizations = {@Authorization(value = "access_token")})
   @PostMapping("/tasks")
   public TaskResponse create(@RequestBody Task task)
   {
@@ -84,7 +84,7 @@ public class TaskController
       dataType = "Task"
     )
   )
-  @ApiOperation(value = "Update task", response = TaskResponse.class)
+  @ApiOperation(value = "Update task", response = TaskResponse.class, authorizations = {@Authorization(value = "access_token")})
   @PatchMapping("/tasks/{id}")
   public TaskResponse update(@PathVariable Long id, @RequestBody Map<String, Object> updates)
   {
@@ -102,7 +102,7 @@ public class TaskController
     return new TaskResponse().success(Arrays.asList( repository.save(task) ));
   }
 
-  @ApiOperation(value = "Delete task")
+  @ApiOperation(value = "Delete task", authorizations = {@Authorization(value = "access_token")})
   @DeleteMapping("/tasks/{id}")
   public TaskResponse delete(@PathVariable Long id)
   {

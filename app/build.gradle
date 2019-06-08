@@ -52,4 +52,7 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     runtimeOnly 'org.xerial:sqlite-jdbc:3.27.2'
     // runtimeOnly 'org.postgresql:postgresql'
+    // auth
+    compile 'com.google.firebase:firebase-admin:6.8.1'
+    compile("org.springframework.boot:spring-boot-starter-security")
 }

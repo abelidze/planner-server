@@ -90,4 +90,16 @@ public class Event
     this.patterns = patterns;
     this.tasks = tasks;
   }
+
+  @Override
+  public String toString() {
+    // event pattern calls event.toString(), which calls eventPatter[].toString();
+    return "";
+  }
+
+  public int hashCode() {
+    // same as prev
+    return id.intValue();
+  }
+
 }

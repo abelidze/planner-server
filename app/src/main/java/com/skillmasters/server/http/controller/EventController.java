@@ -46,7 +46,7 @@ public class EventController
   @Autowired
   ParseContext context;
 
-  @ApiOperation(value = "Get a list of available events", response = EventResponse.class)
+  @ApiOperation(value = "Get a list of available events", response = EventResponse.class, authorizations = {@Authorization(value = "access_token")})
   @GetMapping("/events")
   public EventResponse retrieve(
     @RequestParam(value="id", defaultValue="") List<Long> id,
@@ -143,10 +143,13 @@ public class EventController
     return new EventResponse().success(result);
   }
 
-  @ApiOperation(value = "Create event", response = EventResponse.class)
+  @ApiOperation(value = "Create event", response = EventResponse.class, authorizations = {@Authorization(value = "access_token")})
   @PostMapping("/events")
   public EventResponse create(@RequestBody Event event)
   {
+    for (EventPattern r : event.getPatterns()) {
+      r.setEvent(event);
+    }
     return new EventResponse().success( Arrays.asList(repository.save(event)) );
   }
 
@@ -158,7 +161,7 @@ public class EventController
       dataType = "Event"
     )
   )
-  @ApiOperation(value = "Update event", response = EventResponse.class)
+  @ApiOperation(value = "Update event", response = EventResponse.class, authorizations = {@Authorization(value = "access_token")})
   @PatchMapping("/events/{id}")
   public EventResponse update(@PathVariable Long id, @RequestBody Map<String, Object> updates)
   {
@@ -176,7 +179,7 @@ public class EventController
     return new EventResponse().success(Arrays.asList( repository.save(event) ));
   }
 
-  @ApiOperation(value = "Delete event")
+  @ApiOperation(value = "Delete event", authorizations = {@Authorization(value = "access_token")})
   @DeleteMapping("/events/{id}")
   public EventResponse delete(@PathVariable Long id)
   {

@@ -26,7 +26,7 @@ public class EventPatternController
   @Autowired
   EventRepository eventRepository;
 
-  @ApiOperation(value = "Get a list of patterns for given event", response = EventPatternResponse.class)
+  @ApiOperation(value = "Get a list of patterns for given event", response = EventPatternResponse.class, authorizations = {@Authorization(value = "access_token")})
   @GetMapping("/patterns")
   public EventPatternResponse retrieve(
     @RequestParam(value="event_id", required=true) Long eventId
@@ -37,7 +37,7 @@ public class EventPatternController
     return new EventPatternResponse().success( eventRepository.getOne(eventId).getPatterns() );
   }
 
-  @ApiOperation(value = "Create pattern", response = EventPatternResponse.class)
+  @ApiOperation(value = "Create pattern", response = EventPatternResponse.class, authorizations = {@Authorization(value = "access_token")})
   @PostMapping("/patterns")
   public EventPatternResponse create(
     @RequestParam(value="event_id", required=true) Long eventId,
@@ -58,7 +58,7 @@ public class EventPatternController
       dataType = "EventPattern"
     )
   )
-  @ApiOperation(value = "Update pattern", response = EventPatternResponse.class)
+  @ApiOperation(value = "Update pattern", response = EventPatternResponse.class, authorizations = {@Authorization(value = "access_token")})
   @PatchMapping("/patterns/{id}")
   public EventPatternResponse update(@PathVariable Long id, @RequestBody Map<String, Object> updates)
   {
@@ -76,7 +76,7 @@ public class EventPatternController
     return new EventPatternResponse().success(Arrays.asList( repository.save(pattern) ));
   }
 
-  @ApiOperation(value = "Delete pattern")
+  @ApiOperation(value = "Delete pattern", authorizations = {@Authorization(value = "access_token")})
   @DeleteMapping("/patterns/{id}")
   public EventPatternResponse delete(@PathVariable Long id)
   {
