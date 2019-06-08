@@ -3,10 +3,7 @@ package com.skillmasters.server.model;
 import lombok.Data;
 
 import java.util.Date;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -25,13 +22,16 @@ public class Task
   private String name;
   private String details;
   private String status;
+
+  @ApiModelProperty(example = "1556712345000")
   private Date deadlineAt;
 
-  @ApiModelProperty(readOnly = true)
   @CreationTimestamp
+  @ApiModelProperty(readOnly = true, example = "1556712345000")
   private Date createdAt;
-  @ApiModelProperty(readOnly = true)
+
   @UpdateTimestamp
+  @ApiModelProperty(readOnly = true, example = "1556712345000")
   private Date updatedAt;
 
   Task()
@@ -39,8 +39,13 @@ public class Task
     // default
   }
 
-  Task(Long eventId, Long parentId, String name, String details, String status)
-  {
+  Task(
+    Long eventId,
+    Long parentId,
+    String name,
+    String details,
+    String status
+  ) {
     this.eventId = eventId;
     this.parentId = parentId;
     this.name = name;

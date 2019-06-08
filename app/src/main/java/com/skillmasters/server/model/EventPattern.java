@@ -3,20 +3,12 @@ package com.skillmasters.server.model;
 import lombok.Data;
 
 import java.util.Date;
-import javax.persistence.Id;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.FetchType;
-import javax.persistence.EmbeddedId;
-import javax.persistence.ManyToOne;
-import javax.persistence.JoinColumn;
-import javax.validation.constraints.NotNull;
+import javax.persistence.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -35,22 +27,27 @@ public class EventPattern
   @JsonIgnore
   private Event event;
 
-  private Byte type;
-  private String year;
-  private String weekday;
-  private String month;
-  private String day;
-  private String hour;
-  private String minute;
-  private Long duration;
+  private Byte type = 0;
+  private Long duration = 0L;
+
+  @ApiModelProperty(example = "FREQ=DAILY;INTERVAL=1")
+  private String rrule;
+
+  @ApiModelProperty(example = "FREQ=WEEKLY;INTERVAL=2;BYDAY=TU,TH")
+  private String exrule;
+
+  @ApiModelProperty(example = "1556712345000")
   private Date startedAt;
+
+  @ApiModelProperty(example = "1556712345000")
   private Date endedAt;
 
-  @ApiModelProperty(readOnly = true)
-  @UpdateTimestamp
+  @CreationTimestamp
+  @ApiModelProperty(readOnly = true, example = "1556712345000")
   private Date createdAt;
-  @ApiModelProperty(readOnly = true)
+
   @UpdateTimestamp
+  @ApiModelProperty(readOnly = true, example = "1556712345000")
   private Date updatedAt;
 
   EventPattern()
@@ -60,21 +57,34 @@ public class EventPattern
 
   EventPattern(
     Byte type,
-    String year,
-    String weekday,
-    String month,
-    String day,
-    String hour,
-    String minute,
-    Long duration
+    String rrule,
+    String exrule,
+    Long duration,
+    Date startedAt,
+    Date endedAt
   ) {
     this.type = type;
-    this.year = year;
-    this.weekday = weekday;
-    this.month = month;
-    this.day = day;
-    this.hour = hour;
-    this.minute = minute;
+    this.rrule = rrule;
+    this.exrule = exrule;
+
+    if (startedAt == null) {
+      startedAt = new Date();
+    }
+
+    if (endedAt == null) {
+      if (duration == null) {
+        endedAt = new Date(Long.MAX_VALUE);
+      } else {
+        endedAt = new Date(startedAt.getTime() + duration);
+      }
+    }
+
+    if (duration == null) {
+      duration = endedAt.getTime() - startedAt.getTime();
+    }
+
     this.duration = duration;
+    this.startedAt = startedAt;
+    this.endedAt = endedAt;
   }
 }

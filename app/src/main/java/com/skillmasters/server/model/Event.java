@@ -1,24 +1,24 @@
 package com.skillmasters.server.model;
 
+import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
 import java.util.Set;
 import java.util.Date;
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.CascadeType;
+import javax.persistence.*;
 // import org.springframework.data.annotation.CreatedDate;
 // import org.springframework.data.annotation.LastModifiedDate;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import io.swagger.annotations.ApiModelProperty;
 
 @Data
 @Entity
+@Builder(toBuilder=true)
 public class Event
 {
   @Id
@@ -32,28 +32,56 @@ public class Event
   private String status;
   private String location;
 
-  @ApiModelProperty(readOnly = true)
+  @Transient
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  @ApiModelProperty(readOnly = true, example = "1556712345000")
+  private Date startedAt;
+
+  @Transient
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  @ApiModelProperty(readOnly = true, example = "1556712345000")
+  private Date endedAt;
+
   @CreationTimestamp
+  @ApiModelProperty(readOnly = true, example = "1556712345000")
   private Date createdAt;
-  @ApiModelProperty(readOnly = true)
+
   @UpdateTimestamp
+  @ApiModelProperty(readOnly = true, example = "1556712345000")
   private Date updatedAt;
 
   @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
-  private Set<EventPattern> patterns;
+  @JsonIgnore
+  private List<EventPattern> patterns;
 
   Event()
   {
     // default
   }
 
-  Event(Long ownerId, String name, String details, String status, String location, Set<EventPattern> patterns)
-  {
+  Event(
+    Long id,
+    Long ownerId,
+    String name,
+    String details,
+    String status,
+    String location,
+    Date startedAt,
+    Date endedAt,
+    Date createdAt,
+    Date updatedAt,
+    List<EventPattern> patterns
+  ) {
+    this.id = id;
     this.ownerId = ownerId;
     this.name = name;
     this.details = details;
     this.status = status;
     this.location = location;
+    this.startedAt = startedAt;
+    this.endedAt = endedAt;
+    this.createdAt = createdAt;
+    this.updatedAt = updatedAt;
     this.patterns = patterns;
   }
 }
