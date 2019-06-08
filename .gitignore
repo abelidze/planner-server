@@ -61,3 +61,5 @@ dev/
 *.sqlite
 
 app/memory
+
+app/src/main/resources/service_account\.json
