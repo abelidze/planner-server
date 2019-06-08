@@ -69,7 +69,7 @@ public class Response<M, T extends Response<M, ?>>
 
   public T error(String errorMessage)
   {
-    this.setSuccess(true);
+    this.setSuccess(false);
     this.setStatus(400);
     this.setMessage(errorMessage);
     return self;
