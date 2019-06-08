@@ -1,5 +1,6 @@
 package com.skillmasters.server;
 
+import java.util.Date;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -80,6 +81,7 @@ public class ServerApplication
             // .licenseUrl("https://raw.githubusercontent.com/abelidze/planer-server/master/LICENSE")
             .build())
         .pathMapping("/")
+        .directModelSubstitute(Date.class, Long.class)
         .genericModelSubstitutes(ResponseEntity.class)
         .produces(new HashSet(Arrays.asList("application/json")))
         .consumes(new HashSet(Arrays.asList("application/json")))
