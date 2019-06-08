@@ -54,6 +54,10 @@ public class Event
   @JsonIgnore
   private List<EventPattern> patterns;
 
+  @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
+  @JsonIgnore
+  private List<Task> tasks;
+
   Event()
   {
     // default
@@ -70,7 +74,8 @@ public class Event
     Date endedAt,
     Date createdAt,
     Date updatedAt,
-    List<EventPattern> patterns
+    List<EventPattern> patterns,
+    List<Task> tasks
   ) {
     this.id = id;
     this.ownerId = ownerId;
@@ -83,5 +88,6 @@ public class Event
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
     this.patterns = patterns;
+    this.tasks = tasks;
   }
 }

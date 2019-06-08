@@ -4,8 +4,11 @@ import lombok.Data;
 
 import java.util.Date;
 import javax.persistence.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -17,7 +20,13 @@ public class Task
   @GeneratedValue(strategy = GenerationType.AUTO)
   @ApiModelProperty(readOnly = true)
   private Long id;
-  private Long eventId;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "event_id", nullable = false)
+  @OnDelete(action = OnDeleteAction.CASCADE)
+  @JsonIgnore
+  private Event event;
+
   private Long parentId;
   private String name;
   private String details;
@@ -40,13 +49,13 @@ public class Task
   }
 
   Task(
-    Long eventId,
+    Event event,
     Long parentId,
     String name,
     String details,
     String status
   ) {
-    this.eventId = eventId;
+    this.event = event;
     this.parentId = parentId;
     this.name = name;
     this.details = details;
