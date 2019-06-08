@@ -7,7 +7,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 
 @Data
-public class FirebaseUserDetails implements UserDetails {
+public class FirebaseUserDetails implements UserDetails
+{
   private static final long serialVersionUID = 1L;
 
   private final boolean enabled = true;
@@ -18,13 +19,15 @@ public class FirebaseUserDetails implements UserDetails {
   private String username = null;
   private String id = null;
 
-  public FirebaseUserDetails(String email, String uid) {
+  public FirebaseUserDetails(String email, String uid)
+  {
     this.username = email;
     this.id = uid;
   }
 
   @Override
-  public Collection<? extends GrantedAuthority> getAuthorities() {
+  public Collection<? extends GrantedAuthority> getAuthorities()
+  {
     // TODO Auto-generated method stub
     return null;
   }
