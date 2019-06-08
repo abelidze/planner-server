@@ -1,5 +1,9 @@
 package com.skillmasters.server.sqlite;
 
+import org.hibernate.dialect.pagination.LimitHandler;
+import org.hibernate.engine.spi.RowSelection;
+import org.hibernate.dialect.pagination.LimitHelper;
+import org.hibernate.dialect.pagination.AbstractLimitHandler;
 import java.sql.Types;
 import java.sql.SQLException;
 
@@ -64,31 +68,38 @@ public class SQLiteDialect extends Dialect
     registerFunction( "substr", new StandardSQLFunction( "substr", StandardBasicTypes.STRING ) );
     registerFunction( "substring", new StandardSQLFunction( "substr", StandardBasicTypes.STRING ) );
     registerFunction( "trim", new AbstractAnsiTrimEmulationFunction() {
-      protected SQLFunction resolveBothSpaceTrimFunction() {
+      protected SQLFunction resolveBothSpaceTrimFunction()
+      {
         return new SQLFunctionTemplate( StandardBasicTypes.STRING, "trim(?1)" );
       }
 
-      protected SQLFunction resolveBothSpaceTrimFromFunction() {
+      protected SQLFunction resolveBothSpaceTrimFromFunction()
+      {
         return new SQLFunctionTemplate( StandardBasicTypes.STRING, "trim(?2)" );
       }
 
-      protected SQLFunction resolveLeadingSpaceTrimFunction() {
+      protected SQLFunction resolveLeadingSpaceTrimFunction()
+      {
         return new SQLFunctionTemplate( StandardBasicTypes.STRING, "ltrim(?1)" );
       }
 
-      protected SQLFunction resolveTrailingSpaceTrimFunction() {
+      protected SQLFunction resolveTrailingSpaceTrimFunction()
+      {
         return new SQLFunctionTemplate( StandardBasicTypes.STRING, "rtrim(?1)" );
       }
 
-      protected SQLFunction resolveBothTrimFunction() {
+      protected SQLFunction resolveBothTrimFunction()
+      {
         return new SQLFunctionTemplate( StandardBasicTypes.STRING, "trim(?1, ?2)" );
       }
 
-      protected SQLFunction resolveLeadingTrimFunction() {
+      protected SQLFunction resolveLeadingTrimFunction()
+      {
         return new SQLFunctionTemplate( StandardBasicTypes.STRING, "ltrim(?1, ?2)" );
       }
 
-      protected SQLFunction resolveTrailingTrimFunction() {
+      protected SQLFunction resolveTrailingTrimFunction()
+      {
         return new SQLFunctionTemplate( StandardBasicTypes.STRING, "rtrim(?1, ?2)" );
       }
     } );
@@ -110,7 +121,7 @@ public class SQLiteDialect extends Dialect
   /*
   public boolean supportsInsertSelectIdentity()
   {
-  return true; // As specify in NHibernate dialect
+    return true; // As specify in NHibernate dialect
   }
   */
 
@@ -146,32 +157,39 @@ public class SQLiteDialect extends Dialect
 
   protected String getLimitString(String query, boolean hasOffset)
   {
-    return new StringBuffer(query.length() + 20)
-        .append(query)
-        .append(hasOffset ? " limit ? offset ?" : " limit ?")
-        .toString();
+    return query + (hasOffset ? " limit ? offset ?" : " limit ?");
+    // return new StringBuffer(query.length() + 20)
+    //     .append(query)
+    //     .append(hasOffset ? " limit ? offset ?" : " limit ?")
+    //     .toString();
   }
-  // private static final AbstractLimitHandler LIMIT_HANDLER = new AbstractLimitHandler() {
-  //   @Override
-  //   public  String processSql(String sql, RowSelection selection) {
-  //     final boolean hasOffset = LimitHelper.hasFirstRow( selection );
-  //     return sql + (hasOffset ? " limit ? offset ?" : " limit ?");
-  //   }
 
-  //   @Override
-  //   public  boolean supportsLimit() {
-  //     return true;
-  //   }
+  private static final AbstractLimitHandler LIMIT_HANDLER = new AbstractLimitHandler() {
+    @Override
+    public String processSql(String query, RowSelection selection)
+    {
+      final boolean hasOffset = LimitHelper.hasFirstRow( selection );
+      return query + (hasOffset ? " limit ? offset ?" : " limit ?");
+    }
 
-  //   @Override
-  //   public  boolean bindLimitParametersInReverseOrder() {
-  //     return true;
-  //   }
-  // };
-  // @Override
-  // public  LimitHandler getLimitHandler() {
-  //   return LIMIT_HANDLER;
-  // }
+    @Override
+    public boolean supportsLimit()
+    {
+      return true;
+    }
+
+    @Override
+    public boolean bindLimitParametersInReverseOrder()
+    {
+      return true;
+    }
+  };
+
+  @Override
+  public LimitHandler getLimitHandler()
+  {
+    return LIMIT_HANDLER;
+  }
 
   public boolean supportsTemporaryTables()
   {
