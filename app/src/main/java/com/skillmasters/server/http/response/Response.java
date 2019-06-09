@@ -69,8 +69,13 @@ public class Response<M, T extends Response<M, ?>>
 
   public T error(String errorMessage)
   {
+    return this.error(400, errorMessage);
+  }
+
+  public T error(Integer errorStatus, String errorMessage)
+  {
     this.setSuccess(false);
-    this.setStatus(400);
+    this.setStatus(errorStatus);
     this.setMessage(errorMessage);
     return self;
   }
