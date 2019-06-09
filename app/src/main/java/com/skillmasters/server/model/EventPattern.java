@@ -62,12 +62,14 @@ public class EventPattern
   }
 
   EventPattern(
+    String timezone,
     String rrule,
     String exrule,
     Long duration,
     Date startedAt,
     Date endedAt
   ) {
+    this.timezone = timezone;
     this.rrule = rrule;
     this.exrule = exrule;
 
