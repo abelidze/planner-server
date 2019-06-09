@@ -2,8 +2,10 @@ package com.skillmasters.server.model;
 
 import lombok.Data;
 
+import java.util.TimeZone;
 import java.util.Date;
 import javax.persistence.*;
+
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.CreationTimestamp;
@@ -29,8 +31,10 @@ public class EventPattern
   @JsonIgnore
   private Event event;
 
-  private Byte type = 0;
   private Long duration = 0L;
+
+  @ApiModelProperty(example = "UTC")
+  private String timezone;
 
   @ApiModelProperty(example = "FREQ=DAILY;INTERVAL=1")
   private String rrule;
@@ -58,14 +62,12 @@ public class EventPattern
   }
 
   EventPattern(
-    Byte type,
     String rrule,
     String exrule,
     Long duration,
     Date startedAt,
     Date endedAt
   ) {
-    this.type = type;
     this.rrule = rrule;
     this.exrule = exrule;
 

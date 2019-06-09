@@ -107,9 +107,10 @@ public class EventController
     }
 
     Date eventDate;
-    TimeZone timezone = TimeZone.getTimeZone("GMT");
+    TimeZone utcTimezone = TimeZone.getTimeZone("UTC");
+    TimeZone timezone = utcTimezone;
     DateFormat df = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
-    df.setTimeZone(timezone);
+    df.setTimeZone(utcTimezone);
 
     List<Event> result = Lists.newArrayList();
     Iterable<Event> events = repository.findAll(query);
@@ -128,6 +129,12 @@ public class EventController
           end = end.before(toDate) ? end : toDate;
           rruleStr += ";UNTIL=" + df.format(end);
 
+          if (Strings.isNullOrEmpty(pattern.getTimezone())) {
+            timezone = utcTimezone;
+          } else {
+            timezone = TimeZone.getTimeZone(pattern.getTimezone());
+          }
+
           RecurrenceRule rrule = scribe.parseText(rruleStr, null, new ICalParameters(), context);
           DateIterator dateIt = rrule.getDateIterator(start, timezone);
 
@@ -135,7 +142,7 @@ public class EventController
             dateIt.advanceTo(fromDate);
           }
 
-          while (dateIt.hasNext()) {
+          for (int i = 0; i < 100 && dateIt.hasNext(); ++i) {
             eventDate = dateIt.next();
             eventBuilder.startedAt(eventDate);
             eventBuilder.endedAt(new Date(eventDate.getTime() + pattern.getDuration()));
