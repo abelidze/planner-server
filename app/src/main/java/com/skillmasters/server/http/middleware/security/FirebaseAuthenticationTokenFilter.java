@@ -5,13 +5,15 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import com.google.api.client.util.Strings;
 import com.skillmasters.server.http.middleware.security.model.FirebaseAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import com.skillmasters.server.http.middleware.security.model.SimpleAuthenticationToken;
 
 public class FirebaseAuthenticationTokenFilter extends AbstractAuthenticationProcessingFilter
 {
@@ -23,11 +25,11 @@ public class FirebaseAuthenticationTokenFilter extends AbstractAuthenticationPro
   }
 
   @Override
-  public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
+  public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws IOException
   {
     final String authToken = request.getHeader(TOKEN_HEADER);
     if (Strings.isNullOrEmpty(authToken)) {
-      throw new RuntimeException("Invalid auth token");
+      throw new AuthenticationCredentialsNotFoundException("Invalid auth token");
     }
 
     return getAuthenticationManager().authenticate(new FirebaseAuthenticationToken(authToken));
@@ -56,5 +58,15 @@ public class FirebaseAuthenticationTokenFilter extends AbstractAuthenticationPro
     // As this authentication is in HTTP header, after success we need to continue the request normally
     // and return the response as if the resource was not secured at all
     chain.doFilter(request, response);
+  }
+
+  @Override
+  protected void unsuccessfulAuthentication(
+    HttpServletRequest request,
+    HttpServletResponse response,
+    AuthenticationException error
+  ) throws IOException, ServletException
+  {
+    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, error.getMessage());
   }
 }
