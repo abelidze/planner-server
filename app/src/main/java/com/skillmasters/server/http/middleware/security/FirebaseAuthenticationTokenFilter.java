@@ -7,7 +7,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.google.api.client.util.Strings;
-import com.skillmasters.server.http.middleware.security.model.FirebaseAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
@@ -31,8 +30,7 @@ public class FirebaseAuthenticationTokenFilter extends AbstractAuthenticationPro
     if (Strings.isNullOrEmpty(authToken)) {
       throw new AuthenticationCredentialsNotFoundException("Invalid auth token");
     }
-
-    return getAuthenticationManager().authenticate(new FirebaseAuthenticationToken(authToken));
+    return getAuthenticationManager().authenticate(new SimpleAuthenticationToken(authToken));
   }
 
   /**

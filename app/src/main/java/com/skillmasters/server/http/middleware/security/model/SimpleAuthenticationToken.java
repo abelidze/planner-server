@@ -6,12 +6,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 
 @Data
 @EqualsAndHashCode(callSuper=false)
-public class FirebaseAuthenticationToken extends UsernamePasswordAuthenticationToken
+public class SimpleAuthenticationToken extends UsernamePasswordAuthenticationToken
 {
   private static final long serialVersionUID = 1L;
   private final String token;
 
-  public FirebaseAuthenticationToken(final String token)
+  public SimpleAuthenticationToken(final String token)
   {
     super(null, null);
     this.token = token;
