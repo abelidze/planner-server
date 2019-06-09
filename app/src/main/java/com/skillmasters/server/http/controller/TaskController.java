@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.annotations.*;
 
+import com.google.common.base.CaseFormat;
 import com.querydsl.core.types.dsl.BooleanExpression;
 
 import com.skillmasters.server.misc.OffsetPageRequest;
@@ -111,15 +112,25 @@ public class TaskController
     if (!repository.exists( qTask.id.eq(id).and(qTask.event.ownerId.eq(user.getId())) )) {
       return new TaskResponse().error(404, "Task not found or you don't have access to it");
     }
-    Task task = repository.findById(id).get();
+
+    Task entity = repository.findById(id).get();
     updates.forEach((k, v) -> {
-      Field field = ReflectionUtils.findField(Task.class, k);
+      String fieldName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, k);
+      Field field = ReflectionUtils.findField(Task.class, fieldName);
       if (field != null) {
         ReflectionUtils.makeAccessible(field);
-        ReflectionUtils.setField(field, task, v);
+        final Class<?> type = field.getType();
+        System.out.println(type.getName());
+        if (type.equals(Long.class)) {
+          ReflectionUtils.setField(field, entity, ((Number) v).longValue());
+        } else if (type.equals(Date.class)) {
+          ReflectionUtils.setField(field, entity, new Date( ((Number) v).longValue() ));
+        } else {
+          ReflectionUtils.setField(field, entity, v);
+        }
       }
     });
-    return new TaskResponse().success(Arrays.asList( repository.save(task) ));
+    return new TaskResponse().success(Arrays.asList( repository.save(entity) ));
   }
 
   @ApiOperation(value = "Delete task")

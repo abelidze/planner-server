@@ -1,9 +1,12 @@
 package com.skillmasters.server.http.controller;
 
+import java.util.Date;
 import java.util.Map;
 import java.util.Arrays;
 import java.util.List;
 import java.lang.reflect.Field;
+
+import com.google.common.base.CaseFormat;
 
 import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 import org.springframework.util.ReflectionUtils;
@@ -77,15 +80,25 @@ public class EventPatternController
     if (!repository.exists( qPattern.id.eq(id).and(qPattern.event.ownerId.eq(user.getId())) )) {
       return new EventPatternResponse().error(404, "Task not found or you don't have access to it");
     }
-    EventPattern pattern = repository.findById(id).get();
+
+    EventPattern entity = repository.findById(id).get();
     updates.forEach((k, v) -> {
-      Field field = ReflectionUtils.findField(EventPattern.class, k);
+      String fieldName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, k);
+      Field field = ReflectionUtils.findField(EventPattern.class, fieldName);
       if (field != null) {
         ReflectionUtils.makeAccessible(field);
-        ReflectionUtils.setField(field, pattern, v);
+        final Class<?> type = field.getType();
+        System.out.println(type.getName());
+        if (type.equals(Long.class)) {
+          ReflectionUtils.setField(field, entity, ((Number) v).longValue());
+        } else if (type.equals(Date.class)) {
+          ReflectionUtils.setField(field, entity, new Date( ((Number) v).longValue() ));
+        } else {
+          ReflectionUtils.setField(field, entity, v);
+        }
       }
     });
-    return new EventPatternResponse().success(Arrays.asList( repository.save(pattern) ));
+    return new EventPatternResponse().success(Arrays.asList( repository.save(entity) ));
   }
 
   @ApiOperation(value = "Delete pattern")

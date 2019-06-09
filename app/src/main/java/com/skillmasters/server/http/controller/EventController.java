@@ -22,6 +22,7 @@ import biweekly.util.com.google.ical.compat.javautil.DateIterator;
 import biweekly.parameter.ICalParameters;
 import biweekly.property.RecurrenceRule;
 
+import com.google.common.base.CaseFormat;
 import com.google.common.collect.Lists;
 import com.querydsl.core.types.dsl.BooleanExpression;
 
@@ -173,15 +174,25 @@ public class EventController
     if (!repository.exists( qEvent.id.eq(id).and(qEvent.ownerId.eq(user.getId())) )) {
       return new EventResponse().error(404, "Event not found or you don't have access to it");
     }
-    Event event = repository.findById(id).get();
+
+    Event entity = repository.findById(id).get();
     updates.forEach((k, v) -> {
-      Field field = ReflectionUtils.findField(Event.class, k);
+      String fieldName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, k);
+      Field field = ReflectionUtils.findField(Event.class, fieldName);
       if (field != null) {
         ReflectionUtils.makeAccessible(field);
-        ReflectionUtils.setField(field, event, v);
+        final Class<?> type = field.getType();
+        System.out.println(type.getName());
+        if (type.equals(Long.class)) {
+          ReflectionUtils.setField(field, entity, ((Number) v).longValue());
+        } else if (type.equals(Date.class)) {
+          ReflectionUtils.setField(field, entity, new Date( ((Number) v).longValue() ));
+        } else {
+          ReflectionUtils.setField(field, entity, v);
+        }
       }
     });
-    return new EventResponse().success(Arrays.asList( repository.save(event) ));
+    return new EventResponse().success(Arrays.asList( repository.save(entity) ));
   }
 
   @ApiOperation(value = "Delete event")
