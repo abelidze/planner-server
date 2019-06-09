@@ -9,6 +9,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.lang.reflect.Field;
 
+import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.skillmasters.server.misc.OffsetPageRequest;
 import com.skillmasters.server.http.response.EventResponse;
 import com.skillmasters.server.repository.EventRepository;
+import com.skillmasters.server.model.User;
 import com.skillmasters.server.model.Event;
 import com.skillmasters.server.model.Event.EventBuilder;
 import com.skillmasters.server.model.EventPattern;
@@ -46,9 +48,10 @@ public class EventController
   @Autowired
   ParseContext context;
 
-  @ApiOperation(value = "Get a list of available events", response = EventResponse.class, authorizations = {@Authorization(value = "access_token")})
+  @ApiOperation(value = "Get a list of available events", response = EventResponse.class)
   @GetMapping("/events")
   public EventResponse retrieve(
+    @AuthenticationPrincipal User user,
     @RequestParam(value="id", defaultValue="") List<Long> id,
     @RequestParam(value="offset", defaultValue="0") long offset,
     @RequestParam(value="count", defaultValue="100") int count,
@@ -60,7 +63,7 @@ public class EventController
     @RequestParam(value="updated_to", required=false) Long updatedTo
   ) {
     QEvent qEvent = QEvent.event;
-    BooleanExpression query = null;
+    BooleanExpression query = qEvent.ownerId.eq(user.getId());
 
     if (id.size() > 0) {
       query = qEvent.id.in(id).and(query);
@@ -143,10 +146,11 @@ public class EventController
     return new EventResponse().success(result);
   }
 
-  @ApiOperation(value = "Create event", response = EventResponse.class, authorizations = {@Authorization(value = "access_token")})
+  @ApiOperation(value = "Create event", response = EventResponse.class)
   @PostMapping("/events")
-  public EventResponse create(@RequestBody Event event)
+  public EventResponse create(@AuthenticationPrincipal User user, @RequestBody Event event)
   {
+    event.setOwnerId(user.getId());
     return new EventResponse().success( Arrays.asList(repository.save(event)) );
   }
 
@@ -158,12 +162,16 @@ public class EventController
       dataType = "Event"
     )
   )
-  @ApiOperation(value = "Update event", response = EventResponse.class, authorizations = {@Authorization(value = "access_token")})
+  @ApiOperation(value = "Update event", response = EventResponse.class)
   @PatchMapping("/events/{id}")
-  public EventResponse update(@PathVariable Long id, @RequestBody Map<String, Object> updates)
-  {
-    if (!repository.existsById(id)) {
-      return new EventResponse().error("Event not found");
+  public EventResponse update(
+    @AuthenticationPrincipal User user,
+    @PathVariable Long id,
+    @RequestBody Map<String, Object> updates
+  ) {
+    QEvent qEvent = QEvent.event;
+    if (!repository.exists( qEvent.id.eq(id).and(qEvent.ownerId.eq(user.getId())) )) {
+      return new EventResponse().error(404, "Event not found or you don't have access to it");
     }
     Event event = repository.findById(id).get();
     updates.forEach((k, v) -> {
@@ -176,12 +184,13 @@ public class EventController
     return new EventResponse().success(Arrays.asList( repository.save(event) ));
   }
 
-  @ApiOperation(value = "Delete event", authorizations = {@Authorization(value = "access_token")})
+  @ApiOperation(value = "Delete event")
   @DeleteMapping("/events/{id}")
-  public EventResponse delete(@PathVariable Long id)
+  public EventResponse delete(@AuthenticationPrincipal User user, @PathVariable Long id)
   {
-    if (!repository.existsById(id)) {
-      return new EventResponse().error("Event not found");
+    QEvent qEvent = QEvent.event;
+    if (!repository.exists( qEvent.id.eq(id).and(qEvent.ownerId.eq(user.getId())) )) {
+      return new EventResponse().error(404, "Event not found or you don't have access to it");
     }
     repository.deleteById(id);
     return new EventResponse().ok("ok");

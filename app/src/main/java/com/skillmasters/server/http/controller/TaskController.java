@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.lang.reflect.Field;
 
+import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -17,8 +18,10 @@ import com.skillmasters.server.misc.OffsetPageRequest;
 import com.skillmasters.server.http.response.TaskResponse;
 import com.skillmasters.server.repository.TaskRepository;
 import com.skillmasters.server.repository.EventRepository;
+import com.skillmasters.server.model.User;
 import com.skillmasters.server.model.Task;
 import com.skillmasters.server.model.QTask;
+import com.skillmasters.server.model.QEvent;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -31,9 +34,10 @@ public class TaskController
   @Autowired
   EventRepository eventRepository;
 
-  @ApiOperation(value = "Get a list of available tasks", response = TaskResponse.class, authorizations = {@Authorization(value = "access_token")})
+  @ApiOperation(value = "Get a list of available tasks", response = TaskResponse.class)
   @GetMapping("/tasks")
   public TaskResponse retrieve(
+    @AuthenticationPrincipal User user,
     @RequestParam(value="id", defaultValue="") List<Long> id,
     @RequestParam(value="event_id", required=false) Long eventId,
     @RequestParam(value="created_from", required=false) Long createdFrom,
@@ -51,7 +55,7 @@ public class TaskController
     }
 
     if (eventId != null) {
-      query = qTask.event.id.eq(eventId).and(query);
+      query = qTask.event.id.eq(eventId).and(qTask.event.ownerId.eq(user.getId())).and(query);
     }
 
     if (createdFrom != null) {
@@ -73,14 +77,16 @@ public class TaskController
     return new TaskResponse().success( repository.findAll(query, new OffsetPageRequest(offset, count)) );
   }
 
-  @ApiOperation(value = "Create task", response = TaskResponse.class, authorizations = {@Authorization(value = "access_token")})
+  @ApiOperation(value = "Create task", response = TaskResponse.class)
   @PostMapping("/tasks")
   public TaskResponse create(
+    @AuthenticationPrincipal User user,
     @RequestParam(value="event_id", required=true) Long eventId,
     @RequestBody Task task
   ) {
-    if (!eventRepository.existsById(eventId)) {
-      return new TaskResponse().error("Event not found");
+    QEvent qEvent = QEvent.event;
+    if (!eventRepository.exists( qEvent.id.eq(eventId).and(qEvent.ownerId.eq(user.getId())) )) {
+      return new TaskResponse().error(404, "Event not found or you don't have access to it");
     }
     task.setEvent( eventRepository.getOne(eventId) );
     return new TaskResponse().success( Arrays.asList(repository.save(task)) );
@@ -94,12 +100,16 @@ public class TaskController
       dataType = "Task"
     )
   )
-  @ApiOperation(value = "Update task", response = TaskResponse.class, authorizations = {@Authorization(value = "access_token")})
+  @ApiOperation(value = "Update task", response = TaskResponse.class)
   @PatchMapping("/tasks/{id}")
-  public TaskResponse update(@PathVariable Long id, @RequestBody Map<String, Object> updates)
-  {
-    if (!repository.existsById(id)) {
-      return new TaskResponse().error("Task not found");
+  public TaskResponse update(
+    @AuthenticationPrincipal User user,
+    @PathVariable Long id,
+    @RequestBody Map<String, Object> updates
+  ) {
+    QTask qTask = QTask.task;
+    if (!repository.exists( qTask.id.eq(id).and(qTask.event.ownerId.eq(user.getId())) )) {
+      return new TaskResponse().error(404, "Task not found or you don't have access to it");
     }
     Task task = repository.findById(id).get();
     updates.forEach((k, v) -> {
@@ -112,12 +122,13 @@ public class TaskController
     return new TaskResponse().success(Arrays.asList( repository.save(task) ));
   }
 
-  @ApiOperation(value = "Delete task", authorizations = {@Authorization(value = "access_token")})
+  @ApiOperation(value = "Delete task")
   @DeleteMapping("/tasks/{id}")
-  public TaskResponse delete(@PathVariable Long id)
+  public TaskResponse delete(@AuthenticationPrincipal User user, @PathVariable Long id)
   {
-    if (!repository.existsById(id)) {
-      return new TaskResponse().error("Task not found");
+    QTask qTask = QTask.task;
+    if (!repository.exists( qTask.id.eq(id).and(qTask.event.ownerId.eq(user.getId())) )) {
+      return new TaskResponse().error(404, "Task not found or you don't have access to it");
     }
     repository.deleteById(id);
     return new TaskResponse().ok("ok");
