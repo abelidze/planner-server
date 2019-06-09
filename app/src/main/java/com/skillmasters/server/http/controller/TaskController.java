@@ -16,6 +16,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.skillmasters.server.misc.OffsetPageRequest;
 import com.skillmasters.server.http.response.TaskResponse;
 import com.skillmasters.server.repository.TaskRepository;
+import com.skillmasters.server.repository.EventRepository;
 import com.skillmasters.server.model.Task;
 import com.skillmasters.server.model.QTask;
 
@@ -26,6 +27,9 @@ public class TaskController
 {
   @Autowired
   TaskRepository repository;
+
+  @Autowired
+  EventRepository eventRepository;
 
   @ApiOperation(value = "Get a list of available tasks", response = TaskResponse.class, authorizations = {@Authorization(value = "access_token")})
   @GetMapping("/tasks")
@@ -71,8 +75,14 @@ public class TaskController
 
   @ApiOperation(value = "Create task", response = TaskResponse.class, authorizations = {@Authorization(value = "access_token")})
   @PostMapping("/tasks")
-  public TaskResponse create(@RequestBody Task task)
-  {
+  public TaskResponse create(
+    @RequestParam(value="event_id", required=true) Long eventId,
+    @RequestBody Task task
+  ) {
+    if (!eventRepository.existsById(eventId)) {
+      return new TaskResponse().error("Event not found");
+    }
+    task.setEvent( eventRepository.getOne(eventId) );
     return new TaskResponse().success( Arrays.asList(repository.save(task)) );
   }
 
