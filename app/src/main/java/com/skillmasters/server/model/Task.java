@@ -14,10 +14,12 @@ import io.swagger.annotations.ApiModelProperty;
 
 @Data
 @Entity
+@Table(name = "tasks")
+@SequenceGenerator(name = "seq", sequenceName = "task_seq")
 public class Task
 {
   @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq")
   @ApiModelProperty(readOnly = true)
   private Long id;
 

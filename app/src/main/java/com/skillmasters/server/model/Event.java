@@ -18,11 +18,13 @@ import io.swagger.annotations.ApiModelProperty;
 
 @Data
 @Entity
-@Builder(toBuilder=true)
+@Table(name = "events")
+@Builder(toBuilder = true)
+@SequenceGenerator(name = "seq", sequenceName = "event_seq")
 public class Event
 {
   @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq")
   @ApiModelProperty(readOnly = true)
   private Long id;
 
