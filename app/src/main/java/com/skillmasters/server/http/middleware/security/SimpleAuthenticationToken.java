@@ -1,4 +1,4 @@
-package com.skillmasters.server.http.middleware.security.model;
+package com.skillmasters.server.http.middleware.security;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;

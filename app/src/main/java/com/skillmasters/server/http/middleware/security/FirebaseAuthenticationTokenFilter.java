@@ -12,7 +12,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 
-import com.skillmasters.server.http.middleware.security.model.SimpleAuthenticationToken;
+import com.skillmasters.server.http.middleware.security.SimpleAuthenticationToken;
 
 public class FirebaseAuthenticationTokenFilter extends AbstractAuthenticationProcessingFilter
 {

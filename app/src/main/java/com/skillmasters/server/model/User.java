@@ -1,4 +1,4 @@
-package com.skillmasters.server.http.middleware.security.model;
+package com.skillmasters.server.model;
 
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;

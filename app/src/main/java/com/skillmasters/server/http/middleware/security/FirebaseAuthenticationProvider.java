@@ -12,8 +12,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.session.SessionAuthenticationException;
 import org.springframework.stereotype.Component;
 
-import com.skillmasters.server.http.middleware.security.model.User;
-import com.skillmasters.server.http.middleware.security.model.SimpleAuthenticationToken;
+import com.skillmasters.server.model.User;
+import com.skillmasters.server.http.middleware.security.SimpleAuthenticationToken;
 
 import java.util.concurrent.ExecutionException;
 
