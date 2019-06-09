@@ -147,9 +147,6 @@ public class EventController
   @PostMapping("/events")
   public EventResponse create(@RequestBody Event event)
   {
-    for (EventPattern r : event.getPatterns()) {
-      r.setEvent(event);
-    }
     return new EventResponse().success( Arrays.asList(repository.save(event)) );
   }
 
