@@ -1,7 +1,6 @@
 # API-reference для приложения-календаря
 
 TODO: request examples<br />
-TODO: work with timezones
 
 Работа с API будет проходить с помощью HTTP-запросов <br />
 Используемые методы: GET, POST, PATCH, DELETE <br />
@@ -94,6 +93,7 @@ API GCM на данный момент могло обновиться, поэт
 | id          | uint, required      | Уникальный ID правила                                                                             |
 | event_id    | uint, required      | ID события                                                                                        |
 | type        | char, required      | Deprecated. Тип правила: RRULE[0], EXRULE[1]                                                      |
+| timezone    | string, optional    | Часовой пояс. Необходим для корректной обработки повторяющихся событий                            |
 | rrule       | string, optional    | RRULE-строка, описывающая правило повторения события                                              |
 | exrule      | string, optional    | Не реализовано. EXRULE-строка, описывающая исключения для повторяющихся событий                   |
 | duration    | timestamp, optional | Продолжительность события в мс. В будущем - если NULL, то равна времени, оставшемуся до конца дня |
@@ -341,6 +341,7 @@ API GCM на данный момент могло обновиться, поэт
          "id": "...",
          "rrule": "...",
          "exrule": "...",
+         "timezone": "...",
          "duration": "...",
          "started_at": "...",
          "ended_at": "...",
@@ -365,6 +366,7 @@ API GCM на данный момент могло обновиться, поэт
 | Field      | Type                | Description                                                                     |
 |------------|---------------------|---------------------------------------------------------------------------------|
 | event_id   | uint, required      | GET-параметр. ID события для которого создается паттерн                         |
+| timezone   | string, optional    | Часовой пояс. Необходим для корректной обработки повторяющихся событий          |
 | rrule      | string, optional    | RRULE-строка, описывающая правило повторения события                            |
 | exrule     | string, optional    | Не реализовано. EXRULE-строка, описывающая исключения для повторяющихся событий |
 | duration   | uint, optional      | Продолжительность события в мс                                                  |
