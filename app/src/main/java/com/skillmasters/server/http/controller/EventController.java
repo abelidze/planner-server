@@ -22,6 +22,7 @@ import biweekly.util.com.google.ical.compat.javautil.DateIterator;
 import biweekly.parameter.ICalParameters;
 import biweekly.property.RecurrenceRule;
 
+import com.google.common.base.Strings;
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Lists;
 import com.querydsl.core.types.dsl.BooleanExpression;
