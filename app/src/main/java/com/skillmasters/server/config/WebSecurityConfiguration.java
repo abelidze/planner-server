@@ -43,6 +43,13 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter
   }
 
   @Bean
+  @Override
+  public AuthenticationManager authenticationManagerBean() throws Exception
+  {
+    return super.authenticationManagerBean();
+  }
+
+  @Bean
   public FirebaseAuth firebaseAuth() throws IOException
   {
     // TODO: change before push
