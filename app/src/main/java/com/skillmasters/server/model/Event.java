@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.Date;
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 // import org.springframework.data.annotation.CreatedDate;
 // import org.springframework.data.annotation.LastModifiedDate;
 import org.hibernate.annotations.CreationTimestamp;
@@ -28,7 +29,11 @@ public class Event
   @ApiModelProperty(readOnly = true)
   private Long id;
 
-  private Long ownerId;
+  @NotNull
+  @Column(nullable = false)
+  @ApiModelProperty(readOnly = true, example = "0")
+  private String ownerId;
+
   private String name;
   private String details;
   private String status;
@@ -62,12 +67,12 @@ public class Event
 
   Event()
   {
-    // default
+    this.ownerId = "227";
   }
 
   Event(
     Long id,
-    Long ownerId,
+    String ownerId,
     String name,
     String details,
     String status,
