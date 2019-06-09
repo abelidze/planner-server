@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Arrays;
 import java.util.HashSet;
 
+import com.skillmasters.server.model.User;
 import com.skillmasters.server.http.middleware.security.FirebaseAuthenticationTokenFilter;
 import com.fasterxml.classmate.TypeResolver;
 
@@ -76,6 +77,7 @@ public class SwaggerConfiguration
             // .licenseUrl("https://raw.githubusercontent.com/abelidze/planer-server/master/LICENSE")
             .build())
         .pathMapping("/")
+        .ignoredParameterTypes(User.class)
         .directModelSubstitute(Date.class, Long.class)
         .genericModelSubstitutes(ResponseEntity.class)
         .produces(new HashSet(Arrays.asList("application/json")))
