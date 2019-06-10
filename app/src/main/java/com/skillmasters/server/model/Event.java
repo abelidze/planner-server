@@ -35,8 +35,14 @@ public class Event
   private String ownerId;
 
   private String name;
+
+  @ApiModelProperty(example = "-")
   private String details;
+
+  @ApiModelProperty(example = "busy")
   private String status;
+
+  @ApiModelProperty(example = "unknown")
   private String location;
 
   @Transient
