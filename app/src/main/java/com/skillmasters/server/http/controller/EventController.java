@@ -54,9 +54,10 @@ public class EventController
   @GetMapping("/events")
   public EventResponse retrieve(
     @AuthenticationPrincipal User user,
-    @RequestParam(value="id", defaultValue="") List<Long> id,
     @RequestParam(value="offset", defaultValue="0") long offset,
     @RequestParam(value="count", defaultValue="100") int count,
+    @RequestParam(value="id", defaultValue="") List<Long> id,
+    @RequestParam(value="owner_id", required=false) String ownerId,
     @RequestParam(value="from", required=false) Long from,
     @RequestParam(value="to", required=false) Long to,
     @RequestParam(value="created_from", required=false) Long createdFrom,
@@ -64,39 +65,32 @@ public class EventController
     @RequestParam(value="updated_from", required=false) Long updatedFrom,
     @RequestParam(value="updated_to", required=false) Long updatedTo
   ) {
-    QEvent qEvent = QEvent.event;
-    BooleanExpression query = qEvent.ownerId.eq(user.getId());
+    BooleanExpression query = generateGetQuery(user, id, ownerId, from, to, createdFrom, createdTo, updatedFrom, updatedTo);
+    return new EventResponse().success( repository.findAll(query, new OffsetPageRequest(offset, count)) );
+  }
 
-    if (id.size() > 0) {
-      query = qEvent.id.in(id).and(query);
-    }
-
-    if (createdFrom != null) {
-      query = qEvent.createdAt.goe(new Date(createdFrom)).and(query);
-    }
-
-    if (createdTo != null) {
-      query = qEvent.createdAt.loe(new Date(createdTo)).and(query);
-    }
-
-    if (updatedFrom != null) {
-      query = qEvent.updatedAt.goe(new Date(updatedFrom)).and(query);
-    }
-
-    if (updatedTo != null) {
-      query = qEvent.updatedAt.loe(new Date(updatedTo)).and(query);
-    }
-
-    if (from == null && to == null) {
-      return new EventResponse().success( repository.findAll(query, new OffsetPageRequest(offset, count)) );
-    }
+  @ApiOperation(value = "Get a list of available events instances", response = EventResponse.class)
+  @GetMapping("/events/instances")
+  public EventResponse retrieveInstances(
+    @AuthenticationPrincipal User user,
+    @RequestParam(value="offset", defaultValue="0") long offset,
+    @RequestParam(value="count", defaultValue="100") int count,
+    @RequestParam(value="id", defaultValue="") List<Long> id,
+    @RequestParam(value="owner_id", required=false) String ownerId,
+    @RequestParam(value="from", required=false) Long from,
+    @RequestParam(value="to", required=false) Long to,
+    @RequestParam(value="created_from", required=false) Long createdFrom,
+    @RequestParam(value="created_to", required=false) Long createdTo,
+    @RequestParam(value="updated_from", required=false) Long updatedFrom,
+    @RequestParam(value="updated_to", required=false) Long updatedTo
+  ) {
+    BooleanExpression query = generateGetQuery(user, id, ownerId, from, to, createdFrom, createdTo, updatedFrom, updatedTo);
 
     Date fromDate;
     if (from == null) {
       fromDate = new Date(0);
     } else {
       fromDate = new Date(from);
-      query = qEvent.patterns.any().endedAt.goe(fromDate).and(query);
     }
 
     Date toDate;
@@ -104,15 +98,14 @@ public class EventController
       toDate = new Date(Long.MAX_VALUE);
     } else {
       toDate = new Date(to);
-      query = qEvent.patterns.any().startedAt.loe(toDate).and(query);
     }
 
-    Date eventDate;
     TimeZone utcTimezone = TimeZone.getTimeZone("UTC");
     TimeZone timezone = utcTimezone;
     DateFormat df = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
     df.setTimeZone(utcTimezone);
 
+    Date eventDate;
     List<Event> result = Lists.newArrayList();
     Iterable<Event> events = repository.findAll(query);
     for (Event event : events) {
@@ -213,5 +206,56 @@ public class EventController
     }
     repository.deleteById(id);
     return new EventResponse().ok("ok");
+  }
+
+  private BooleanExpression generateGetQuery(
+    User user,
+    List<Long> id,
+    String ownerId,
+    Long from,
+    Long to,
+    Long createdFrom,
+    Long createdTo,
+    Long updatedFrom,
+    Long updatedTo
+  ) {
+    QEvent qEvent = QEvent.event;
+    BooleanExpression query = null;
+
+    if (id.size() > 0) {
+      query = qEvent.id.in(id).and(query);
+    }
+
+    if (ownerId == null) {
+      query = qEvent.ownerId.eq(user.getId()).and(query);
+    } else {
+      query = qEvent.ownerId.eq(ownerId).and(query);
+    }
+
+    if (createdFrom != null) {
+      query = qEvent.createdAt.goe(new Date(createdFrom)).and(query);
+    }
+
+    if (createdTo != null) {
+      query = qEvent.createdAt.loe(new Date(createdTo)).and(query);
+    }
+
+    if (updatedFrom != null) {
+      query = qEvent.updatedAt.goe(new Date(updatedFrom)).and(query);
+    }
+
+    if (updatedTo != null) {
+      query = qEvent.updatedAt.loe(new Date(updatedTo)).and(query);
+    }
+
+    if (from != null) {
+      query = qEvent.patterns.any().endedAt.goe(new Date(from)).and(query);
+    }
+
+    if (to != null) {
+      query = qEvent.patterns.any().startedAt.loe(new Date(to)).and(query);
+    }
+
+    return query;
   }
 }
