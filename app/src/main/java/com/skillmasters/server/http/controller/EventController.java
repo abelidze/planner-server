@@ -24,15 +24,14 @@ import biweekly.property.RecurrenceRule;
 
 import com.google.common.base.Strings;
 import com.google.common.base.CaseFormat;
-import com.google.common.collect.Lists;
 import com.querydsl.core.types.dsl.BooleanExpression;
 
 import com.skillmasters.server.misc.OffsetPageRequest;
 import com.skillmasters.server.http.response.EventResponse;
+import com.skillmasters.server.http.response.EventInstanceResponse;
 import com.skillmasters.server.repository.EventRepository;
 import com.skillmasters.server.model.User;
 import com.skillmasters.server.model.Event;
-import com.skillmasters.server.model.Event.EventBuilder;
 import com.skillmasters.server.model.EventPattern;
 import com.skillmasters.server.model.QEvent;
 
@@ -69,12 +68,10 @@ public class EventController
     return new EventResponse().success( repository.findAll(query, new OffsetPageRequest(offset, count)) );
   }
 
-  @ApiOperation(value = "Get a list of available events instances", response = EventResponse.class)
+  @ApiOperation(value = "Get a list of available events instances", response = EventInstanceResponse.class)
   @GetMapping("/events/instances")
-  public EventResponse retrieveInstances(
+  public EventInstanceResponse retrieveInstances(
     @AuthenticationPrincipal User user,
-    @RequestParam(value="offset", defaultValue="0") long offset,
-    @RequestParam(value="count", defaultValue="100") int count,
     @RequestParam(value="id", defaultValue="") List<Long> id,
     @RequestParam(value="owner_id", required=false) String ownerId,
     @RequestParam(value="from", required=false) Long from,
@@ -84,6 +81,7 @@ public class EventController
     @RequestParam(value="updated_from", required=false) Long updatedFrom,
     @RequestParam(value="updated_to", required=false) Long updatedTo
   ) {
+    EventInstanceResponse response = new EventInstanceResponse();
     BooleanExpression query = generateGetQuery(user, id, ownerId, from, to, createdFrom, createdTo, updatedFrom, updatedTo);
 
     Date fromDate;
@@ -106,21 +104,15 @@ public class EventController
     df.setTimeZone(utcTimezone);
 
     Date eventDate;
-    List<Event> result = Lists.newArrayList();
     Iterable<Event> events = repository.findAll(query);
     for (Event event : events) {
       for (EventPattern pattern : event.getPatterns()) {
-        EventBuilder eventBuilder = event.toBuilder();
-        Date start = pattern.getStartedAt();
-        Date end = pattern.getEndedAt();
-
         String rruleStr = pattern.getRrule();
         if (rruleStr == null) {
-          eventBuilder.startedAt(start);
-          eventBuilder.endedAt(end);
-          result.add(eventBuilder.build());
+          response.addInstance(event, pattern);
         } else {
-          end = end.before(toDate) ? end : toDate;
+          Date start = pattern.getStartedAt();
+          Date end = pattern.getEndedAt().before(toDate) ? pattern.getEndedAt() : toDate;
           rruleStr += ";UNTIL=" + df.format(end);
 
           if (Strings.isNullOrEmpty(pattern.getTimezone())) {
@@ -138,14 +130,12 @@ public class EventController
 
           for (int i = 0; i < 100 && dateIt.hasNext(); ++i) {
             eventDate = dateIt.next();
-            eventBuilder.startedAt(eventDate);
-            eventBuilder.endedAt(new Date(eventDate.getTime() + pattern.getDuration()));
-            result.add(eventBuilder.build());
+            response.addInstance(event, pattern, eventDate, new Date(eventDate.getTime() + pattern.getDuration()));
           }
         }
       }
     }
-    return new EventResponse().success(result);
+    return response.success();
   }
 
   @ApiOperation(value = "Create event", response = EventResponse.class)

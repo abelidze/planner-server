@@ -1,6 +1,5 @@
 package com.skillmasters.server.model;
 
-import lombok.Builder;
 import lombok.Data;
 
 import java.util.List;
@@ -12,7 +11,6 @@ import javax.validation.constraints.NotNull;
 // import org.springframework.data.annotation.LastModifiedDate;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -20,7 +18,6 @@ import io.swagger.annotations.ApiModelProperty;
 @Data
 @Entity
 @Table(name = "events")
-@Builder(toBuilder = true)
 @SequenceGenerator(name = "seq", sequenceName = "event_seq")
 public class Event
 {
@@ -44,16 +41,6 @@ public class Event
 
   @ApiModelProperty(example = "unknown")
   private String location;
-
-  @Transient
-  @JsonInclude(JsonInclude.Include.NON_NULL)
-  @ApiModelProperty(readOnly = true, example = "1556712345000")
-  private Date startedAt;
-
-  @Transient
-  @JsonInclude(JsonInclude.Include.NON_NULL)
-  @ApiModelProperty(readOnly = true, example = "1556712345000")
-  private Date endedAt;
 
   @CreationTimestamp
   @ApiModelProperty(readOnly = true, example = "1556712345000")
@@ -83,8 +70,6 @@ public class Event
     String details,
     String status,
     String location,
-    Date startedAt,
-    Date endedAt,
     Date createdAt,
     Date updatedAt,
     List<EventPattern> patterns,
@@ -96,8 +81,6 @@ public class Event
     this.details = details;
     this.status = status;
     this.location = location;
-    this.startedAt = startedAt;
-    this.endedAt = endedAt;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
     this.patterns = patterns;

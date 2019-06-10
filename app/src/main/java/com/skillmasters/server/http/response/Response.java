@@ -44,6 +44,9 @@ public class Response<M, T extends Response<M, ?>>
   {
     this.setSuccess(true);
     this.setStatus(200);
+    if (this.data != null) {
+      this.setCount(this.data.size());
+    }
     return self;
   }
 
