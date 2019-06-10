@@ -66,24 +66,24 @@ API GCM на данный момент могло обновиться, поэт
 | event_id    | uint, optional      | ID события, за которым закреплена задача |
 | parent_id   | uint, optional      | ID родительской задачи                   |
 | deadline_at | timestamp, required | Крайний срок выполнения задачи           |
-| created_at  | timestamp, optional | Временная отметка создания задачи        |
-| updated_at  | timestamp, optional | Временная отметка обновления задачи      |
+| created_at  | timestamp, optional | Unix-время в мс создания задачи          |
+| updated_at  | timestamp, optional | Unix-время в мс обновления задачи        |
 
 
 **Event** - событие
 
-| Name       | Type                | Description                                                                                       |
-|------------|---------------------|---------------------------------------------------------------------------------------------------|
-| id         | uint, required      | Уникальный ID события                                                                             |
-| owner_id   | uint, required      | ID создателя события                                                                              |
-| name       | string, optional    | Название события                                                                                  |
-| details    | string, optional    | Описание события                                                                                  |
-| status     | char, required      | Текущий статус события, enum                                                                      |
-| location   | string, optional    | Место события                                                                                     |
-| started_at | timestamp, optional | Временная отметка начала события. Присутствует только при запросе события на временном промежутке |
-| ended_at   | timestamp, optional | Временная отметка конца события. Присутствует только при запросе события на временном промежутке  |
-| created_at | timestamp, optional | Временная отметка создания события                                                                |
-| updated_at | timestamp, optional | Временная отметка обновления события                                                              |
+| Name       | Type                | Description                                                                                     |
+|------------|---------------------|-------------------------------------------------------------------------------------------------|
+| id         | uint, required      | Уникальный ID события                                                                           |
+| owner_id   | uint, required      | ID создателя события                                                                            |
+| name       | string, optional    | Название события                                                                                |
+| details    | string, optional    | Описание события                                                                                |
+| status     | char, required      | Текущий статус события, enum                                                                    |
+| location   | string, optional    | Место события                                                                                   |
+| started_at | timestamp, optional | Unix-время в мс начала события. Присутствует только при запросе события на временном промежутке |
+| ended_at   | timestamp, optional | Unix-время в мс конца события. Присутствует только при запросе события на временном промежутке  |
+| created_at | timestamp, optional | Unix-время в мс создания события                                                                |
+| updated_at | timestamp, optional | Unix-время в мс обновления события                                                              |
 
 
 **EventPattern** - описывает RRULE, RDATE, EXRULE и EXDATE правила для события
@@ -97,10 +97,10 @@ API GCM на данный момент могло обновиться, поэт
 | rrule       | string, optional    | RRULE-строка, описывающая правило повторения события                                              |
 | exrule      | string, optional    | Не реализовано. EXRULE-строка, описывающая исключения для повторяющихся событий                   |
 | duration    | timestamp, optional | Продолжительность события в мс. В будущем - если NULL, то равна времени, оставшемуся до конца дня |
-| started_at  | timestamp, optional | Временная отметка начала события / правила                                                        |
-| ended_at    | timestamp, optional | Временная отметка конца события / правила                                                         |
-| created_at  | timestamp, optional | Временная отметка создания правила                                                                |
-| updated_at  | timestamp, optional | Временная отметка обновления правила                                                              |
+| started_at  | timestamp, optional | Unix-время в мс начала события / правила                                                          |
+| ended_at    | timestamp, optional | Unix-время в мс конца события / правила                                                           |
+| created_at  | timestamp, optional | Unix-время в мс создания правила                                                                  |
+| updated_at  | timestamp, optional | Unix-время в мс обновления правила                                                                |
 
 
 **Tag** - теги событий (задач?)
@@ -110,8 +110,8 @@ API GCM на данный момент могло обновиться, поэт
 | id         | uint, required      | Уникальный ID тега                       |
 | name       | string, required    | Название тега                            |
 | slug       | string, required    | Уникальное ключевое слово тега, латиница |
-| created_at | timestamp, optional | Временная отметка создания тега          |
-| updated_at | timestamp, optional | Временная отметка обновления тега        |
+| created_at | timestamp, optional | Unix-время в мс создания тега            |
+| updated_at | timestamp, optional | Unix-время в мс обновления тега          |
 
 
 **EventToTag** - m2m связь событий и тегов
@@ -198,12 +198,12 @@ API GCM на данный момент могло обновиться, поэт
 | participants | uint[], optional    | WIP. ID участников события                                                    |
 | count        | uint, optional      | Количество событий, которое необходимо вернуть. По умолчанию: 100             |
 | offset       | uint, optinal       | Количество событий, которое необходимо пропустить. По умолчанию: 0            |
-| from         | timestamp, optional | Unix-время в мс, после которого события закончатся (включительно)             |
-| to           | timestamp, optional | Unix-время в мс, до которого события могут начаться (включительно)            |
-| created_from | timestamp, optional | Unix-время в мс, после которого события были созданы (включительно)           |
-| created_to   | timestamp, optional | Unix-время в мс, до которого события были созданы (включительно)              |
-| updated_from | timestamp, optional | Unix-время в мс, после которого события были обновлены (включительно)         |
-| updated_to   | timestamp, optional | Unix-время в мс, до которого события были обновлены (включительно)            |
+| from         | timestamp, optional | Unix-время в мс после которого события закончатся (включительно)              |
+| to           | timestamp, optional | Unix-время в мс до которого события могут начаться (включительно)             |
+| created_from | timestamp, optional | Unix-время в мс после которого события были созданы (включительно)            |
+| created_to   | timestamp, optional | Unix-время в мс до которого события были созданы (включительно)               |
+| updated_from | timestamp, optional | Unix-время в мс после которого события были обновлены (включительно)          |
+| updated_to   | timestamp, optional | Unix-время в мс до которого события были обновлены (включительно)             |
 
 **HTTP 200**
 ```
@@ -370,8 +370,8 @@ API GCM на данный момент могло обновиться, поэт
 | rrule      | string, optional    | RRULE-строка, описывающая правило повторения события                            |
 | exrule     | string, optional    | Не реализовано. EXRULE-строка, описывающая исключения для повторяющихся событий |
 | duration   | uint, optional      | Продолжительность события в мс                                                  |
-| started_at | timestamp, optional | Временная отметка начала события / правила                                      |
-| ended_at   | timestamp, optional | Временная отметка конца события / правила                                       |
+| started_at | timestamp, optional | Unix-время в мс начала события / правила                                        |
+| ended_at   | timestamp, optional | Unix-время в мс конца события / правила                                         |
 
 **HTTP 200**
 ```
@@ -407,8 +407,8 @@ API GCM на данный момент могло обновиться, поэт
 | rrule      | string, optional    | RRULE-строка, описывающая правило повторения события                            |
 | exrule     | string, optional    | Не реализовано. EXRULE-строка, описывающая исключения для повторяющихся событий |
 | duration   | uint, optional      | Продолжительность события в мс                                                  |
-| started_at | timestamp, optional | Временная отметка начала события / правила                                      |
-| ended_at   | timestamp, optional | Временная отметка конца события / правила                                       |
+| started_at | timestamp, optional | Unix-время в мс начала события / правила                                        |
+| ended_at   | timestamp, optional | Unix-время в мс конца события / правила                                         |
 
 **HTTP 200**
 ```
