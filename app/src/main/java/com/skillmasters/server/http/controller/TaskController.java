@@ -120,7 +120,6 @@ public class TaskController
       if (field != null) {
         ReflectionUtils.makeAccessible(field);
         final Class<?> type = field.getType();
-        System.out.println(type.getName());
         if (type.equals(Long.class)) {
           ReflectionUtils.setField(field, entity, ((Number) v).longValue());
         } else if (type.equals(Date.class)) {
