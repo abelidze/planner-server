@@ -5,6 +5,7 @@ import lombok.Data;
 import java.util.TimeZone;
 import java.util.Date;
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -31,10 +32,14 @@ public class EventPattern
   @JsonIgnore
   private Event event;
 
+  @NotNull
+  @Column(nullable = false)
   private Long duration = 0L;
 
+  @NotNull
+  @Column(nullable = false)
   @ApiModelProperty(example = "UTC")
-  private String timezone;
+  private String timezone = "UTC";
 
   @ApiModelProperty(example = "FREQ=DAILY;INTERVAL=1")
   private String rrule;
@@ -42,11 +47,15 @@ public class EventPattern
   @ApiModelProperty(example = "FREQ=WEEKLY;INTERVAL=2;BYDAY=TU,TH")
   private String exrule;
 
+  @NotNull
+  @Column(nullable = false)
   @ApiModelProperty(example = "1556712345000")
-  private Date startedAt;
+  private Date startedAt = new Date();
 
+  @NotNull
+  @Column(nullable = false)
   @ApiModelProperty(example = "1556712345000")
-  private Date endedAt;
+  private Date endedAt = new Date(Long.MAX_VALUE);
 
   @CreationTimestamp
   @ApiModelProperty(readOnly = true, example = "1556712345000")
@@ -58,7 +67,7 @@ public class EventPattern
 
   EventPattern()
   {
-    // default
+    //
   }
 
   EventPattern(
@@ -69,28 +78,11 @@ public class EventPattern
     Date startedAt,
     Date endedAt
   ) {
-    this.timezone = timezone;
-    this.rrule = rrule;
-    this.exrule = exrule;
-
-    if (startedAt == null) {
-      startedAt = new Date();
-    }
-
-    if (endedAt == null) {
-      if (duration == null) {
-        endedAt = new Date(Long.MAX_VALUE);
-      } else {
-        endedAt = new Date(startedAt.getTime() + duration);
-      }
-    }
-
-    if (duration == null) {
-      duration = endedAt.getTime() - startedAt.getTime();
-    }
-
-    this.duration = duration;
-    this.startedAt = startedAt;
-    this.endedAt = endedAt;
+    this.setTimezone(timezone);
+    this.setRrule(rrule);
+    this.setExrule(exrule);
+    this.setStartedAt(startedAt);
+    this.setDuration(duration);
+    this.setEndedAt(endedAt);
   }
 }

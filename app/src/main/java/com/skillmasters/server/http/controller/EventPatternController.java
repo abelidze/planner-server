@@ -58,7 +58,12 @@ public class EventPatternController
       return new EventPatternResponse().error(404, "Event not found or you don't have access to it");
     }
     pattern.setEvent( eventRepository.getOne(eventId) );
-    return new EventPatternResponse().success(Arrays.asList( repository.save(pattern) ));
+    if (pattern.getEndedAt().getTime() == Long.MAX_VALUE) {
+      pattern.setEndedAt(new Date(pattern.getStartedAt().getTime() + pattern.getDuration()));
+    } else if (pattern.getDuration() <= 0) {
+      pattern.setDuration(pattern.getEndedAt().getTime() - pattern.getStartedAt().getTime());
+    }
+    return new EventPatternResponse().success( repository.save(pattern) );
   }
 
   @ApiImplicitParams(
