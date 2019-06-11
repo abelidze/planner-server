@@ -55,12 +55,14 @@ public class Task
     Long parentId,
     String name,
     String details,
-    String status
+    String status,
+    Date deadlineAt
   ) {
     this.event = event;
     this.parentId = parentId;
     this.name = name;
     this.details = details;
     this.status = status;
+    this.deadlineAt = deadlineAt;
   }
 }
