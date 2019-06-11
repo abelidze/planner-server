@@ -1,8 +1,7 @@
 package com.skillmasters.server.http.response;
 
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
 import lombok.Data;
 
 import org.springframework.data.domain.Page;
@@ -50,9 +49,14 @@ public class Response<M, T extends Response<M, ?>>
     return self;
   }
 
+  public T success(M object)
+  {
+    this.setData( Arrays.asList(object) );
+    return this.success();
+  }
+
   public T success(List<M> objects)
   {
-    this.setCount(objects.size());
     this.setData(objects);
     return this.success();
   }
