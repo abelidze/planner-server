@@ -26,7 +26,7 @@ import com.skillmasters.server.model.QEvent;
 
 @RestController
 @RequestMapping("/api/v1")
-@Api(tags="Tasks", description="planner's tasks")
+@Api(tags="Tasks", description="events' tasks")
 public class TaskController
 {
   @Autowired

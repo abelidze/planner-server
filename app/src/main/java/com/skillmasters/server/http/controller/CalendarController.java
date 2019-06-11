@@ -29,7 +29,7 @@ import com.skillmasters.server.model.QEvent;
 
 @RestController
 @RequestMapping("/api/v1")
-@Api(tags="Calendar", description="import / export iCalendar")
+@Api(tags="Calendar", description="utils for iCalendar")
 public class CalendarController
 {
   @Autowired
