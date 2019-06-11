@@ -173,16 +173,19 @@ public class EventController
       if (field != null) {
         ReflectionUtils.makeAccessible(field);
         final Class<?> type = field.getType();
-        if (type.equals(Long.class)) {
-          ReflectionUtils.setField(field, entity, ((Number) v).longValue());
-        } else if (type.equals(Date.class)) {
-          ReflectionUtils.setField(field, entity, new Date( ((Number) v).longValue() ));
-        } else {
-          ReflectionUtils.setField(field, entity, v);
+        if (v != null) {
+          if (type.equals(Long.class)) {
+            ReflectionUtils.setField(field, entity, ((Number) v).longValue());
+            return;
+          } else if (type.equals(Date.class)) {
+            ReflectionUtils.setField(field, entity, new Date( ((Number) v).longValue() ));
+            return;
+          }
         }
+        ReflectionUtils.setField(field, entity, v);
       }
     });
-    return new EventResponse().success(Arrays.asList( repository.save(entity) ));
+    return new EventResponse().success( repository.save(entity) );
   }
 
   @ApiOperation(value = "Delete event")

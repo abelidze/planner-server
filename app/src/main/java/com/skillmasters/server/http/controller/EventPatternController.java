@@ -93,13 +93,16 @@ public class EventPatternController
       if (field != null) {
         ReflectionUtils.makeAccessible(field);
         final Class<?> type = field.getType();
-        if (type.equals(Long.class)) {
-          ReflectionUtils.setField(field, entity, ((Number) v).longValue());
-        } else if (type.equals(Date.class)) {
-          ReflectionUtils.setField(field, entity, new Date( ((Number) v).longValue() ));
-        } else {
-          ReflectionUtils.setField(field, entity, v);
+        if (v != null) {
+          if (type.equals(Long.class)) {
+            ReflectionUtils.setField(field, entity, ((Number) v).longValue());
+            return;
+          } else if (type.equals(Date.class)) {
+            ReflectionUtils.setField(field, entity, new Date( ((Number) v).longValue() ));
+            return;
+          }
         }
+        ReflectionUtils.setField(field, entity, v);
       }
     });
     return new EventPatternResponse().success(Arrays.asList( repository.save(entity) ));
