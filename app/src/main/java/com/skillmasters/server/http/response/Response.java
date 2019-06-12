@@ -1,13 +1,19 @@
 package com.skillmasters.server.http.response;
 
-import java.util.Arrays;
-import java.util.List;
 import lombok.Data;
 
-import org.springframework.data.domain.Page;
+import java.util.Arrays;
+import java.util.List;
+import javax.servlet.http.HttpServletResponse;
+
+import com.google.common.collect.Lists;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+
+import org.springframework.data.domain.Page;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
 
 @Data
 public class Response<M, T extends Response<M, ?>>
@@ -61,6 +67,11 @@ public class Response<M, T extends Response<M, ?>>
     return this.success();
   }
 
+  public T success(Iterable<M> objects)
+  {
+    return this.success( Lists.newArrayList(objects) );
+  }
+
   public T success(Page<M> page)
   {
     this.setOffset(page.getPageable().getOffset());
@@ -85,5 +96,18 @@ public class Response<M, T extends Response<M, ?>>
     this.setStatus(errorStatus);
     this.setMessage(errorMessage);
     return self;
+  }
+
+  public void setStatus(Integer value)
+  {
+    this.status = value;
+
+    ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+    if (requestAttributes == null) return;
+
+    HttpServletResponse response = requestAttributes.getResponse();
+    if (response == null) return;
+    
+    response.setStatus(value);
   }
 }
