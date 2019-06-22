@@ -191,13 +191,16 @@ public class CalendarController
 
     // Generate .ics
     String exported = Biweekly.write(ical).go();
-    response.setContentType("text/calendar");
+    response.setContentType("text/calendar; charset=UTF-8");
     response.setContentLength(exported.getBytes("UTF-8").length);
+    response.setCharacterEncoding("UTF-8");
     response.setHeader("Content-Disposition", "attachment;filename=ical.ics");
 
     // Return ical.ics file...
+    // PrintWriter out = response.getWriter();
+    // out.println(exported);
     ServletOutputStream out = response.getOutputStream();
-    out.println(exported);
+    out.write(exported.getBytes("UTF-8")); 
     out.flush();
     out.close();
 
