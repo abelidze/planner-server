@@ -1,13 +1,14 @@
 package com.skillmasters.server.http.controller;
 
-import java.util.TimeZone;
 import java.util.Map;
 import java.util.Date;
-import java.util.Arrays;
 import java.util.List;
+import java.util.TimeZone;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.lang.reflect.Field;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 
 import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 import org.springframework.util.ReflectionUtils;
@@ -25,15 +26,18 @@ import biweekly.property.RecurrenceRule;
 import com.google.common.base.Strings;
 import com.google.common.base.CaseFormat;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQuery;
 
 import com.skillmasters.server.misc.OffsetPageRequest;
 import com.skillmasters.server.http.response.EventResponse;
 import com.skillmasters.server.http.response.EventInstanceResponse;
-import com.skillmasters.server.repository.EventRepository;
+import com.skillmasters.server.service.PermissionService;
+import com.skillmasters.server.service.EventService;
 import com.skillmasters.server.model.User;
 import com.skillmasters.server.model.Event;
 import com.skillmasters.server.model.EventPattern;
 import com.skillmasters.server.model.QEvent;
+import com.skillmasters.server.model.QPermission;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -41,7 +45,10 @@ import com.skillmasters.server.model.QEvent;
 public class EventController
 {
   @Autowired
-  EventRepository repository;
+  EventService service;
+
+  @Autowired
+  PermissionService permissionService;
 
   @Autowired
   RecurrenceRuleScribe scribe;
@@ -49,24 +56,8 @@ public class EventController
   @Autowired
   ParseContext context;
 
-  @ApiOperation(value = "Get a list of available events", response = EventResponse.class)
-  @GetMapping("/events")
-  public EventResponse retrieve(
-    @AuthenticationPrincipal User user,
-    @RequestParam(value="offset", defaultValue="0") long offset,
-    @RequestParam(value="count", defaultValue="100") int count,
-    @RequestParam(value="id", defaultValue="") List<Long> id,
-    @RequestParam(value="owner_id", required=false) String ownerId,
-    @RequestParam(value="from", required=false) Long from,
-    @RequestParam(value="to", required=false) Long to,
-    @RequestParam(value="created_from", required=false) Long createdFrom,
-    @RequestParam(value="created_to", required=false) Long createdTo,
-    @RequestParam(value="updated_from", required=false) Long updatedFrom,
-    @RequestParam(value="updated_to", required=false) Long updatedTo
-  ) {
-    BooleanExpression query = generateGetQuery(user, id, ownerId, from, to, createdFrom, createdTo, updatedFrom, updatedTo);
-    return new EventResponse().success( repository.findAll(query, new OffsetPageRequest(offset, count)) );
-  }
+  @PersistenceContext
+  EntityManager entityManager;
 
   @ApiOperation(value = "Get a list of available events instances", response = EventInstanceResponse.class)
   @GetMapping("/events/instances")
@@ -82,7 +73,7 @@ public class EventController
     @RequestParam(value="updated_to", required=false) Long updatedTo
   ) {
     EventInstanceResponse response = new EventInstanceResponse();
-    BooleanExpression query = generateGetQuery(user, id, ownerId, from, to, createdFrom, createdTo, updatedFrom, updatedTo);
+    JPAQuery query = generateGetQuery(user, id, ownerId, from, to, createdFrom, createdTo, updatedFrom, updatedTo);
 
     Date fromDate;
     if (from == null) {
@@ -104,7 +95,7 @@ public class EventController
     df.setTimeZone(utcTimezone);
 
     Date eventDate;
-    Iterable<Event> events = repository.findAll(query);
+    Iterable<Event> events = service.getByQuery(query);
     for (Event event : events) {
       for (EventPattern pattern : event.getPatterns()) {
         String rruleStr = pattern.getRrule();
@@ -124,7 +115,8 @@ public class EventController
           RecurrenceRule rrule = scribe.parseText(rruleStr, null, new ICalParameters(), context);
           DateIterator dateIt = rrule.getDateIterator(start, timezone);
 
-          if (start.before(fromDate)) {
+          Date firstEnd = new Date(start.getTime() + pattern.getDuration());
+          if (fromDate.after(firstEnd)) {
             dateIt.advanceTo(fromDate);
           }
 
@@ -138,12 +130,42 @@ public class EventController
     return response.success();
   }
 
+  @ApiOperation(value = "Get a list of available events", response = EventResponse.class)
+  @GetMapping("/events")
+  public EventResponse retrieve(
+    @AuthenticationPrincipal User user,
+    @RequestParam(value="offset", defaultValue="0") long offset,
+    @RequestParam(value="count", defaultValue="100") int count,
+    @RequestParam(value="id", defaultValue="") List<Long> id,
+    @RequestParam(value="owner_id", required=false) String ownerId,
+    @RequestParam(value="from", required=false) Long from,
+    @RequestParam(value="to", required=false) Long to,
+    @RequestParam(value="created_from", required=false) Long createdFrom,
+    @RequestParam(value="created_to", required=false) Long createdTo,
+    @RequestParam(value="updated_from", required=false) Long updatedFrom,
+    @RequestParam(value="updated_to", required=false) Long updatedTo
+  ) {
+    JPAQuery query = generateGetQuery(user, id, ownerId, from, to, createdFrom, createdTo, updatedFrom, updatedTo);
+    return new EventResponse().success( service.getByQuery(query, new OffsetPageRequest(offset, count)) );
+  }
+
+  @ApiOperation(value = "Get event by id", response = EventResponse.class)
+  @GetMapping("/events/{id}")
+  public EventResponse retrieveById(@PathVariable Long id)
+  {
+    Event entity = service.getById(id);
+    if (entity == null) {
+      return new EventResponse().error(404, "Event not found");
+    }
+    return new EventResponse().success(entity);
+  }
+
   @ApiOperation(value = "Create event", response = EventResponse.class)
   @PostMapping("/events")
   public EventResponse create(@AuthenticationPrincipal User user, @RequestBody Event event)
   {
     event.setOwnerId(user.getId());
-    return new EventResponse().success( Arrays.asList(repository.save(event)) );
+    return new EventResponse().success( service.save(event) );
   }
 
   @ApiImplicitParams(
@@ -156,51 +178,28 @@ public class EventController
   )
   @ApiOperation(value = "Update event", response = EventResponse.class)
   @PatchMapping("/events/{id}")
-  public EventResponse update(
-    @AuthenticationPrincipal User user,
-    @PathVariable Long id,
-    @RequestBody Map<String, Object> updates
-  ) {
-    QEvent qEvent = QEvent.event;
-    if (!repository.exists( qEvent.id.eq(id).and(qEvent.ownerId.eq(user.getId())) )) {
-      return new EventResponse().error(404, "Event not found or you don't have access to it");
+  public EventResponse update(@PathVariable Long id, @RequestBody Map<String, Object> updates)
+  {
+    Event entity = service.getById(id);
+    if (entity == null) {
+      return new EventResponse().error(404, "Event not found");
     }
-
-    Event entity = repository.findById(id).get();
-    updates.forEach((k, v) -> {
-      String fieldName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, k);
-      Field field = ReflectionUtils.findField(Event.class, fieldName);
-      if (field != null) {
-        ReflectionUtils.makeAccessible(field);
-        final Class<?> type = field.getType();
-        if (v != null) {
-          if (type.equals(Long.class)) {
-            ReflectionUtils.setField(field, entity, ((Number) v).longValue());
-            return;
-          } else if (type.equals(Date.class)) {
-            ReflectionUtils.setField(field, entity, new Date( ((Number) v).longValue() ));
-            return;
-          }
-        }
-        ReflectionUtils.setField(field, entity, v);
-      }
-    });
-    return new EventResponse().success( repository.save(entity) );
+    return new EventResponse().success( service.update(entity, updates) );
   }
 
   @ApiOperation(value = "Delete event")
   @DeleteMapping("/events/{id}")
-  public EventResponse delete(@AuthenticationPrincipal User user, @PathVariable Long id)
+  public EventResponse delete(@PathVariable Long id)
   {
-    QEvent qEvent = QEvent.event;
-    if (!repository.exists( qEvent.id.eq(id).and(qEvent.ownerId.eq(user.getId())) )) {
-      return new EventResponse().error(404, "Event not found or you don't have access to it");
+    Event entity = service.getById(id);
+    if (entity == null) {
+      return new EventResponse().error(404, "Event not found");
     }
-    repository.deleteById(id);
-    return new EventResponse().ok("ok");
+    service.delete(entity);
+    return new EventResponse().success();
   }
 
-  private BooleanExpression generateGetQuery(
+  private JPAQuery generateGetQuery(
     User user,
     List<Long> id,
     String ownerId,
@@ -212,42 +211,50 @@ public class EventController
     Long updatedTo
   ) {
     QEvent qEvent = QEvent.event;
-    BooleanExpression query = null;
+    JPAQuery query = new JPAQuery(entityManager);
+    query.from(qEvent);
+    BooleanExpression where = null;
 
     if (id.size() > 0) {
-      query = qEvent.id.in(id).and(query);
+      where = qEvent.id.in(id).and(where);
     }
 
-    if (ownerId == null) {
-      query = qEvent.ownerId.eq(user.getId()).and(query);
+    String userId = user.getId();
+    if (ownerId != null && ownerId != userId) {
+      QPermission qPermission = QPermission.permission;
+      BooleanExpression hasPermission = permissionService.getHasPermissionQuery(userId, "READ_EVENT")
+          .and(qEvent.id.stringValue().eq(qPermission.entityId).or(qPermission.entityId.eq(ownerId)));
+      query.innerJoin(qPermission).on(hasPermission);
+      where = qEvent.ownerId.eq(ownerId).and(where);
     } else {
-      query = qEvent.ownerId.eq(ownerId).and(query);
+      where = qEvent.ownerId.eq(userId).and(where);
     }
 
     if (createdFrom != null) {
-      query = qEvent.createdAt.goe(new Date(createdFrom)).and(query);
+      where = qEvent.createdAt.goe(new Date(createdFrom)).and(where);
     }
 
     if (createdTo != null) {
-      query = qEvent.createdAt.loe(new Date(createdTo)).and(query);
+      where = qEvent.createdAt.loe(new Date(createdTo)).and(where);
     }
 
     if (updatedFrom != null) {
-      query = qEvent.updatedAt.goe(new Date(updatedFrom)).and(query);
+      where = qEvent.updatedAt.goe(new Date(updatedFrom)).and(where);
     }
 
     if (updatedTo != null) {
-      query = qEvent.updatedAt.loe(new Date(updatedTo)).and(query);
+      where = qEvent.updatedAt.loe(new Date(updatedTo)).and(where);
     }
 
     if (from != null) {
-      query = qEvent.patterns.any().endedAt.goe(new Date(from)).and(query);
+      where = qEvent.patterns.any().endedAt.goe(new Date(from)).and(where);
     }
 
     if (to != null) {
-      query = qEvent.patterns.any().startedAt.loe(new Date(to)).and(query);
+      where = qEvent.patterns.any().startedAt.loe(new Date(to)).and(where);
     }
 
+    query.where(where);
     return query;
   }
 }

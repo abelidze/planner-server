@@ -8,7 +8,6 @@ import java.lang.reflect.Field;
 
 import com.google.common.base.CaseFormat;
 
-import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -18,15 +17,24 @@ import com.skillmasters.server.http.response.EventPatternResponse;
 import com.skillmasters.server.repository.EventPatternRepository;
 import com.skillmasters.server.repository.EventRepository;
 import com.skillmasters.server.model.User;
+import com.skillmasters.server.model.Event;
 import com.skillmasters.server.model.EventPattern;
 import com.skillmasters.server.model.QEventPattern;
 import com.skillmasters.server.model.QEvent;
+import com.skillmasters.server.service.EventPatternService;
+import com.skillmasters.server.service.EventService;
 
 @RestController
 @RequestMapping("/api/v1")
 @Api(tags="Patterns", description="events' patterns")
 public class EventPatternController
 {
+  @Autowired
+  EventPatternService service;
+
+  @Autowired
+  EventService eventService;
+
   @Autowired
   EventPatternRepository repository;
 
@@ -35,35 +43,33 @@ public class EventPatternController
 
   @ApiOperation(value = "Get a list of patterns for given event", response = EventPatternResponse.class)
   @GetMapping("/patterns")
-  public EventPatternResponse retrieve(
-    @AuthenticationPrincipal User user,
-    @RequestParam(value="event_id", required=true) Long eventId
-  ) {
-    QEvent qEvent = QEvent.event;
-    if (!eventRepository.exists( qEvent.id.eq(eventId).and(qEvent.ownerId.eq(user.getId())) )) {
-      return new EventPatternResponse().error(404, "Event not found or you don't have access to it");
+  public EventPatternResponse retrieve(@RequestParam(value="event_id", required=true) Long eventId)
+  {
+    Event entity = eventService.getById(eventId);
+    if (entity == null) {
+      return new EventPatternResponse().error(404, "Event not found");
     }
-    return new EventPatternResponse().success( eventRepository.getOne(eventId).getPatterns() );
+    return new EventPatternResponse().success( entity.getPatterns() );
   }
 
   @ApiOperation(value = "Create pattern", response = EventPatternResponse.class)
   @PostMapping("/patterns")
   public EventPatternResponse create(
-    @AuthenticationPrincipal User user,
     @RequestParam(value="event_id", required=true) Long eventId,
     @RequestBody EventPattern pattern
   ) {
-    QEvent qEvent = QEvent.event;
-    if (!eventRepository.exists( qEvent.id.eq(eventId).and(qEvent.ownerId.eq(user.getId())) )) {
-      return new EventPatternResponse().error(404, "Event not found or you don't have access to it");
+    Event entity = eventService.getById(eventId);
+    if (entity == null) {
+      return new EventPatternResponse().error(404, "Event not found");
     }
-    pattern.setEvent( eventRepository.getOne(eventId) );
+
+    pattern.setEvent(entity);
     if (pattern.getEndedAt().getTime() == Long.MAX_VALUE) {
       pattern.setEndedAt(new Date(pattern.getStartedAt().getTime() + pattern.getDuration()));
     } else if (pattern.getDuration() <= 0) {
       pattern.setDuration(pattern.getEndedAt().getTime() - pattern.getStartedAt().getTime());
     }
-    return new EventPatternResponse().success( repository.save(pattern) );
+    return new EventPatternResponse().success( service.save(pattern) );
   }
 
   @ApiImplicitParams(
@@ -76,47 +82,24 @@ public class EventPatternController
   )
   @ApiOperation(value = "Update pattern", response = EventPatternResponse.class)
   @PatchMapping("/patterns/{id}")
-  public EventPatternResponse update(
-    @AuthenticationPrincipal User user,
-    @PathVariable Long id,
-    @RequestBody Map<String, Object> updates
-  ) {
-    QEventPattern qPattern = QEventPattern.eventPattern;
-    if (!repository.exists( qPattern.id.eq(id).and(qPattern.event.ownerId.eq(user.getId())) )) {
-      return new EventPatternResponse().error(404, "Task not found or you don't have access to it");
+  public EventPatternResponse update(@PathVariable Long id, @RequestBody Map<String, Object> updates)
+  {
+    EventPattern entity = service.getById(id);
+    if (entity == null) {
+      return new EventPatternResponse().error(404, "EventPattern not found");
     }
-
-    EventPattern entity = repository.findById(id).get();
-    updates.forEach((k, v) -> {
-      String fieldName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, k);
-      Field field = ReflectionUtils.findField(EventPattern.class, fieldName);
-      if (field != null) {
-        ReflectionUtils.makeAccessible(field);
-        final Class<?> type = field.getType();
-        if (v != null) {
-          if (type.equals(Long.class)) {
-            ReflectionUtils.setField(field, entity, ((Number) v).longValue());
-            return;
-          } else if (type.equals(Date.class)) {
-            ReflectionUtils.setField(field, entity, new Date( ((Number) v).longValue() ));
-            return;
-          }
-        }
-        ReflectionUtils.setField(field, entity, v);
-      }
-    });
-    return new EventPatternResponse().success(Arrays.asList( repository.save(entity) ));
+    return new EventPatternResponse().success( service.update(entity, updates) );
   }
 
   @ApiOperation(value = "Delete pattern")
   @DeleteMapping("/patterns/{id}")
-  public EventPatternResponse delete(@AuthenticationPrincipal User user, @PathVariable Long id)
+  public EventPatternResponse delete(@PathVariable Long id)
   {
-    QEventPattern qPattern = QEventPattern.eventPattern;
-    if (!repository.exists( qPattern.id.eq(id).and(qPattern.event.ownerId.eq(user.getId())) )) {
-      return new EventPatternResponse().error(404, "Task not found or you don't have access to it");
+    EventPattern entity = service.getById(id);
+    if (entity == null) {
+      return new EventPatternResponse().error(404, "EventPattern not found");
     }
-    repository.deleteById(id);
-    return new EventPatternResponse().ok("ok");
+    service.delete(entity);
+    return new EventPatternResponse().success();
   }
 }

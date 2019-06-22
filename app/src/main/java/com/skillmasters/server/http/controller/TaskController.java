@@ -17,12 +17,12 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 
 import com.skillmasters.server.misc.OffsetPageRequest;
 import com.skillmasters.server.http.response.TaskResponse;
-import com.skillmasters.server.repository.TaskRepository;
-import com.skillmasters.server.repository.EventRepository;
+import com.skillmasters.server.service.TaskService;
+import com.skillmasters.server.service.EventService;
 import com.skillmasters.server.model.User;
 import com.skillmasters.server.model.Task;
+import com.skillmasters.server.model.Event;
 import com.skillmasters.server.model.QTask;
-import com.skillmasters.server.model.QEvent;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -30,10 +30,10 @@ import com.skillmasters.server.model.QEvent;
 public class TaskController
 {
   @Autowired
-  TaskRepository repository;
+  TaskService service;
 
   @Autowired
-  EventRepository eventRepository;
+  EventService eventService;
 
   @ApiOperation(value = "Get a list of available tasks", response = TaskResponse.class)
   @GetMapping("/tasks")
@@ -49,14 +49,14 @@ public class TaskController
     @RequestParam(value="offset", defaultValue="0") long offset
   ) {
     QTask qTask = QTask.task;
-    BooleanExpression query = null;
+    BooleanExpression query = qTask.event.ownerId.eq(user.getId());
 
     if (id.size() > 0) {
       query = qTask.id.in(id).and(query);
     }
 
     if (eventId != null) {
-      query = qTask.event.id.eq(eventId).and(qTask.event.ownerId.eq(user.getId())).and(query);
+      query = qTask.event.id.eq(eventId).and(query);
     }
 
     if (createdFrom != null) {
@@ -75,22 +75,32 @@ public class TaskController
       query = qTask.updatedAt.loe(new Date(updatedTo)).and(query);
     }
 
-    return new TaskResponse().success( repository.findAll(query, new OffsetPageRequest(offset, count)) );
+    return new TaskResponse().success( service.getByQuery(query, new OffsetPageRequest(offset, count)) );
+  }
+
+  @ApiOperation(value = "Get task by id", response = TaskResponse.class)
+  @GetMapping("/tasks/{id}")
+  public TaskResponse retrieveById(@PathVariable Long id)
+  {
+    Task entity = service.getById(id);
+    if (entity == null) {
+      return new TaskResponse().error(404, "Task not found");
+    }
+    return new TaskResponse().success(entity);
   }
 
   @ApiOperation(value = "Create task", response = TaskResponse.class)
   @PostMapping("/tasks")
   public TaskResponse create(
-    @AuthenticationPrincipal User user,
     @RequestParam(value="event_id", required=true) Long eventId,
     @RequestBody Task task
   ) {
-    QEvent qEvent = QEvent.event;
-    if (!eventRepository.exists( qEvent.id.eq(eventId).and(qEvent.ownerId.eq(user.getId())) )) {
-      return new TaskResponse().error(404, "Event not found or you don't have access to it");
+    Event entity = eventService.getById(eventId);
+    if (entity == null) {
+      return new TaskResponse().error(404, "Event not found");
     }
-    task.setEvent( eventRepository.getOne(eventId) );
-    return new TaskResponse().success( Arrays.asList(repository.save(task)) );
+    task.setEvent(entity);
+    return new TaskResponse().success( service.save(task) );
   }
 
   @ApiImplicitParams(
@@ -103,47 +113,24 @@ public class TaskController
   )
   @ApiOperation(value = "Update task", response = TaskResponse.class)
   @PatchMapping("/tasks/{id}")
-  public TaskResponse update(
-    @AuthenticationPrincipal User user,
-    @PathVariable Long id,
-    @RequestBody Map<String, Object> updates
-  ) {
-    QTask qTask = QTask.task;
-    if (!repository.exists( qTask.id.eq(id).and(qTask.event.ownerId.eq(user.getId())) )) {
-      return new TaskResponse().error(404, "Task not found or you don't have access to it");
+  public TaskResponse update(@PathVariable Long id, @RequestBody Map<String, Object> updates)
+  {
+    Task entity = service.getById(id);
+    if (entity == null) {
+      return new TaskResponse().error(404, "Task not found");
     }
-
-    Task entity = repository.findById(id).get();
-    updates.forEach((k, v) -> {
-      String fieldName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, k);
-      Field field = ReflectionUtils.findField(Task.class, fieldName);
-      if (field != null) {
-        ReflectionUtils.makeAccessible(field);
-        final Class<?> type = field.getType();
-        if (v != null) {
-          if (type.equals(Long.class)) {
-            ReflectionUtils.setField(field, entity, ((Number) v).longValue());
-            return;
-          } else if (type.equals(Date.class)) {
-            ReflectionUtils.setField(field, entity, new Date( ((Number) v).longValue() ));
-            return;
-          }
-        }
-        ReflectionUtils.setField(field, entity, v);
-      }
-    });
-    return new TaskResponse().success(Arrays.asList( repository.save(entity) ));
+    return new TaskResponse().success( service.update(entity, updates) );
   }
 
   @ApiOperation(value = "Delete task")
   @DeleteMapping("/tasks/{id}")
-  public TaskResponse delete(@AuthenticationPrincipal User user, @PathVariable Long id)
+  public TaskResponse delete(@PathVariable Long id)
   {
-    QTask qTask = QTask.task;
-    if (!repository.exists( qTask.id.eq(id).and(qTask.event.ownerId.eq(user.getId())) )) {
-      return new TaskResponse().error(404, "Task not found or you don't have access to it");
+    Task entity = service.getById(id);
+    if (entity == null) {
+      return new TaskResponse().error(404, "Task not found");
     }
-    repository.deleteById(id);
-    return new TaskResponse().ok("ok");
+    service.delete(entity);
+    return new TaskResponse().success();
   }
 }

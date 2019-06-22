@@ -1,16 +1,19 @@
 package com.skillmasters.server.model;
 
+import java.util.Collection;
+
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
+import com.skillmasters.server.service.PermissionService;
 
 @Data
 public class User implements UserDetails
 {
   private static final long serialVersionUID = 1L;
 
+  private final PermissionService permissionService;
   private final boolean enabled = true;
   private final boolean credentialsNonExpired = true;
   private final boolean accountNonLocked = true;
@@ -19,8 +22,14 @@ public class User implements UserDetails
   private String username = null;
   private String id = null;
 
-  public User(String username, String uid)
+  public User()
   {
+    this.permissionService = null;
+  }
+
+  public User(String username, String uid, PermissionService service)
+  {
+    this.permissionService = service;
     this.username = username;
     this.id = uid;
   }
@@ -32,24 +41,20 @@ public class User implements UserDetails
     return null;
   }
 
-  // public boolean isEnabled()
-  // {
-  //   return enabled;
-  // }
+  /**
+   * Stuff below is a very big hack and needs refactor
+   */
 
-  // public boolean isCredentialsNonExpired()
-  // {
-  //   return credentialsNonExpired;
-  // }
+  public boolean can(String action, IEntity entity)
+  {
+    return entity == null
+        || this.isOwner(entity)
+        || (this.permissionService != null && this.permissionService.hasPermission(this, action, entity));
+  }
 
-  // public boolean isAccountNonLocked()
-  // {
-  //   return accountNonLocked;
-  // }
-
-  // public boolean isAccountNonExpired()
-  // {
-  //   return accountNonExpired;
-  // }
+  public boolean isOwner(IEntity entity)
+  {
+    return entity.getOwnerId().equals( this.getId() );
+  }
 
 }

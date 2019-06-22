@@ -18,11 +18,11 @@ import io.swagger.annotations.ApiModelProperty;
 @Data
 @Entity
 @Table(name = "events")
-@SequenceGenerator(name = "seq", sequenceName = "event_seq")
-public class Event
+@SequenceGenerator(name = "eventId", sequenceName = "event_seq", allocationSize = 1)
+public class Event implements IEntity
 {
   @Id
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq")
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "eventId")
   @ApiModelProperty(readOnly = true)
   private Long id;
 
@@ -63,28 +63,10 @@ public class Event
     this.ownerId = "227";
   }
 
-  Event(
-    Long id,
-    String ownerId,
-    String name,
-    String details,
-    String status,
-    String location,
-    Date createdAt,
-    Date updatedAt,
-    List<EventPattern> patterns,
-    List<Task> tasks
-  ) {
-    this.id = id;
-    this.ownerId = ownerId;
-    this.name = name;
-    this.details = details;
-    this.status = status;
-    this.location = location;
-    this.createdAt = createdAt;
-    this.updatedAt = updatedAt;
-    this.patterns = patterns;
-    this.tasks = tasks;
+  @JsonIgnore
+  public String getEntityName()
+  {
+    return "EVENT";
   }
 
   // @Override

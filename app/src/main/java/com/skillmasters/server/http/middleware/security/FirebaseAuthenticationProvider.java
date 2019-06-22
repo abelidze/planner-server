@@ -13,6 +13,7 @@ import org.springframework.security.web.authentication.session.SessionAuthentica
 import org.springframework.stereotype.Component;
 
 import com.skillmasters.server.model.User;
+import com.skillmasters.server.service.PermissionService;
 import com.skillmasters.server.http.middleware.security.SimpleAuthenticationToken;
 
 import java.util.concurrent.ExecutionException;
@@ -22,6 +23,9 @@ public class FirebaseAuthenticationProvider extends AbstractUserDetailsAuthentic
 {
   @Autowired
   private FirebaseAuth firebaseAuth;
+
+  @Autowired
+  private PermissionService permissionService;
 
   @Override
   public boolean supports(Class<?> authentication)
@@ -43,13 +47,13 @@ public class FirebaseAuthenticationProvider extends AbstractUserDetailsAuthentic
 
     // backdoor. Request by Sergey
     if (authenticationToken.getToken().equals("serega_mem")) {
-      return new User("sergo@zink.ovic", "227");
+      return new User("sergo@zink.ovic", "227", permissionService);
     }
 
     ApiFuture<FirebaseToken> task = firebaseAuth.verifyIdTokenAsync(authenticationToken.getToken());
     try {
       FirebaseToken token = task.get();
-      return new User(token.getEmail(), token.getUid());
+      return new User(token.getEmail(), token.getUid(), permissionService);
     } catch (InterruptedException | ExecutionException e) {
       throw new SessionAuthenticationException(e.getMessage());
     }

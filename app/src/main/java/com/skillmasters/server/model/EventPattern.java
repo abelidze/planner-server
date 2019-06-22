@@ -18,15 +18,15 @@ import io.swagger.annotations.ApiModelProperty;
 @Data
 @Entity
 @Table(name = "patterns")
-@SequenceGenerator(name = "seq", sequenceName = "pattern_seq")
-public class EventPattern
+@SequenceGenerator(name = "patternId", sequenceName = "pattern_seq", allocationSize = 1)
+public class EventPattern implements IEntity
 {
   @Id
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq")
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "patternId")
   @ApiModelProperty(readOnly = true)
   private Long id;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "event_id", nullable = false)
   @OnDelete(action = OnDeleteAction.CASCADE)
   @JsonIgnore
@@ -70,19 +70,15 @@ public class EventPattern
     //
   }
 
-  EventPattern(
-    String timezone,
-    String rrule,
-    String exrule,
-    Long duration,
-    Date startedAt,
-    Date endedAt
-  ) {
-    this.setTimezone(timezone);
-    this.setRrule(rrule);
-    this.setExrule(exrule);
-    this.setStartedAt(startedAt);
-    this.setDuration(duration);
-    this.setEndedAt(endedAt);
+  @JsonIgnore
+  public String getOwnerId()
+  {
+    return this.event.getOwnerId();
+  }
+
+  @JsonIgnore
+  public String getEntityName()
+  {
+    return "PATTERN";
   }
 }

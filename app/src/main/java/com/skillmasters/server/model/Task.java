@@ -15,15 +15,15 @@ import io.swagger.annotations.ApiModelProperty;
 @Data
 @Entity
 @Table(name = "tasks")
-@SequenceGenerator(name = "seq", sequenceName = "task_seq")
-public class Task
+@SequenceGenerator(name = "taskId", sequenceName = "task_seq", allocationSize = 1)
+public class Task implements IEntity
 {
   @Id
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq")
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "taskId")
   @ApiModelProperty(readOnly = true)
   private Long id;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "event_id", nullable = false)
   @OnDelete(action = OnDeleteAction.CASCADE)
   @JsonIgnore
@@ -50,19 +50,15 @@ public class Task
     // default
   }
 
-  Task(
-    Event event,
-    Long parentId,
-    String name,
-    String details,
-    String status,
-    Date deadlineAt
-  ) {
-    this.event = event;
-    this.parentId = parentId;
-    this.name = name;
-    this.details = details;
-    this.status = status;
-    this.deadlineAt = deadlineAt;
+  @JsonIgnore
+  public String getOwnerId()
+  {
+    return this.event.getOwnerId();
+  }
+
+  @JsonIgnore
+  public String getEntityName()
+  {
+    return "TASK";
   }
 }
