@@ -19,6 +19,7 @@ import com.skillmasters.server.repository.EventRepository;
 import com.skillmasters.server.model.User;
 import com.skillmasters.server.model.Event;
 import com.skillmasters.server.model.EventPattern;
+import com.skillmasters.server.model.EventPatternExrule;
 import com.skillmasters.server.model.QEventPattern;
 import com.skillmasters.server.model.QEvent;
 import com.skillmasters.server.service.EventPatternService;
@@ -61,6 +62,10 @@ public class EventPatternController
     Event entity = eventService.getById(eventId);
     if (entity == null) {
       return new EventPatternResponse().error(404, "Event not found");
+    }
+
+    for (EventPatternExrule ex : pattern.getExrules()) {
+      ex.setPattern(pattern);
     }
 
     pattern.setEvent(entity);

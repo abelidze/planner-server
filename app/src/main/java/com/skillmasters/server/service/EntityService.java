@@ -1,5 +1,6 @@
 package com.skillmasters.server.service;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Date;
 import java.lang.reflect.Field;
@@ -76,6 +77,9 @@ public class EntityService<R extends JpaRepository<T, ID> & QuerydslPredicateExe
             return;
           } else if (type.equals(Date.class)) {
             ReflectionUtils.setField(field, entity, new Date( ((Number) v).longValue() ));
+            return;
+          } else if (type.equals(List.class)) {
+            // ReflectionUtils.setField(field, entity, new ArrayList<>( ((Number) v).longValue() ));
             return;
           }
         }

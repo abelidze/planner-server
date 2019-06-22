@@ -2,8 +2,10 @@ package com.skillmasters.server.model;
 
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.TimeZone;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
@@ -46,6 +48,9 @@ public class EventPattern implements IEntity
 
   @ApiModelProperty(example = "FREQ=WEEKLY;INTERVAL=2;BYDAY=TU,TH")
   private String exrule;
+
+  @OneToMany(mappedBy = "pattern", cascade = CascadeType.ALL)
+  private List<EventPatternExrule> exrules = new ArrayList<>();
 
   @NotNull
   @Column(nullable = false)
