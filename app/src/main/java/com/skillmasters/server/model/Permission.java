@@ -28,7 +28,7 @@ public class Permission
   @UpdateTimestamp
   private Date updatedAt;
 
-  Permission()
+  public Permission()
   {
     // default
   }

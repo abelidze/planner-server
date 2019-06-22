@@ -1,5 +1,6 @@
 package com.skillmasters.server.http.controller;
 
+import com.skillmasters.server.service.ShareService;
 import java.util.List;
 import java.util.TimeZone;
 import java.io.IOException;
@@ -23,15 +24,14 @@ import biweekly.io.scribe.property.RecurrenceRuleScribe;
 
 import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.annotations.*;
 
-import com.skillmasters.server.repository.EventRepository;
-import com.skillmasters.server.model.User;
-import com.skillmasters.server.model.Task;
-import com.skillmasters.server.model.Event;
-import com.skillmasters.server.model.EventPattern;
-import com.skillmasters.server.model.QEvent;
+import com.skillmasters.server.misc.ResourceNotFoundException;
+import com.skillmasters.server.misc.PermissionDeniedException;
+import com.skillmasters.server.service.*;
+import com.skillmasters.server.model.*;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -39,13 +39,83 @@ import com.skillmasters.server.model.QEvent;
 public class CalendarController
 {
   @Autowired
-  EventRepository eventRepository;
+  EventService eventService;
+
+  @Autowired
+  EventPatternService patternService;
+
+  @Autowired
+  TaskService taskService;
+
+  @Autowired
+  ShareService shareService;
+
+  @Autowired
+  PermissionService permissionService;
 
   @Autowired
   RecurrenceRuleScribe scribe;
 
   @Autowired
   ParseContext context;
+
+  private enum ActionType
+  {
+    READ,
+    UPDATE,
+    DELETE,
+  }
+
+  private enum EntityType
+  {
+    EVENT,
+    PATTERN,
+    TASK,
+  }
+
+  @ApiOperation(value = "Generate a link for sharing permission on specific entity", produces="text/plain")
+  @GetMapping("/share")
+  public String share(
+    @AuthenticationPrincipal User user,
+    @RequestParam(value="entity_id", required=true) Long entityId,
+    @RequestParam(value="entity_type", required=true) EntityType entityType,
+    @RequestParam(value="action", required=true) ActionType action
+  ) {
+    if (entityId == null || entityType == null || action == null) {
+      throw new IllegalArgumentException("Invalid request parameters");
+    }
+    // Generate permission object and store it
+    Permission perm = permissionService.generatePermission(null, action.name(), retriveEntity(entityId, entityType));
+    String token = shareService.cachePermission(perm);
+    return ServletUriComponentsBuilder.fromCurrentRequestUri().pathSegment(token).toUriString();
+  }
+
+  @ApiOperation(value = "Activate generated share-link")
+  @GetMapping("/share/{token}")
+  public void share(@AuthenticationPrincipal User user, @PathVariable String token)
+  {
+    Permission perm = shareService.validateToken(token);
+    if (perm == null) {
+      throw new PermissionDeniedException(); 
+    }
+    perm.setUserId(user.getId());
+    permissionService.grantPermission(perm);
+  }
+
+  @ApiOperation(value = "Grant permission to user for specific entity")
+  @GetMapping("/grant")
+  public void grant(
+    @AuthenticationPrincipal User user,
+    @RequestParam(value="user_id", required=true) String userId,
+    @RequestParam(value="entity_id", required=true) Long entityId,
+    @RequestParam(value="entity_type", required=true) EntityType entityType,
+    @RequestParam(value="action", required=true) ActionType action
+  ) {
+    if (userId == null || entityId == null || entityType == null || action == null) {
+      throw new IllegalArgumentException("Invalid request parameters");
+    }
+    permissionService.grantPermission(userId, action.name(), retriveEntity(entityId, entityType));
+  }
 
   @ApiOperation(value = "Export current user calendar to iCal / .ics", produces = "text/calendar")
   @GetMapping("/export")
@@ -60,7 +130,7 @@ public class CalendarController
     tzInfo.setDefaultTimezone(TimezoneAssignment.download(TimeZone.getTimeZone("UTC"), false));
 
     // Export Events + Patterns + Tasks
-    Iterable<Event> events = eventRepository.findAll( QEvent.event.ownerId.eq(user.getId()) );
+    Iterable<Event> events = eventService.getByQuery( QEvent.event.ownerId.eq(user.getId()) );
     for (Event e : events) {
       String uid = e.getId().toString();
       VEvent event = new VEvent();
@@ -133,5 +203,34 @@ public class CalendarController
 
     // ...and ical's string for ajax users
     return exported;
+  }
+
+  private IEntity retriveEntity(Long entityId, EntityType entityType)
+  {
+    IEntity entity = null;
+    switch (entityType) {
+      case EVENT:
+        entity = eventService.getById(entityId);
+        break;
+
+      case PATTERN:
+        entity = patternService.getById(entityId);
+        break;
+
+      case TASK:
+        entity = taskService.getById(entityId);
+        break;
+    }
+
+    if (entity == null) {
+      throw new ResourceNotFoundException(); 
+    }
+
+    // It's not needed due to services, but who knows...
+    // if (!user.isOwner(entity)) {
+    //   throw new PermissionDeniedException(); 
+    // }
+
+    return entity;
   }
 }
