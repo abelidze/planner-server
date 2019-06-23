@@ -53,6 +53,17 @@ public class EventPatternController
     return new EventPatternResponse().success( entity.getPatterns() );
   }
 
+  @ApiOperation(value = "Get pattern by id", response = EventPatternResponse.class)
+  @GetMapping("/patterns/{id}")
+  public EventPatternResponse retrieveById(@PathVariable Long id)
+  {
+    EventPattern entity = service.getById(id);
+    if (entity == null) {
+      return new EventPatternResponse().error(404, "EventPattern not found");
+    }
+    return new EventPatternResponse().success(entity);
+  }
+
   @ApiOperation(value = "Create pattern", response = EventPatternResponse.class)
   @PostMapping("/patterns")
   public EventPatternResponse create(
