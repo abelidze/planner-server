@@ -137,7 +137,7 @@ public class EntityService<R extends JpaRepository<T, ID> & QuerydslPredicateExe
     return repository.exists(query);
   }
 
-  private User getCurrentUser()
+  protected User getCurrentUser()
   {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     if (auth == null) {

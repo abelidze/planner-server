@@ -2,7 +2,6 @@ package com.skillmasters.server.service;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.skillmasters.server.repository.PermissionRepository;
 import com.skillmasters.server.model.User;
@@ -11,16 +10,19 @@ import com.skillmasters.server.model.Permission;
 import com.skillmasters.server.model.QPermission;
 
 @Service
-public class PermissionService
+public class PermissionService extends EntityService<PermissionRepository, Permission, Long>
 {
-  @Autowired
-  private PermissionRepository repository;
+  public PermissionService()
+  {
+    super(Permission.class, "PERMISSION");
+  }
 
   public Permission generatePermission(String userId, String action, IEntity entity)
   {
     Permission permission = new Permission();
     permission.setName(action + "_" + entity.getEntityName());
     permission.setUserId(userId);
+    permission.setOwnerId(getCurrentUser().getId());
     permission.setEntityId(entity.getId().toString());
     return permission;
   }
@@ -44,9 +46,9 @@ public class PermissionService
       );
   }
 
-  public BooleanExpression getHasPermissionQuery(String userId2, String perm)
+  public BooleanExpression getHasPermissionQuery(String userId, String perm)
   {
     QPermission qPermission = QPermission.permission;
-    return qPermission.userId.eq(userId2).and(qPermission.name.eq(perm));
+    return qPermission.userId.eq(userId).and(qPermission.name.eq(perm));
   }
 }

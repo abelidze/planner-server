@@ -12,13 +12,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @Entity
 @Table(name = "permissions")
 @SequenceGenerator(name = "permissionId", sequenceName = "permission_seq", allocationSize = 1)
-public class Permission
+public class Permission implements IEntity
 {
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "permissionId")
   private Long id;
 
   private String userId;
+  private String ownerId;
   private String entityId;
   private String name;
 
@@ -31,5 +32,17 @@ public class Permission
   public Permission()
   {
     // default
+  }
+
+  // @JsonIgnore
+  // public String getOwnerId()
+  // {
+  //   return this.userId;
+  // }
+
+  @JsonIgnore
+  public String getEntityName()
+  {
+    return "PERMISSION";
   }
 }
