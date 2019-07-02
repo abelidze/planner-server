@@ -120,7 +120,7 @@ public class EventController
             dateIt.advanceTo(fromDate);
           }
 
-          for (int i = 0; i < 100 && dateIt.hasNext(); ++i) {
+          for (int i = 0; i < 1000 && dateIt.hasNext(); ++i) {
             eventDate = dateIt.next();
             response.addInstance(event, pattern, eventDate, new Date(eventDate.getTime() + pattern.getDuration()));
           }
