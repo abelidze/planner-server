@@ -1,9 +1,11 @@
 package com.skillmasters.server.service;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Arrays;
 import java.nio.charset.StandardCharsets;
 
 import com.google.common.hash.Hashing;
@@ -19,20 +21,32 @@ public class ShareService
   private class CachedPermission
   {
     public long timestamp;
-    public Permission permission;
+    public List<Permission> permissions;
 
     public CachedPermission(Permission permission)
     {
-      this.permission = permission;
+      this.permissions = Arrays.asList(permission);
+      this.timestamp = new Date().getTime();
+    }
+
+    public CachedPermission(List<Permission> permissions)
+    {
+      this.permissions = permissions;
       this.timestamp = new Date().getTime();
     }
   }
 
   public String cachePermission(Permission permission)
   {
-    String uuid = UUID.randomUUID().toString();
-    String token = Hashing.sha256().hashString(uuid, StandardCharsets.UTF_8).toString();
+    String token = generateToken();
     cache.put(token, new CachedPermission(permission));
+    return token;
+  }
+
+  public String cachePermissionList(List<Permission> permissions)
+  {
+    String token = generateToken();
+    cache.put(token, new CachedPermission(permissions));
     return token;
   }
 
@@ -41,13 +55,19 @@ public class ShareService
     this.cache.remove(token);
   }
 
-  public Permission validateToken(String token)
+  public List<Permission> validateToken(String token)
   {
     CachedPermission obj = this.cache.get(token);
     if (obj == null || new Date().getTime() - obj.timestamp > this.INVALIDATE_TIME) {
       revokeToken(token);
       return null;
     }
-    return obj.permission;
+    return obj.permissions;
+  }
+
+  private String generateToken()
+  {
+    String uuid = UUID.randomUUID().toString();
+    return Hashing.sha256().hashString(uuid, StandardCharsets.UTF_8).toString();
   }
 }
