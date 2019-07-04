@@ -2,6 +2,9 @@ sudo: true
 language: java
 jdk: openjdk8
 
+before_install:
+ - chmod +x app/gradlew
+
 script:
   - cd app
   - ./gradlew clean check test build
