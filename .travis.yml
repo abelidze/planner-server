@@ -1,0 +1,6 @@
+language: java
+jdk: openjdk8
+
+script:
+  - cd app
+  - ./gradlew clean check test build
