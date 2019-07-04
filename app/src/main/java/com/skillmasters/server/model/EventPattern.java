@@ -31,6 +31,9 @@ public class EventPattern implements IEntity
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "event_id", nullable = false)
   @OnDelete(action = OnDeleteAction.CASCADE)
+  // @JsonProperty(value = "event_id", access = JsonProperty.Access.READ_ONLY)
+  // @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+  // @JsonIdentityReference(alwaysAsId = true)
   @JsonIgnore
   private Event event;
 
@@ -73,6 +76,12 @@ public class EventPattern implements IEntity
   EventPattern()
   {
     //
+  }
+
+  @ApiModelProperty(readOnly = true)
+  public Long getEventId()
+  {
+    return event.getId();
   }
 
   @JsonIgnore

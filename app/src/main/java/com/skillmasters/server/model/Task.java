@@ -50,6 +50,12 @@ public class Task implements IEntity
     // default
   }
 
+  @ApiModelProperty(readOnly = true)
+  public Long getEventId()
+  {
+    return event.getId();
+  }
+
   @JsonIgnore
   public String getOwnerId()
   {
