@@ -63,6 +63,7 @@ dev/
 app/memory
 
 app/src/main/resources/service_account\.json
+app/src/test/resources/service_account\.json
 
 # H2 db files
 *.mv.db
