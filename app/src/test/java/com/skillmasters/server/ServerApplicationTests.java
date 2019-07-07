@@ -1,29 +1,23 @@
  package com.skillmasters.server;
 
- import static org.assertj.core.api.Assertions.assertThat;
- import static org.springframework.test.annotation.DirtiesContext.ClassMode.*;
-
  import com.querydsl.core.types.dsl.BooleanExpression;
  import com.querydsl.jpa.impl.JPAQuery;
  import com.skillmasters.server.http.controller.EventController;
+ import com.skillmasters.server.http.controller.HomeController;
  import com.skillmasters.server.model.Event;
  import com.skillmasters.server.model.QEvent;
  import com.skillmasters.server.service.EventService;
  import org.junit.Test;
  import org.junit.runner.RunWith;
- import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
- import org.springframework.boot.test.context.SpringBootTest;
- import org.springframework.data.jpa.repository.Query;
- import org.springframework.test.annotation.DirtiesContext;
- import org.springframework.test.annotation.DirtiesContext.ClassMode;
- import org.springframework.test.context.junit4.SpringRunner;
  import org.springframework.beans.factory.annotation.Autowired;
- import com.skillmasters.server.http.controller.HomeController;
- import org.springframework.test.util.ReflectionTestUtils;
+ import org.springframework.boot.test.context.SpringBootTest;
+ import org.springframework.test.context.junit4.SpringRunner;
  import org.springframework.transaction.annotation.Transactional;
 
  import javax.persistence.EntityManager;
  import javax.persistence.PersistenceContext;
+
+ import static org.assertj.core.api.Assertions.assertThat;
 
  @RunWith(SpringRunner.class)
  @SpringBootTest
