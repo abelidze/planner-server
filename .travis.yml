@@ -7,4 +7,4 @@ before_install:
 
 script:
   - cd app
-  - ./gradlew clean build
+  - ./gradlew clean check
