@@ -58,7 +58,7 @@ public class Event implements IEntity
   @JsonIgnore
   private List<Task> tasks;
 
-  Event()
+  public Event()
   {
     this.ownerId = "227";
   }

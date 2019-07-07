@@ -50,7 +50,6 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter
   @Bean
   public FirebaseAuth firebaseAuth() throws IOException
   {
-    // TODO: change before push
     if (FirebaseApp.getApps().size() == 0) {
       ClassLoader loader = getClass().getClassLoader();
       InputStream serviceAccount = loader.getResourceAsStream("service_account.json");
