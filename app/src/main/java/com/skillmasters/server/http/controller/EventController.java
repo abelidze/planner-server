@@ -116,7 +116,7 @@ public class EventController
           DateIterator dateIt = rrule.getDateIterator(start, timezone);
 
           if (fromDate.after(start)) {
-            dateIt.advanceTo(new Date(fromDate.getTime() - pattern.getDuration()););
+            dateIt.advanceTo(new Date(fromDate.getTime() - pattern.getDuration()));
           }
 
           for (int i = 0; i < 1000 && dateIt.hasNext(); ++i) {
