@@ -115,9 +115,8 @@ public class EventController
           RecurrenceRule rrule = scribe.parseText(rruleStr, null, new ICalParameters(), context);
           DateIterator dateIt = rrule.getDateIterator(start, timezone);
 
-          Date firstEnd = new Date(start.getTime() + pattern.getDuration());
-          if (fromDate.after(firstEnd)) {
-            dateIt.advanceTo(fromDate);
+          if (fromDate.after(start)) {
+            dateIt.advanceTo(new Date(fromDate.getTime() - pattern.getDuration()););
           }
 
           for (int i = 0; i < 1000 && dateIt.hasNext(); ++i) {
