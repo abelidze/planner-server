@@ -46,6 +46,7 @@ dependencies {
     // implementation 'javax.persistence:persistence-api:1.0'
     implementation 'com.querydsl:querydsl-jpa:4.2.1'
     implementation 'com.google.guava:guava:27.1-jre'
+
     implementation 'io.springfox:springfox-swagger-ui:2.9.2'
     implementation ('io.springfox:springfox-swagger2:2.9.2') {
         exclude module: 'swagger-annotations'
@@ -53,10 +54,13 @@ dependencies {
     }
     implementation 'io.swagger:swagger-annotations:1.5.21'
     implementation 'io.swagger:swagger-models:1.5.21'
+
     implementation 'javax.xml.bind:jaxb-api:2.3.0'
     implementation 'org.javassist:javassist'
     implementation 'net.sf.biweekly:biweekly:0.6.3'
+    implementation 'com.aventrix.jnanoid:jnanoid:2.0.0'
     implementation 'com.google.firebase:firebase-admin:6.8.1'
+
     implementation 'org.springframework.boot:spring-boot-starter-web'
     // implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -64,6 +68,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
     runtimeOnly 'org.xerial:sqlite-jdbc:3.27.2'
     runtimeOnly 'com.h2database:h2:1.4.199'
     // runtimeOnly 'org.postgresql:postgresql'

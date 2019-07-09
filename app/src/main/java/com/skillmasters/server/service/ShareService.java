@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.nio.charset.StandardCharsets;
 
 import com.google.common.hash.Hashing;
+import com.aventrix.jnanoid.jnanoid.NanoIdUtils;
 import org.springframework.stereotype.Service;
 import com.skillmasters.server.model.Permission;
 
@@ -72,7 +73,9 @@ public class ShareService
 
   private String generateToken()
   {
-    String uuid = UUID.randomUUID().toString();
-    return Hashing.sha256().hashString(uuid, StandardCharsets.UTF_8).toString();
+    char[] alphabet = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
+    return NanoIdUtils.randomNanoId(NanoIdUtils.DEFAULT_NUMBER_GENERATOR, alphabet, 8);
+    // String uuid = UUID.randomUUID().toString();
+    // return Hashing.sha256().hashString(uuid, StandardCharsets.UTF_8).toString();
   }
 }
