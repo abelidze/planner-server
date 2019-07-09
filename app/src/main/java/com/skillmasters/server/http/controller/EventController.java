@@ -210,6 +210,7 @@ public class EventController
     Long updatedTo
   ) {
     QEvent qEvent = QEvent.event;
+    QPermission qPermission = QPermission.permission;
     JPAQuery query = new JPAQuery(entityManager);
     query.from(qEvent);
     BooleanExpression where = null;
@@ -219,14 +220,18 @@ public class EventController
     }
 
     String userId = user.getId();
+    BooleanExpression hasPermission = permissionService.getHasPermissionQuery(userId, "READ_EVENT");
     if (ownerId != null && ownerId != userId) {
-      QPermission qPermission = QPermission.permission;
-      BooleanExpression hasPermission = permissionService.getHasPermissionQuery(userId, "READ_EVENT")
+      hasPermission = hasPermission
           .and(qEvent.id.stringValue().eq(qPermission.entityId).or(qPermission.entityId.eq(ownerId)));
       query.innerJoin(qPermission).on(hasPermission);
       where = qEvent.ownerId.eq(ownerId).and(where);
     } else {
-      where = qEvent.ownerId.eq(userId).and(where);
+      query.leftJoin(qPermission).on(hasPermission);
+      where = qEvent.ownerId.eq(userId)
+          .or(qEvent.id.stringValue().eq(qPermission.entityId))
+          .or(qEvent.ownerId.eq(qPermission.entityId))
+          .and(where);
     }
 
     if (createdFrom != null) {

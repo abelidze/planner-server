@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.Arrays;
 import java.util.List;
 import java.lang.reflect.Field;
+import javax.persistence.PersistenceContext;
+import javax.persistence.EntityManager;
 
 import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 import org.springframework.util.ReflectionUtils;
@@ -14,15 +16,14 @@ import io.swagger.annotations.*;
 
 import com.google.common.base.CaseFormat;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQuery;
 
 import com.skillmasters.server.misc.OffsetPageRequest;
 import com.skillmasters.server.http.response.TaskResponse;
 import com.skillmasters.server.service.TaskService;
 import com.skillmasters.server.service.EventService;
-import com.skillmasters.server.model.User;
-import com.skillmasters.server.model.Task;
-import com.skillmasters.server.model.Event;
-import com.skillmasters.server.model.QTask;
+import com.skillmasters.server.service.PermissionService;
+import com.skillmasters.server.model.*;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -34,6 +35,12 @@ public class TaskController
 
   @Autowired
   EventService eventService;
+
+  @Autowired
+  PermissionService permissionService;
+
+  @PersistenceContext
+  EntityManager entityManager;
 
   @ApiOperation(value = "Get a list of available tasks", response = TaskResponse.class)
   @GetMapping("/tasks")
@@ -49,32 +56,45 @@ public class TaskController
     @RequestParam(value="offset", defaultValue="0") long offset
   ) {
     QTask qTask = QTask.task;
-    BooleanExpression query = qTask.event.ownerId.eq(user.getId());
+    QPermission qPermission = QPermission.permission;
+    JPAQuery query = new JPAQuery(entityManager);
+    query.from(qTask);
+
+    String userId = user.getId();
+    BooleanExpression where = qTask.event.ownerId.eq(userId)
+        .or(qTask.id.stringValue().eq(qPermission.entityId))
+        .or(qTask.event.ownerId.eq(qPermission.entityId))
+        .or(qTask.event.id.stringValue().eq(qPermission.entityId).and(qPermission.name.eq("READ_EVENT")));
+
+    BooleanExpression hasPermission = permissionService.getHasPermissionQuery(userId, "READ_TASK")
+        .or(permissionService.getHasPermissionQuery(userId, "READ_EVENT"));
+    query.leftJoin(qPermission).on(hasPermission);
 
     if (id.size() > 0) {
-      query = qTask.id.in(id).and(query);
+      where = qTask.id.in(id).and(where);
     }
 
     if (eventId != null) {
-      query = qTask.event.id.eq(eventId).and(query);
+      where = qTask.event.id.eq(eventId).and(where);
     }
 
     if (createdFrom != null) {
-      query = qTask.createdAt.goe(new Date(createdFrom)).and(query);
+      where = qTask.createdAt.goe(new Date(createdFrom)).and(where);
     }
 
     if (createdTo != null) {
-      query = qTask.createdAt.loe(new Date(createdTo)).and(query);
+      where = qTask.createdAt.loe(new Date(createdTo)).and(where);
     }
 
     if (updatedFrom != null) {
-      query = qTask.updatedAt.goe(new Date(updatedFrom)).and(query);
+      where = qTask.updatedAt.goe(new Date(updatedFrom)).and(where);
     }
 
     if (updatedTo != null) {
-      query = qTask.updatedAt.loe(new Date(updatedTo)).and(query);
+      where = qTask.updatedAt.loe(new Date(updatedTo)).and(where);
     }
 
+    query.where(where);
     return new TaskResponse().success( service.getByQuery(query, new OffsetPageRequest(offset, count)) );
   }
 

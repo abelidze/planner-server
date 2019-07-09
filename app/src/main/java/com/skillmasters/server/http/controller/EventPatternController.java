@@ -5,12 +5,16 @@ import java.util.Map;
 import java.util.Arrays;
 import java.util.List;
 import java.lang.reflect.Field;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 
 import com.google.common.base.CaseFormat;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQuery;
 
 import org.springframework.util.ReflectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.annotations.*;
 
@@ -18,14 +22,10 @@ import com.skillmasters.server.misc.OffsetPageRequest;
 import com.skillmasters.server.http.response.EventPatternResponse;
 import com.skillmasters.server.repository.EventPatternRepository;
 import com.skillmasters.server.repository.EventRepository;
-import com.skillmasters.server.model.User;
-import com.skillmasters.server.model.Event;
-import com.skillmasters.server.model.EventPattern;
-import com.skillmasters.server.model.EventPatternExrule;
-import com.skillmasters.server.model.QEventPattern;
-import com.skillmasters.server.model.QEvent;
+import com.skillmasters.server.service.PermissionService;
 import com.skillmasters.server.service.EventPatternService;
 import com.skillmasters.server.service.EventService;
+import com.skillmasters.server.model.*;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -36,6 +36,9 @@ public class EventPatternController
   EventPatternService service;
 
   @Autowired
+  PermissionService permissionService;
+
+  @Autowired
   EventService eventService;
 
   @Autowired
@@ -44,9 +47,13 @@ public class EventPatternController
   @Autowired
   EventRepository eventRepository;
 
+  @PersistenceContext
+  EntityManager entityManager;
+
   @ApiOperation(value = "Get a list of patterns for given event", response = EventPatternResponse.class)
   @GetMapping("/patterns")
   public EventPatternResponse retrieve(
+    @AuthenticationPrincipal User user,
     @RequestParam(value="offset", defaultValue="0") long offset,
     @RequestParam(value="count", defaultValue="100") int count,
     @RequestParam(value="id", defaultValue="") List<Long> id,
@@ -68,7 +75,7 @@ public class EventPatternController
       return new EventPatternResponse().success( entity.getPatterns() );
     }
 
-    BooleanExpression query = generateGetQuery(id, events, from, to, createdFrom, createdTo, updatedFrom, updatedTo);
+    JPAQuery query = generateGetQuery(user, id, events, from, to, createdFrom, createdTo, updatedFrom, updatedTo);
     return new EventPatternResponse().success( service.getByQuery(query, new OffsetPageRequest(offset, count)) );
   }
 
@@ -138,7 +145,8 @@ public class EventPatternController
     return new EventPatternResponse().success();
   }
 
-  private BooleanExpression generateGetQuery(
+  private JPAQuery generateGetQuery(
+    User user,
     List<Long> id,
     List<Long> events,
     Long from,
@@ -149,7 +157,19 @@ public class EventPatternController
     Long updatedTo
   ) {
     QEventPattern qPattern = QEventPattern.eventPattern;
-    BooleanExpression where = null;
+    QPermission qPermission = QPermission.permission;
+    JPAQuery query = new JPAQuery(entityManager);
+    query.from(qPattern);
+
+    String userId = user.getId();
+    BooleanExpression where = qPattern.event.ownerId.eq(userId)
+        .or(qPattern.id.stringValue().eq(qPermission.entityId))
+        .or(qPattern.event.ownerId.eq(qPermission.entityId))
+        .or(qPattern.event.id.stringValue().eq(qPermission.entityId).and(qPermission.name.eq("READ_EVENT")));
+
+    BooleanExpression hasPermission = permissionService.getHasPermissionQuery(userId, "READ_PATTERN")
+        .or(permissionService.getHasPermissionQuery(userId, "READ_EVENT"));
+    query.leftJoin(qPermission).on(hasPermission);
 
     if (id.size() > 0) {
       where = qPattern.id.in(id).and(where);
@@ -183,6 +203,7 @@ public class EventPatternController
       where = qPattern.startedAt.loe(new Date(to)).and(where);
     }
 
-    return where;
+    query.where(where);
+    return query;
   }
 }
