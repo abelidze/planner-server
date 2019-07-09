@@ -6,7 +6,7 @@ import javax.validation.constraints.NotNull;
 import com.querydsl.core.types.dsl.BooleanExpression;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.annotations.*;

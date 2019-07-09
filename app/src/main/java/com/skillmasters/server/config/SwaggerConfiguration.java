@@ -80,8 +80,8 @@ public class SwaggerConfiguration
         .ignoredParameterTypes(User.class)
         .directModelSubstitute(Date.class, Long.class)
         .genericModelSubstitutes(ResponseEntity.class)
-        .produces(new HashSet(Arrays.asList("application/json")))
-        .consumes(new HashSet(Arrays.asList("application/json")))
+        .produces(new HashSet<String>(Arrays.asList("application/json")))
+        .consumes(new HashSet<String>(Arrays.asList("application/json")))
         .alternateTypeRules(
             newRule(
                 typeResolver.resolve(DeferredResult.class,

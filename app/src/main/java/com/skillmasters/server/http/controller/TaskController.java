@@ -8,7 +8,7 @@ import java.lang.reflect.Field;
 import javax.persistence.PersistenceContext;
 import javax.persistence.EntityManager;
 
-import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
