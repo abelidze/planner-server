@@ -42,11 +42,11 @@ public class PermissionController
   @ApiOperation(value = "Generate a link for sharing permission on specific entity", produces="text/plain")
   @GetMapping("/share")
   public String share(
-    @ApiParam(value = "Allowed entity's id")
+    @ApiParam(value = "Allowed entity's id", required=true)
     @RequestParam(value="entity_id", required=true) Long entityId,
-    @ApiParam(value = "Allowed entity: EVENT, PATTERN, TASK")
+    @ApiParam(value = "Allowed entity: EVENT, PATTERN, TASK", required=true)
     @RequestParam(value="entity_type", required=true) PermissionRequest.EntityType entityType,
-    @ApiParam(value = "Allowed action: READ, UPDATE, DELETE")
+    @ApiParam(value = "Allowed action: READ, UPDATE, DELETE", required=true)
     @RequestParam(value="action", required=true) PermissionRequest.ActionType action
   ) {
     if (entityId == null || entityType == null || action == null) {
@@ -94,13 +94,13 @@ public class PermissionController
   @ApiOperation(value = "Grant permission to user for specific entity")
   @GetMapping("/grant")
   public void grant(
-    @ApiParam(value = "Unique user's id")
+    @ApiParam(value = "Unique user's id", required=true)
     @RequestParam(value="user_id", required=true) String userId,
-    @ApiParam(value = "Allowed entity's id")
+    @ApiParam(value = "Allowed entity's id", required=true)
     @RequestParam(value="entity_id", required=true) Long entityId,
-    @ApiParam(value = "Allowed entity: EVENT, PATTERN, TASK")
+    @ApiParam(value = "Allowed entity: EVENT, PATTERN, TASK", required=true)
     @RequestParam(value="entity_type", required=true) PermissionRequest.EntityType entityType,
-    @ApiParam(value = "Allowed action: READ, UPDATE, DELETE")
+    @ApiParam(value = "Allowed action: READ, UPDATE, DELETE", required=true)
     @RequestParam(value="action", required=true) PermissionRequest.ActionType action
   ) {
     if (userId == null || entityId == null || entityType == null || action == null) {
@@ -113,12 +113,19 @@ public class PermissionController
   @GetMapping("/permissions")
   public PermissionResponse retrieve(
     @AuthenticationPrincipal User user,
+    @ApiParam(value = "Get only entities of specified type")
+    @RequestParam(value="entity_type", required=false) PermissionRequest.EntityType entityType,
     @ApiParam(value = "Pagination offset")
     @RequestParam(value="offset", defaultValue="0") long offset,
     @ApiParam(value = "Count of permissions to retrieve")
     @RequestParam(value="count", defaultValue="100") int count
   ) {
     BooleanExpression query = QPermission.permission.ownerId.eq(user.getId());
+
+    if (entityType != null) {
+      query = QPermission.permission.name.like("%" + entityType.name()).and(query);
+    }
+
     return new PermissionResponse().success( permissionService.getByQuery(query, new OffsetPageRequest(offset, count)) );
   }
 
