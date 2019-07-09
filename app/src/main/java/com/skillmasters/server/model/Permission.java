@@ -1,5 +1,7 @@
 package com.skillmasters.server.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
 import java.util.Date;
@@ -10,6 +12,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Data
 @Entity
+@AllArgsConstructor
+@Builder(toBuilder = true)
 @Table(name = "permissions")
 @SequenceGenerator(name = "permissionId", sequenceName = "permission_seq", allocationSize = 1)
 public class Permission implements IEntity

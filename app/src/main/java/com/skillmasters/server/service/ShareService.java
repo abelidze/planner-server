@@ -6,6 +6,7 @@ import java.util.UUID;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.nio.charset.StandardCharsets;
 
 import com.google.common.hash.Hashing;
@@ -62,7 +63,11 @@ public class ShareService
       revokeToken(token);
       return null;
     }
-    return obj.permissions;
+    List<Permission> copy = new ArrayList<Permission>();
+    for (Permission permission : obj.permissions) {
+      copy.add(permission.toBuilder().build());
+    }
+    return copy;
   }
 
   private String generateToken()
