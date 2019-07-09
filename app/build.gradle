@@ -43,14 +43,17 @@ dependencies {
         'org.projectlombok:lombok:1.18.6'
     )
 
-    // compile 'javax.persistence:persistence-api:1.0'
-    compile 'com.querydsl:querydsl-jpa:4.2.1'
-    compile 'com.google.guava:guava:27.1-jre'
-    compile 'io.springfox:springfox-swagger2:2.9.2'
-    compile 'io.springfox:springfox-swagger-ui:2.9.2'
-    compile 'io.swagger:swagger-annotations:1.5.21'
-    compile 'io.swagger:swagger-models:1.5.21'
-    compile 'javax.xml.bind:jaxb-api:2.3.0'
+    // implementation 'javax.persistence:persistence-api:1.0'
+    implementation 'com.querydsl:querydsl-jpa:4.2.1'
+    implementation 'com.google.guava:guava:27.1-jre'
+    implementation 'io.springfox:springfox-swagger-ui:2.9.2'
+    implementation ('io.springfox:springfox-swagger2:2.9.2') {
+        exclude module: 'swagger-annotations'
+        exclude module: 'swagger-models'
+    }
+    implementation 'io.swagger:swagger-annotations:1.5.21'
+    implementation 'io.swagger:swagger-models:1.5.21'
+    implementation 'javax.xml.bind:jaxb-api:2.3.0'
     implementation 'org.javassist:javassist'
     implementation 'net.sf.biweekly:biweekly:0.6.3'
     implementation 'com.google.firebase:firebase-admin:6.8.1'
