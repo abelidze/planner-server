@@ -46,14 +46,24 @@ public class TaskController
   @GetMapping("/tasks")
   public TaskResponse retrieve(
     @AuthenticationPrincipal User user,
+    @ApiParam(value = "Array of tasks's id")
     @RequestParam(value="id", defaultValue="") List<Long> id,
+    @ApiParam(value = "Id of linked event")
     @RequestParam(value="event_id", required=false) Long eventId,
+    @ApiParam(value = "Task's deadline, timestamp")
+    @RequestParam(value="deadline", required=false) Long deadlineTo,
+    @ApiParam(value = "Timestamp after that task was created")
     @RequestParam(value="created_from", required=false) Long createdFrom,
+    @ApiParam(value = "Timestamp before that task was created")
     @RequestParam(value="created_to", required=false) Long createdTo,
+    @ApiParam(value = "Timestamp after that task was updated")
     @RequestParam(value="updated_from", required=false) Long updatedFrom,
+    @ApiParam(value = "Timestamp before that task was updated")
     @RequestParam(value="updated_to", required=false) Long updatedTo,
-    @RequestParam(value="count", defaultValue="100") int count,
-    @RequestParam(value="offset", defaultValue="0") long offset
+    @ApiParam(value = "Pagination offset")
+    @RequestParam(value="offset", defaultValue="0") long offset,
+    @ApiParam(value = "Count of tasks to retrieve")
+    @RequestParam(value="count", defaultValue="100") int count
   ) {
     QTask qTask = QTask.task;
     QPermission qPermission = QPermission.permission;

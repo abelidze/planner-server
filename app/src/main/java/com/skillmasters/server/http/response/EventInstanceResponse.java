@@ -16,13 +16,16 @@ public class EventInstanceResponse extends Response<EventInstanceResponse.EventI
 
   public static class EventInstance
   {
+    @ApiModelProperty(value = "Instance's event")
     public Long eventId;
+
+    @ApiModelProperty(value = "Pattern that was used to generate instance")
     public Long patternId;
 
-    @ApiModelProperty(readOnly = true, example = "1556712345000")
+    @ApiModelProperty(value = "Start of the instance", readOnly = true, example = "1556712345000")
     public Date startedAt;
 
-    @ApiModelProperty(readOnly = true, example = "1556712345000")
+    @ApiModelProperty(value = "End of the instance", readOnly = true, example = "1556712345000")
     public Date endedAt;
 
     public EventInstance()

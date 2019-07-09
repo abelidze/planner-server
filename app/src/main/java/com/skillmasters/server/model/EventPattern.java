@@ -25,7 +25,7 @@ public class EventPattern implements IEntity
 {
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "patternId")
-  @ApiModelProperty(readOnly = true)
+  @ApiModelProperty(value = "Pattern's unique id", readOnly = true)
   private Long id;
 
   @ManyToOne(fetch = FetchType.EAGER)
@@ -39,38 +39,41 @@ public class EventPattern implements IEntity
 
   @NotNull
   @Column(nullable = false)
+  @ApiModelProperty(value = "Duration of a single event's instance")
   private Long duration = 0L;
 
   @NotNull
   @Column(nullable = false)
-  @ApiModelProperty(example = "UTC")
+  @ApiModelProperty(value = "Timezone to work in", example = "UTC")
   private String timezone = "UTC";
 
-  @ApiModelProperty(example = "FREQ=DAILY;INTERVAL=1")
+  @ApiModelProperty(value = "iCal's RRULE string", example = "FREQ=DAILY;INTERVAL=1")
   private String rrule;
 
+  @Deprecated
   @ApiModelProperty(example = "FREQ=WEEKLY;INTERVAL=2;BYDAY=TU,TH")
   private String exrule;
 
   @OneToMany(mappedBy = "pattern", cascade = CascadeType.ALL)
+  @ApiModelProperty(value = "Array of iCal's EXRULE")
   private List<EventPatternExrule> exrules = new ArrayList<>();
 
   @NotNull
   @Column(nullable = false)
-  @ApiModelProperty(example = "1556712345000")
+  @ApiModelProperty(value = "Start of the first event's instance", example = "1556712345000")
   private Date startedAt = new Date();
 
   @NotNull
   @Column(nullable = false)
-  @ApiModelProperty(example = "1556712345000")
+  @ApiModelProperty(value = "Timestamp until that event can occur", example = "1556712345000")
   private Date endedAt = new Date(Long.MAX_VALUE);
 
   @CreationTimestamp
-  @ApiModelProperty(readOnly = true, example = "1556712345000")
+  @ApiModelProperty(value = "Creation timestamp", readOnly = true, example = "1556712345000")
   private Date createdAt;
 
   @UpdateTimestamp
-  @ApiModelProperty(readOnly = true, example = "1556712345000")
+  @ApiModelProperty(value = "Update timestamp", readOnly = true, example = "1556712345000")
   private Date updatedAt;
 
   public EventPattern()

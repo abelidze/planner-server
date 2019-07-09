@@ -20,7 +20,7 @@ public class Task implements IEntity
 {
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "taskId")
-  @ApiModelProperty(readOnly = true)
+  @ApiModelProperty(value = "Task's unique id", readOnly = true)
   private Long id;
 
   @ManyToOne(fetch = FetchType.EAGER)
@@ -29,20 +29,27 @@ public class Task implements IEntity
   @JsonIgnore
   private Event event;
 
+  @ApiModelProperty(value = "Id of task's parent (another task)")
   private Long parentId;
+
+  @ApiModelProperty(value = "Task's name")
   private String name;
+
+  @ApiModelProperty(value = "Description for task")
   private String details;
+
+  @ApiModelProperty(value = "Task's status", example = "IN-PROCESS")
   private String status;
 
-  @ApiModelProperty(example = "1556712345000")
+  @ApiModelProperty(value = "Task's deadline", example = "1556712345000")
   private Date deadlineAt;
 
   @CreationTimestamp
-  @ApiModelProperty(readOnly = true, example = "1556712345000")
+  @ApiModelProperty(value = "Creation timestamp", readOnly = true, example = "1556712345000")
   private Date createdAt;
 
   @UpdateTimestamp
-  @ApiModelProperty(readOnly = true, example = "1556712345000")
+  @ApiModelProperty(value = "Update timestamp", readOnly = true, example = "1556712345000")
   private Date updatedAt;
 
   public Task()

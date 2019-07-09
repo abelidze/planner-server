@@ -63,13 +63,21 @@ public class EventController
   @GetMapping("/events/instances")
   public EventInstanceResponse retrieveInstances(
     @AuthenticationPrincipal User user,
+    @ApiParam(value = "Array of event's id")
     @RequestParam(value="id", defaultValue="") List<Long> id,
+    @ApiParam(value = "Owner's unique id")
     @RequestParam(value="owner_id", required=false) String ownerId,
+    @ApiParam(value = "Start of requesting range")
     @RequestParam(value="from", required=false) Long from,
+    @ApiParam(value = "End of requesting range")
     @RequestParam(value="to", required=false) Long to,
+    @ApiParam(value = "Timestamp after that event was created")
     @RequestParam(value="created_from", required=false) Long createdFrom,
+    @ApiParam(value = "Timestamp before that event was created")
     @RequestParam(value="created_to", required=false) Long createdTo,
+    @ApiParam(value = "Timestamp after that event was updated")
     @RequestParam(value="updated_from", required=false) Long updatedFrom,
+    @ApiParam(value = "Timestamp before that event was updated")
     @RequestParam(value="updated_to", required=false) Long updatedTo
   ) {
     EventInstanceResponse response = new EventInstanceResponse();
@@ -133,16 +141,26 @@ public class EventController
   @GetMapping("/events")
   public EventResponse retrieve(
     @AuthenticationPrincipal User user,
-    @RequestParam(value="offset", defaultValue="0") long offset,
-    @RequestParam(value="count", defaultValue="100") int count,
+    @ApiParam(value = "Array of event's id")
     @RequestParam(value="id", defaultValue="") List<Long> id,
+    @ApiParam(value = "Owner's unique id")
     @RequestParam(value="owner_id", required=false) String ownerId,
+    @ApiParam(value = "Start of requesting range")
     @RequestParam(value="from", required=false) Long from,
+    @ApiParam(value = "End of requesting range")
     @RequestParam(value="to", required=false) Long to,
+    @ApiParam(value = "Timestamp after that event was created")
     @RequestParam(value="created_from", required=false) Long createdFrom,
+    @ApiParam(value = "Timestamp before that event was created")
     @RequestParam(value="created_to", required=false) Long createdTo,
+    @ApiParam(value = "Timestamp after that event was updated")
     @RequestParam(value="updated_from", required=false) Long updatedFrom,
-    @RequestParam(value="updated_to", required=false) Long updatedTo
+    @ApiParam(value = "Timestamp before that event was updated")
+    @RequestParam(value="updated_to", required=false) Long updatedTo,
+    @ApiParam(value = "Pagination offset")
+    @RequestParam(value="offset", defaultValue="0") long offset,
+    @ApiParam(value = "Count of events to retrieve")
+    @RequestParam(value="count", defaultValue="100") int count
   ) {
     JPAQuery query = generateGetQuery(user, id, ownerId, from, to, createdFrom, createdTo, updatedFrom, updatedTo);
     return new EventResponse().success( service.getByQuery(query, new OffsetPageRequest(offset, count)) );

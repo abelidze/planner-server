@@ -54,17 +54,29 @@ public class EventPatternController
   @GetMapping("/patterns")
   public EventPatternResponse retrieve(
     @AuthenticationPrincipal User user,
-    @RequestParam(value="offset", defaultValue="0") long offset,
-    @RequestParam(value="count", defaultValue="100") int count,
+    @ApiParam(value = "Array of pattern's id")
     @RequestParam(value="id", defaultValue="") List<Long> id,
+    @ApiParam(value = "Array of connected events's id")
     @RequestParam(value="events", defaultValue="") List<Long> events,
+    @Deprecated
+    @ApiParam(value = "Id of linked event")
     @RequestParam(value="event_id", required=false) Long eventId,
+    @ApiParam(value = "Start of requesting range")
     @RequestParam(value="from", required=false) Long from,
+    @ApiParam(value = "End of requesting range")
     @RequestParam(value="to", required=false) Long to,
+    @ApiParam(value = "Timestamp after that pattern was created")
     @RequestParam(value="created_from", required=false) Long createdFrom,
+    @ApiParam(value = "Timestamp before that pattern was created")
     @RequestParam(value="created_to", required=false) Long createdTo,
+    @ApiParam(value = "Timestamp after that pattern was updated")
     @RequestParam(value="updated_from", required=false) Long updatedFrom,
-    @RequestParam(value="updated_to", required=false) Long updatedTo
+    @ApiParam(value = "Timestamp before that pattern was updated")
+    @RequestParam(value="updated_to", required=false) Long updatedTo,
+    @ApiParam(value = "Pagination offset")
+    @RequestParam(value="offset", defaultValue="0") long offset,
+    @ApiParam(value = "Count of patterns to retrieve")
+    @RequestParam(value="count", defaultValue="100") int count
   ) {
     // for backward compatibility
     if (eventId != null) {

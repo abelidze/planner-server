@@ -23,31 +23,32 @@ public class Event implements IEntity
 {
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "eventId")
-  @ApiModelProperty(readOnly = true)
+  @ApiModelProperty(value = "Event's unique id", readOnly = true)
   private Long id;
 
   @NotNull
   @Column(nullable = false)
-  @ApiModelProperty(readOnly = true, example = "0")
+  @ApiModelProperty(value = "Owner's unique id", readOnly = true, example = "0")
   private String ownerId;
 
+  @ApiModelProperty(value = "Event's name", example = "eventname")
   private String name;
 
-  @ApiModelProperty(example = "-")
+  @ApiModelProperty(value = "Description for event", example = "-")
   private String details;
 
-  @ApiModelProperty(example = "busy")
+  @ApiModelProperty(value = "Event's status", example = "busy")
   private String status;
 
-  @ApiModelProperty(example = "unknown")
+  @ApiModelProperty(value = "Event's location", example = "unknown")
   private String location;
 
   @CreationTimestamp
-  @ApiModelProperty(readOnly = true, example = "1556712345000")
+  @ApiModelProperty(value = "Creation timestamp", readOnly = true, example = "1556712345000")
   private Date createdAt;
 
   @UpdateTimestamp
-  @ApiModelProperty(readOnly = true, example = "1556712345000")
+  @ApiModelProperty(value = "Update timestamp", readOnly = true, example = "1556712345000")
   private Date updatedAt;
 
   @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)

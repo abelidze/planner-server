@@ -10,6 +10,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import io.swagger.annotations.ApiModelProperty;
+
 @Data
 @Entity
 @AllArgsConstructor
@@ -20,17 +22,27 @@ public class Permission implements IEntity
 {
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "permissionId")
+  @ApiModelProperty(value = "Permission's unique id", readOnly = true)
   private Long id;
 
+  @ApiModelProperty(value = "Id of the user that is granted for action")
   private String userId;
+
+  @ApiModelProperty(value = "Id of the entity's owner")
   private String ownerId;
+
+  @ApiModelProperty(value = "Entity's id")
   private String entityId;
+
+  @ApiModelProperty(value = "Name of granted permission")
   private String name;
 
   @CreationTimestamp
+  @ApiModelProperty(value = "Creation timestamp", readOnly = true, example = "1556712345000")
   private Date createdAt;
 
   @UpdateTimestamp
+  @ApiModelProperty(value = "Update timestamp", readOnly = true, example = "1556712345000")
   private Date updatedAt;
 
   public Permission()
