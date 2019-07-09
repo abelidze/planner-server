@@ -44,7 +44,7 @@ public class EventPatternExrule
   @ApiModelProperty(readOnly = true, example = "1556712345000")
   private Date updatedAt;
 
-  EventPatternExrule()
+  public EventPatternExrule()
   {
     //
   }

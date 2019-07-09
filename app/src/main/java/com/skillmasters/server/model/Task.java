@@ -45,7 +45,7 @@ public class Task implements IEntity
   @ApiModelProperty(readOnly = true, example = "1556712345000")
   private Date updatedAt;
 
-  Task()
+  public Task()
   {
     // default
   }

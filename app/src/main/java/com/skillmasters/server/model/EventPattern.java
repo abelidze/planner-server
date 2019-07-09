@@ -73,7 +73,7 @@ public class EventPattern implements IEntity
   @ApiModelProperty(readOnly = true, example = "1556712345000")
   private Date updatedAt;
 
-  EventPattern()
+  public EventPattern()
   {
     //
   }
