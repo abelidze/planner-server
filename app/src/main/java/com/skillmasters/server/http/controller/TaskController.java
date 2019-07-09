@@ -88,6 +88,10 @@ public class TaskController
       where = qTask.event.id.eq(eventId).and(where);
     }
 
+    if (deadlineTo != null) {
+      where = qTask.deadlineAt.goe(new Date(deadlineTo)).and(where);
+    }
+
     if (createdFrom != null) {
       where = qTask.createdAt.goe(new Date(createdFrom)).and(where);
     }
