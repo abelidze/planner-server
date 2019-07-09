@@ -50,6 +50,8 @@ public class TaskController
     @RequestParam(value="id", defaultValue="") List<Long> id,
     @ApiParam(value = "Id of linked event")
     @RequestParam(value="event_id", required=false) Long eventId,
+    @ApiParam(value = "Id of parent task")
+    @RequestParam(value="parent_id", required=false) Long parentId,
     @ApiParam(value = "Task's deadline, timestamp")
     @RequestParam(value="deadline", required=false) Long deadlineTo,
     @ApiParam(value = "Timestamp after that task was created")
@@ -86,6 +88,10 @@ public class TaskController
 
     if (eventId != null) {
       where = qTask.event.id.eq(eventId).and(where);
+    }
+
+    if (parentId != null) {
+      where = qTask.parentId.eq(parentId).and(where);
     }
 
     if (deadlineTo != null) {
