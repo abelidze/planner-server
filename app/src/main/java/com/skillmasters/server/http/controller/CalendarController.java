@@ -1,6 +1,9 @@
 package com.skillmasters.server.http.controller;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.TimeZone;
 import java.io.IOException;
 
@@ -12,6 +15,7 @@ import biweekly.ICalendar;
 import biweekly.component.VEvent;
 import biweekly.component.VTodo;
 import biweekly.property.Status;
+import biweekly.property.DateStart;
 import biweekly.parameter.ICalParameters;
 import biweekly.util.Frequency;
 import biweekly.util.Recurrence;
@@ -23,9 +27,12 @@ import biweekly.io.scribe.property.RecurrenceRuleScribe;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.annotations.*;
 
+import com.skillmasters.server.http.response.ObjectResponse;
+import com.skillmasters.server.service.EventPatternService;
 import com.skillmasters.server.service.EventService;
 import com.skillmasters.server.model.*;
 
@@ -38,14 +45,102 @@ public class CalendarController
   EventService eventService;
 
   @Autowired
+  EventPatternService patternService;
+
+  @Autowired
   RecurrenceRuleScribe scribe;
 
   @Autowired
   ParseContext context;
 
+  @ApiOperation(value = "Import iCal calendar for current user", response = ObjectResponse.class)
+  @PostMapping("/import")
+  public ObjectResponse calendarImport(@AuthenticationPrincipal User user, @RequestParam MultipartFile file) throws IOException
+  {
+    // Configure ical
+    ICalendar ical = Biweekly.parse(file.getInputStream()).first();
+
+    // Deal with timezones
+    TimezoneInfo tzInfo = ical.getTimezoneInfo();
+
+    // Import events and patterns
+    Map<String, Event> cache = new HashMap<>();
+    for (VEvent e : ical.getEvents()) {
+      String uid = e.getUid().toString();
+
+      // Import event's data
+      Event event = cache.get(uid);
+      if (event == null) {
+        event = new Event();
+        event.setOwnerId(user.getId());
+
+        if (e.getSummary() != null) {
+          event.setName(e.getSummary().getValue());
+        }
+
+        if (e.getDescription() != null) {
+          event.setDetails(e.getDescription().getValue());
+        }
+
+        if (e.getLocation() != null) {
+          event.setLocation(e.getLocation().getValue());
+        }
+
+        if (e.getCreated() != null) {
+          event.setCreatedAt(e.getCreated().getValue());
+        }
+
+        if (e.getLastModified() != null) {
+          event.setUpdatedAt(e.getLastModified().getValue());
+        }
+
+        cache.put(uid, event);
+        eventService.save(event);
+      }
+
+      // Import pattern's data
+      EventPattern pattern = new EventPattern();
+
+      DateStart dstart = e.getDateStart();
+      pattern.setStartedAt(dstart.getValue());
+
+      TimeZone tz;
+      if (tzInfo.isFloating(dstart)) {
+        tz = TimeZone.getDefault();
+      } else {
+        TimezoneAssignment tza = tzInfo.getTimezone(dstart);
+        tz = (tza == null) ? TimeZone.getTimeZone("UTC") : tza.getTimeZone();
+      }
+      pattern.setTimezone(tz.getID());
+
+      if (e.getDuration() == null) {
+        pattern.setDuration(pattern.getEndedAt().getTime() - pattern.getStartedAt().getTime());
+      } else {
+        pattern.setDuration(e.getDuration().getValue().toMillis());
+      }
+
+      if (e.getDateEnd() == null) {
+        pattern.setEndedAt(new Date(Long.MAX_VALUE));
+      } else {
+        pattern.setEndedAt(e.getDateEnd().getValue());
+      }
+
+      if (e.getRecurrenceRule() != null) {
+        pattern.setRrule(e.getRecurrenceRule().toString());
+      }
+
+      pattern.setEvent(event);
+      patternService.save(pattern);
+    }
+
+    // TODO: import tasks
+
+    return new ObjectResponse().success();
+  }
+
   @ApiOperation(value = "Export current user calendar to iCal / .ics", produces = "text/calendar")
   @GetMapping("/export")
-  public String export(@AuthenticationPrincipal User user, HttpServletResponse response) throws IOException
+  public String calendarExport(@AuthenticationPrincipal User user, HttpServletResponse response) throws IOException
   {
     // Configure ical
     ICalendar ical = new ICalendar();
