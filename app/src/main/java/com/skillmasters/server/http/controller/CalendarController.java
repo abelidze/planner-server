@@ -102,6 +102,9 @@ public class CalendarController
       EventPattern pattern = new EventPattern();
 
       DateStart dstart = e.getDateStart();
+      if (dstart == null) {
+        continue;
+      }
       pattern.setStartedAt(dstart.getValue());
 
       TimeZone tz;
