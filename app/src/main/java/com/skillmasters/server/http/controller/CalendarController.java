@@ -12,15 +12,18 @@ import javax.servlet.http.HttpServletResponse;
 
 import biweekly.Biweekly;
 import biweekly.ICalendar;
+import biweekly.ICalVersion;
 import biweekly.component.VEvent;
 import biweekly.component.VTodo;
 import biweekly.property.Status;
 import biweekly.property.DateStart;
+import biweekly.property.RelatedTo;
 import biweekly.parameter.ICalParameters;
 import biweekly.util.Frequency;
 import biweekly.util.Recurrence;
 import biweekly.util.Duration;
 import biweekly.io.ParseContext;
+import biweekly.io.WriteContext;
 import biweekly.io.TimezoneInfo;
 import biweekly.io.TimezoneAssignment;
 import biweekly.io.scribe.property.RecurrenceRuleScribe;
@@ -34,6 +37,7 @@ import io.swagger.annotations.*;
 import com.skillmasters.server.http.response.ObjectResponse;
 import com.skillmasters.server.service.EventPatternService;
 import com.skillmasters.server.service.EventService;
+import com.skillmasters.server.service.TaskService;
 import com.skillmasters.server.model.*;
 
 @RestController
@@ -43,6 +47,9 @@ public class CalendarController
 {
   @Autowired
   EventService eventService;
+
+  @Autowired
+  TaskService taskService;
 
   @Autowired
   EventPatternService patternService;
@@ -62,11 +69,12 @@ public class CalendarController
 
     // Deal with timezones
     TimezoneInfo tzInfo = ical.getTimezoneInfo();
+    WriteContext ctx = new WriteContext(ICalVersion.V2_0, tzInfo, tzInfo.getDefaultTimezone());
 
-    // Import events and patterns
+    // Import Events and Patterns
     Map<String, Event> cache = new HashMap<>();
     for (VEvent e : ical.getEvents()) {
-      String uid = e.getUid().toString();
+      String uid = e.getUid().getValue();
 
       // Import event's data
       Event event = cache.get(uid);
@@ -76,6 +84,10 @@ public class CalendarController
 
         if (e.getSummary() != null) {
           event.setName(e.getSummary().getValue());
+        }
+
+        if (e.getStatus() != null) {
+          event.setStatus(e.getStatus().getValue());
         }
 
         if (e.getDescription() != null) {
@@ -129,14 +141,55 @@ public class CalendarController
       }
 
       if (e.getRecurrenceRule() != null) {
-        pattern.setRrule(e.getRecurrenceRule().toString());
+        pattern.setRrule(scribe.writeText(e.getRecurrenceRule(), ctx));
       }
 
       pattern.setEvent(event);
       patternService.save(pattern);
     }
 
-    // TODO: import tasks
+    // Import tasks
+    for (VTodo todo : ical.getTodos()) {
+      Task task = new Task();
+
+      // Attach task to event
+      List<RelatedTo> related = todo.getRelatedTo();
+      if (related != null && !related.isEmpty()) {
+        String uid = related.get(0).getValue();
+        if (cache.containsKey(uid)) {
+          task.setEvent(cache.get(uid));
+        }
+      }
+
+      // todo.getOrganizer()
+      // todo.getLocation()
+
+      if (todo.getSummary() != null) {
+        task.setName(todo.getSummary().getValue());
+      }
+
+      if (todo.getDescription() != null) {
+        task.setDetails(todo.getDescription().getValue());
+      }
+
+      if (todo.getStatus() != null) {
+        task.setStatus(todo.getStatus().getValue());
+      }
+
+      if (todo.getDateDue() != null) {
+        task.setDeadlineAt(todo.getDateDue().getValue());
+      }
+
+      if (todo.getCreated() != null) {
+        task.setCreatedAt(todo.getCreated().getValue());
+      }
+
+      if (todo.getLastModified() != null) {
+        task.setUpdatedAt(todo.getLastModified().getValue());
+      }
+
+      taskService.save(task);
+    }
 
     return new ObjectResponse().success();
   }
@@ -161,6 +214,7 @@ public class CalendarController
       event.setUid(uid); // <-- dangerous thing due to `eventCopy`, needed for todos, but...
       event.setSummary(e.getName());
       event.setDescription(e.getDetails());
+      event.setStatus(new Status(e.getStatus()));
       event.setLocation(e.getLocation());
       event.setCreated(e.getCreatedAt());
       event.setLastModified(e.getUpdatedAt());

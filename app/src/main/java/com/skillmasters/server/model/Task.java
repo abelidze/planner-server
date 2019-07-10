@@ -24,7 +24,7 @@ public class Task implements IEntity
   private Long id;
 
   @ManyToOne(fetch = FetchType.EAGER)
-  @JoinColumn(name = "event_id", nullable = false)
+  @JoinColumn(name = "event_id", nullable = true)
   @OnDelete(action = OnDeleteAction.CASCADE)
   @JsonIgnore
   private Event event;
