@@ -9,6 +9,7 @@ import java.util.List;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.annotations.Check;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.CreationTimestamp;
@@ -20,6 +21,7 @@ import io.swagger.annotations.ApiModelProperty;
 @Data
 @Entity
 @Table(name = "patterns")
+@Check(constraints = "ended_at >= started_at")
 @SequenceGenerator(name = "patternId", sequenceName = "pattern_seq", allocationSize = 1)
 public class EventPattern implements IEntity
 {
@@ -59,12 +61,12 @@ public class EventPattern implements IEntity
   private List<EventPatternExrule> exrules = new ArrayList<>();
 
   @NotNull
-  @Column(nullable = false)
+  @Column(name = "started_at", nullable = false)
   @ApiModelProperty(value = "Start of the first event's instance", example = "1556712345000")
   private Date startedAt = new Date();
 
   @NotNull
-  @Column(nullable = false)
+  @Column(name = "ended_at", nullable = false)
   @ApiModelProperty(value = "Timestamp until that event can occur", example = "1556712345000")
   private Date endedAt = new Date(Long.MAX_VALUE);
 

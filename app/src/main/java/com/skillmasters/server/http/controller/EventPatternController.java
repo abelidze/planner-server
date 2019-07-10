@@ -108,6 +108,16 @@ public class EventPatternController
     @RequestParam(value="event_id", required=true) Long eventId,
     @RequestBody EventPattern pattern
   ) {
+    if (pattern.getEndedAt().getTime() == Long.MAX_VALUE && pattern.getRrule() == null) {
+      pattern.setEndedAt(new Date(pattern.getStartedAt().getTime() + pattern.getDuration()));
+    } else if (pattern.getDuration() <= 0) {
+      pattern.setDuration(pattern.getEndedAt().getTime() - pattern.getStartedAt().getTime());
+    }
+
+    if (pattern.getEndedAt().before(pattern.getStartedAt())) {
+      return new EventPatternResponse().error(400, "Parameter ended_at must be greater or equal to started_at");
+    }
+
     Event entity = eventService.getById(eventId);
     if (entity == null) {
       return new EventPatternResponse().error(404, "Event not found");
@@ -118,11 +128,6 @@ public class EventPatternController
     }
 
     pattern.setEvent(entity);
-    if (pattern.getEndedAt().getTime() == Long.MAX_VALUE && pattern.getRrule() != null) {
-      pattern.setEndedAt(new Date(pattern.getStartedAt().getTime() + pattern.getDuration()));
-    } else if (pattern.getDuration() <= 0) {
-      pattern.setDuration(pattern.getEndedAt().getTime() - pattern.getStartedAt().getTime());
-    }
     return new EventPatternResponse().success( service.save(pattern) );
   }
 
