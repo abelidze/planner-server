@@ -2,14 +2,11 @@ package com.skillmasters.server.service;
 
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
-import java.util.Map;
-import java.util.HashMap;
 import java.util.Arrays;
 import java.util.ArrayList;
-import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-import com.google.common.hash.Hashing;
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils;
 import org.springframework.stereotype.Service;
 import com.skillmasters.server.model.Permission;
@@ -17,7 +14,7 @@ import com.skillmasters.server.model.Permission;
 @Service
 public class ShareService
 {
-  private final Map<String, CachedPermission> cache = new HashMap<>();
+  private final Map<String, CachedPermission> cache = new ConcurrentHashMap<>();
   private final long INVALIDATE_TIME = 3600000;
 
   private class CachedPermission
