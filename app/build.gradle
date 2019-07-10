@@ -25,6 +25,7 @@ configurations {
 
 repositories {
     jcenter()
+    maven { url 'https://jitpack.io' }
 }
 
 // compileJava {
@@ -69,7 +70,8 @@ dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
-    runtimeOnly 'org.xerial:sqlite-jdbc:3.27.2'
+    // runtimeOnly 'org.xerial:sqlite-jdbc:3.28.0'
+    runtimeOnly 'com.github.Txture:sqlite-jdbc:10cb68a'
     runtimeOnly 'com.h2database:h2:1.4.199'
     // runtimeOnly 'org.postgresql:postgresql'
 }
