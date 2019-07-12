@@ -7,7 +7,7 @@ import java.util.TimeZone;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.*;
 
 import org.hibernate.annotations.Check;
 import org.hibernate.annotations.OnDelete;
@@ -33,13 +33,11 @@ public class EventPattern implements IEntity
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "event_id", nullable = false)
   @OnDelete(action = OnDeleteAction.CASCADE)
-  // @JsonProperty(value = "event_id", access = JsonProperty.Access.READ_ONLY)
-  // @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-  // @JsonIdentityReference(alwaysAsId = true)
   @JsonIgnore
   private Event event;
 
   @NotNull
+  @Min(value = 0, message = "Duration can't be less then 0")
   @Column(nullable = false)
   @ApiModelProperty(value = "Duration of a single event's instance")
   private Long duration = 0L;
@@ -49,6 +47,7 @@ public class EventPattern implements IEntity
   @ApiModelProperty(value = "Timezone to work in", example = "UTC")
   private String timezone = "UTC";
 
+  @Pattern(regexp = "|^((?!UNTIL[\\s=]+).)*$", message = "UNTIL is auto-generated and can't be setted manually")
   @ApiModelProperty(value = "iCal's RRULE string", example = "FREQ=DAILY;INTERVAL=1")
   private String rrule;
 
@@ -83,6 +82,12 @@ public class EventPattern implements IEntity
     //
   }
 
+  @AssertTrue(message = "Field ended_at must be greater or equal to started_at")
+  private boolean isRangeValid()
+  {
+    return !endedAt.before(startedAt);
+  }
+
   @ApiModelProperty(readOnly = true)
   public Long getEventId()
   {
@@ -92,7 +97,7 @@ public class EventPattern implements IEntity
   @JsonIgnore
   public String getOwnerId()
   {
-    return this.event.getOwnerId();
+    return event.getOwnerId();
   }
 
   @JsonIgnore

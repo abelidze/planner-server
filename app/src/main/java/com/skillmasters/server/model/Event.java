@@ -26,7 +26,7 @@ public class Event implements IEntity
   @ApiModelProperty(value = "Event's unique id", readOnly = true)
   private Long id;
 
-  @NotNull
+  @NotNull("Field owner_id can't be null")
   @Column(nullable = false)
   @ApiModelProperty(value = "Owner's unique id", readOnly = true, example = "0")
   private String ownerId;

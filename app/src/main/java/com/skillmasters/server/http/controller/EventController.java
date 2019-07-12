@@ -10,6 +10,9 @@ import java.lang.reflect.Field;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import org.springframework.validation.Validator;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.data.domain.PageRequest;
@@ -52,6 +55,9 @@ public class EventController
 
   @Autowired
   RecurrenceRuleScribe scribe;
+
+  @Autowired
+  Validator validator;
 
   @Autowired
   ParseContext context;
@@ -184,8 +190,15 @@ public class EventController
 
   @ApiOperation(value = "Create event", response = EventResponse.class)
   @PostMapping("/events")
-  public EventResponse create(@AuthenticationPrincipal User user, @RequestBody Event event)
-  {
+  public EventResponse create(
+    @AuthenticationPrincipal User user,
+    @RequestBody @Validated Event event,
+    BindingResult binding
+  ) {
+    if (binding.hasErrors()) {
+      return new EventResponse().error(400, binding.getAllErrors().get(0).getDefaultMessage());
+    }
+
     event.setOwnerId(user.getId());
     return new EventResponse().success( service.save(event) );
   }
@@ -200,13 +213,21 @@ public class EventController
   )
   @ApiOperation(value = "Update event", response = EventResponse.class)
   @PatchMapping("/events/{id}")
-  public EventResponse update(@PathVariable Long id, @RequestBody Map<String, Object> updates)
-  {
+  public EventResponse update(
+    @PathVariable Long id,
+    @RequestBody Map<String, Object> updates,
+    BindingResult binding
+  ) {
     Event entity = service.getById(id);
     if (entity == null) {
       return new EventResponse().error(404, "Event not found");
     }
-    return new EventResponse().success( service.update(entity, updates) );
+    service.update(entity, updates);
+    validator.validate(entity, binding);
+    if (binding.hasErrors()) {
+      return new EventResponse().error(400, binding.getAllErrors().get(0).getDefaultMessage());
+    }
+    return new EventResponse().success( service.save(entity) );
   }
 
   @ApiOperation(value = "Delete event")

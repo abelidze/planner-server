@@ -12,6 +12,9 @@ import com.google.common.base.CaseFormat;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 
+import org.springframework.validation.Validator;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -46,6 +49,9 @@ public class EventPatternController
 
   @Autowired
   EventRepository eventRepository;
+
+  @Autowired
+  Validator validator;
 
   @PersistenceContext
   EntityManager entityManager;
@@ -106,16 +112,17 @@ public class EventPatternController
   @PostMapping("/patterns")
   public EventPatternResponse create(
     @RequestParam(value="event_id", required=true) Long eventId,
-    @RequestBody EventPattern pattern
+    @RequestBody @Validated EventPattern pattern,
+    BindingResult binding
   ) {
+    if (binding.hasErrors()) {
+      return new EventPatternResponse().error(400, binding.getAllErrors().get(0).getDefaultMessage());
+    }
+
     if (pattern.getEndedAt().getTime() == Long.MAX_VALUE && pattern.getRrule() == null) {
       pattern.setEndedAt(new Date(pattern.getStartedAt().getTime() + pattern.getDuration()));
     } else if (pattern.getDuration() <= 0) {
       pattern.setDuration(pattern.getEndedAt().getTime() - pattern.getStartedAt().getTime());
-    }
-
-    if (pattern.getEndedAt().before(pattern.getStartedAt())) {
-      return new EventPatternResponse().error(400, "Parameter ended_at must be greater or equal to started_at");
     }
 
     Event entity = eventService.getById(eventId);
@@ -141,13 +148,21 @@ public class EventPatternController
   )
   @ApiOperation(value = "Update pattern", response = EventPatternResponse.class)
   @PatchMapping("/patterns/{id}")
-  public EventPatternResponse update(@PathVariable Long id, @RequestBody Map<String, Object> updates)
-  {
+  public EventPatternResponse update(
+    @PathVariable Long id,
+    @RequestBody Map<String, Object> updates,
+    BindingResult binding
+  ) {
     EventPattern entity = service.getById(id);
     if (entity == null) {
       return new EventPatternResponse().error(404, "EventPattern not found");
     }
-    return new EventPatternResponse().success( service.update(entity, updates) );
+    service.update(entity, updates);
+    validator.validate(entity, binding);
+    if (binding.hasErrors()) {
+      return new EventPatternResponse().error(400, binding.getAllErrors().get(0).getDefaultMessage());
+    }
+    return new EventPatternResponse().success( service.save(entity) );
   }
 
   @ApiOperation(value = "Delete pattern")
@@ -224,3 +239,24 @@ public class EventPatternController
     return query;
   }
 }
+
+// public class PatternUpdateValidator implements Validator
+// {
+//   @Override
+//   public boolean supports(Class<?> clazz)
+//   {
+//     return FormParams.class.isAssignableFrom(clazz);
+//   }
+
+//   @Override
+//   public void validate(Object target, Errors errors)
+//   {
+//     FormParams params = (FormParams) target;
+
+//     if (StringUtils.isBlank(params.getRuleId()) && StringUtils.isBlank(params.getRef())) {
+//       errors.reject(null, "Необходимо указать или 'ID правила', и/или 'Объект алерта'!");
+//     } else if (params.getDateFrom() == null || params.getDateTo() == null) {
+//       errors.reject(null, "Необходимо указать период поиска!");
+//     }
+//   }
+// }

@@ -64,7 +64,12 @@ public class EntityService<R extends JpaRepository<T, ID> & QuerydslPredicateExe
 
   public T updateById(ID id, Map<String, Object> updates)
   {
-    return this.update( this.getById(id), updates );
+    return this.updateAndSave( this.getById(id), updates );
+  }
+
+  public T updateAndSave(T entity, Map<String, Object> updates)
+  {
+    return repository.save( this.update(entity, updates) );
   }
 
   @PreAuthorize("principal.can('UPDATE', #entity)")
@@ -91,7 +96,7 @@ public class EntityService<R extends JpaRepository<T, ID> & QuerydslPredicateExe
         ReflectionUtils.setField(field, entity, v);
       }
     });
-    return repository.save(entity);
+    return entity;
   }
 
   @PreAuthorize("principal.can('DELETE', #entity)")

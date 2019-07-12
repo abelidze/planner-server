@@ -8,6 +8,9 @@ import java.lang.reflect.Field;
 import javax.persistence.PersistenceContext;
 import javax.persistence.EntityManager;
 
+import org.springframework.validation.Validator;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +41,9 @@ public class TaskController
 
   @Autowired
   PermissionService permissionService;
+
+  @Autowired
+  Validator validator;
 
   @PersistenceContext
   EntityManager entityManager;
@@ -139,8 +145,13 @@ public class TaskController
   @PostMapping("/tasks")
   public TaskResponse create(
     @RequestParam(value="event_id", required=true) Long eventId,
-    @RequestBody Task task
+    @RequestBody @Validated Task task,
+    BindingResult binding
   ) {
+    if (binding.hasErrors()) {
+      return new TaskResponse().error(400, binding.getAllErrors().get(0).getDefaultMessage());
+    }
+
     Event entity = eventService.getById(eventId);
     if (entity == null) {
       return new TaskResponse().error(404, "Event not found");
@@ -159,13 +170,21 @@ public class TaskController
   )
   @ApiOperation(value = "Update task", response = TaskResponse.class)
   @PatchMapping("/tasks/{id}")
-  public TaskResponse update(@PathVariable Long id, @RequestBody Map<String, Object> updates)
-  {
+  public TaskResponse update(
+    @PathVariable Long id,
+    @RequestBody Map<String, Object> updates,
+    BindingResult binding
+  ) {
     Task entity = service.getById(id);
     if (entity == null) {
       return new TaskResponse().error(404, "Task not found");
     }
-    return new TaskResponse().success( service.update(entity, updates) );
+    service.update(entity, updates);
+    validator.validate(entity, binding);
+    if (binding.hasErrors()) {
+      return new TaskResponse().error(400, binding.getAllErrors().get(0).getDefaultMessage());
+    }
+    return new TaskResponse().success( service.save(entity) );
   }
 
   @ApiOperation(value = "Delete task")

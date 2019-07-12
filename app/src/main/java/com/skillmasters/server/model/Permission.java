@@ -25,13 +25,13 @@ public class Permission implements IEntity
   @ApiModelProperty(value = "Permission's unique id", readOnly = true)
   private Long id;
 
-  @ApiModelProperty(value = "Id of the user that is granted for action")
+  @ApiModelProperty(value = "Id of the user that is granted for action", example = "odZqu_9pJ0JvP6-omCa_pXC")
   private String userId;
 
-  @ApiModelProperty(value = "Id of the entity's owner")
+  @ApiModelProperty(value = "Id of the entity's owner", example = "KV_sG5hz-iRrwH3zA_Tr3Ly")
   private String ownerId;
 
-  @ApiModelProperty(value = "Entity's id")
+  @ApiModelProperty(value = "Entity's id", example = "1")
   private String entityId;
 
   @ApiModelProperty(value = "Name of granted permission")
