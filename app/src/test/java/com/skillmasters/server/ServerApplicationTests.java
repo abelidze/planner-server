@@ -36,37 +36,37 @@
    @PersistenceContext
    EntityManager entityManager;
 
-   @Test
-   public void dummyTest() throws Exception
-   {
-     assertThat(controller).isNotNull();
-   }
+//   @Test
+//   public void dummyTest() throws Exception
+//   {
+//     assertThat(controller).isNotNull();
+//   }
 
-   @Test
-   public void testConnection()
-   {
-     QEvent qEvent = QEvent.event;
-     JPAQuery query = new JPAQuery(entityManager);
-     query.from(qEvent);
-     BooleanExpression where = qEvent.isNotNull();
-     assertThat(eventService.count(where)).isEqualTo(0);
-     Event e = new Event();
-
-     eventService.save(e);
-     assertThat(eventService.count(where)).isEqualTo(1);
-   }
-
-   @Test
-   public void testConnection2()
-   {
-     QEvent qEvent = QEvent.event;
-     JPAQuery query = new JPAQuery(entityManager);
-     query.from(qEvent);
-     BooleanExpression where = qEvent.isNotNull();
-     assertThat(eventService.count(where)).isEqualTo(0);
-     Event e = new Event();
-
-     eventService.save(e);
-     assertThat(eventService.count(where)).isEqualTo(1);
-   }
+//   @Test
+//   public void testConnection()
+//   {
+//     QEvent qEvent = QEvent.event;
+//     JPAQuery query = new JPAQuery(entityManager);
+//     query.from(qEvent);
+//     BooleanExpression where = qEvent.isNotNull();
+//     assertThat(eventService.count(where)).isEqualTo(0);
+//     Event e = new Event();
+//
+//     eventService.save(e);
+//     assertThat(eventService.count(where)).isEqualTo(1);
+//   }
+//
+//   @Test
+//   public void testConnection2()
+//   {
+//     QEvent qEvent = QEvent.event;
+//     JPAQuery query = new JPAQuery(entityManager);
+//     query.from(qEvent);
+//     BooleanExpression where = qEvent.isNotNull();
+//     assertThat(eventService.count(where)).isEqualTo(0);
+//     Event e = new Event();
+//
+//     eventService.save(e);
+//     assertThat(eventService.count(where)).isEqualTo(1);
+//   }
  }

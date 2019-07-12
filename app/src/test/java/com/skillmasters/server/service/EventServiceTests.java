@@ -3,6 +3,7 @@ package com.skillmasters.server.service;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.skillmasters.server.model.Event;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,21 +14,20 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @Transactional
-@Commit
 public class EventServiceTests extends ServiceTests
 {
   @Autowired
   protected EventService eventService;
 
-  @Test
-  @Order(1)
-  public void testCreate()
+  private ArrayList<Event> populate()
   {
     ArrayList<Event> events = new ArrayList<>(10);
     for (int i = 0; i < 10; i++) {
@@ -36,12 +36,20 @@ public class EventServiceTests extends ServiceTests
       e.setDetails("Details for event number " + i);
       e.setName("Name for event number " + i);
       e.setLocation("Location for event number " + i);
+      e = eventService.save(e);
       events.add(e);
-      eventService.save(e);
     }
     eventService.getRepository().flush();
 
-    assertThat(countRowsInTable("events")).isEqualTo(10);
+    return events;
+  }
+
+  @Test
+  public void testCreate()
+  {
+    ArrayList<Event> events = populate();
+
+    assertThat(countRowsInTable(eventsTablename)).isEqualTo(10);
     assertThat(eventService.count(qEvent.id.isNotNull())).isEqualTo(10);
 
     JPAQuery query = getQueryFromEvent();
@@ -59,6 +67,61 @@ public class EventServiceTests extends ServiceTests
       i++;
     }
   }
+
+  @Test
+  public void testUpdate()
+  {
+    ArrayList<Event> events = populate();
+
+    assertThat(countRowsInTable("events")).isEqualTo(10);
+    Long id = events.get(3).getId();
+
+    Event event = eventService.getById(id);
+    assertThat(event).isNotNull();
+
+    System.out.println(event);
+    Map<String, Object> updates = new HashMap<>();
+
+    String newDetails = "new details";
+    String newName = "new name";
+    String newLocation = "new location";
+
+    updates.put("details", newDetails);
+    updates.put("name", newName);
+    updates.put("location", newLocation);
+
+    eventService.update(event, updates);
+    eventService.getRepository().flush();
+
+    assertThat(countRowsInTable(eventsTablename)).isEqualTo(10);
+
+    for (Event e : eventService.getByQuery(qEvent.isNotNull())) {
+      if (e.getId().equals(id)) {
+        assertThat(e.getDetails()).isEqualTo(newDetails);
+        assertThat(e.getName()).isEqualTo(newName);
+        assertThat(e.getLocation()).isEqualTo(newLocation);
+        continue;
+      }
+
+      assertThat(e.getDetails()).isNotEqualTo(newDetails);
+      assertThat(e.getName()).isNotEqualTo(newName);
+      assertThat(e.getLocation()).isNotEqualTo(newLocation);
+    }
+  }
+
+  @Test
+  public void testRemove()
+  {
+    ArrayList<Event> events = populate();
+    assertThat(countRowsInTable(eventsTablename)).isEqualTo(10);
+
+    for (Event e : events) {
+      eventService.delete(e);
+    }
+    eventService.getRepository().flush();
+    assertThat(countRowsInTable("events")).isEqualTo(0);
+  }
+
 
   private JPAQuery getQueryFromEvent()
   {
