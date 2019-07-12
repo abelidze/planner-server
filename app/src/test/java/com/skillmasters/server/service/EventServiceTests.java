@@ -2,6 +2,7 @@ package com.skillmasters.server.service;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
+import com.skillmasters.server.common.EventGenerator;
 import com.skillmasters.server.model.Event;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,11 +32,8 @@ public class EventServiceTests extends ServiceTests
   {
     ArrayList<Event> events = new ArrayList<>(10);
     for (int i = 0; i < 10; i++) {
-      Event e = new Event();
+      Event e = EventGenerator.genEvent(i);
       e.setOwnerId(testUser.getId());
-      e.setDetails("Details for event number " + i);
-      e.setName("Name for event number " + i);
-      e.setLocation("Location for event number " + i);
       e = eventService.save(e);
       events.add(e);
     }
