@@ -49,6 +49,7 @@ public class FirebaseAuthenticationProvider extends AbstractUserDetailsAuthentic
     if (authenticationToken.getToken().equals("serega_mem")) {
       return new User("sergo@zink.ovic", "227", permissionService);
     }
+    // pls don't remove. tests depend on this token.
     if (authenticationToken.getToken().equals("tester")) {
       return new User("test@test.com", "322", permissionService);
     }

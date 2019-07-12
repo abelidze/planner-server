@@ -52,6 +52,11 @@ public class EntityService<R extends JpaRepository<T, ID> & QuerydslPredicateExe
     this.entityName = entityName;
   }
 
+  public R getRepository()
+  {
+    return repository;
+  }
+
   public T save(T entity)
   {
     return repository.save(entity);

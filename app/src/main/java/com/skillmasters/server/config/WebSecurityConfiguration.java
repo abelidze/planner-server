@@ -40,7 +40,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter
     return new ProviderManager(Arrays.asList(authenticationProvider));
   }
 
-  @Bean
+  @Bean("authManager")
   @Override
   public AuthenticationManager authenticationManagerBean() throws Exception
   {
