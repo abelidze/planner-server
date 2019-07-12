@@ -74,6 +74,11 @@ dependencies {
     runtimeOnly 'com.github.Txture:sqlite-jdbc:10cb68a'
     runtimeOnly 'com.h2database:h2:1.4.199'
     // runtimeOnly 'org.postgresql:postgresql'
+
+}
+
+test {
+    include "com/skillmasters/server/suites/TestServiceSuite.class"
 }
 
 //fancy test output
