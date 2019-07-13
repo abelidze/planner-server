@@ -72,7 +72,7 @@ public class EventController
     @ApiParam(value = "Array of event's id")
     @RequestParam(value="id", defaultValue="") List<Long> id,
     @ApiParam(value = "Return only new started instances")
-    @RequestParam(value="newOnly", defaultValue="false") Boolean newOnly,
+    @RequestParam(value="new_only", defaultValue="false") Boolean newOnly,
     @ApiParam(value = "Owner's unique id")
     @RequestParam(value="owner_id", required=false) String ownerId,
     @ApiParam(value = "Start of requesting range")
