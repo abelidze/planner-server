@@ -116,7 +116,7 @@ public class EventServiceTests extends ServiceTests
       eventService.delete(e);
     }
     eventService.getRepository().flush();
-    assertThat(countRowsInTable("events")).isEqualTo(0);
+    assertThat(countRowsInTable(eventsTablename)).isEqualTo(0);
   }
 
 
