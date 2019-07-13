@@ -80,6 +80,7 @@ dependencies {
 
 test {
     include "com/skillmasters/server/suites/TestServiceSuite.class"
+//    failFast = true
 }
 
 //fancy test output

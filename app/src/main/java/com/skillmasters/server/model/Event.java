@@ -10,6 +10,8 @@ import javax.validation.constraints.NotNull;
 // import org.springframework.data.annotation.CreatedDate;
 // import org.springframework.data.annotation.LastModifiedDate;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.UpdateTimestamp;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -52,6 +54,8 @@ public class Event implements IEntity
   private Date updatedAt;
 
   @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
+  //todo: fix? for some reasons cascade delete doesn't work during tests.
+  @OnDelete(action = OnDeleteAction.CASCADE)
   @JsonIgnore
   private List<EventPattern> patterns;
 

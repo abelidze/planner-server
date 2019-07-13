@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Commit;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,6 +48,7 @@ public class EventPatternServiceTests extends ServiceTests
       eventPatterns.add(ep);
     }
     eventPatternService.getRepository().flush();
+    eventService.getRepository().flush();
     return eventPatterns;
   }
 
@@ -56,6 +58,7 @@ public class EventPatternServiceTests extends ServiceTests
     ArrayList<EventPattern> eventPatterns = populate();
 
     assertThat(countRowsInTable(eventPatternsTablename)).isEqualTo(10);
+    assertThat(countRowsInTable(eventsTablename)).isEqualTo(10);
     assertThat(eventPatternService.count(qEventPattern.id.isNotNull())).isEqualTo(10);
 
     JPAQuery query = getQueryFromEventPattern();
@@ -109,9 +112,39 @@ public class EventPatternServiceTests extends ServiceTests
 
   }
 
+  @Test
   public void testRemove()
   {
+    ArrayList<EventPattern> eventPatterns = populate();
+    assertThat(countRowsInTable(eventPatternsTablename)).isEqualTo(10);
 
+    for (EventPattern ep : eventPatterns) {
+      eventPatternService.delete(ep);
+    }
+    eventService.getRepository().flush();
+    assertThat(countRowsInTable(eventPatternsTablename)).isEqualTo(0);
+    assertThat(countRowsInTable(eventsTablename)).isEqualTo(10);
+  }
+
+  @Test
+  public void testRemoveCascade()
+  {
+    ArrayList<EventPattern> eventPatterns = populate();
+    assertThat(countRowsInTable(eventPatternsTablename)).isEqualTo(10);
+
+    for (EventPattern ep : eventPatterns) {
+      eventService.delete(ep.getEvent());
+    }
+
+//    for (Event e : eventService.getByQuery(qEvent.isNotNull())) {
+//      eventService.delete(e);
+//    }
+
+    eventService.getRepository().flush();
+    eventPatternService.getRepository().flush();
+
+    assertThat(countRowsInTable(eventPatternsTablename)).isEqualTo(0);
+    assertThat(countRowsInTable(eventsTablename)).isEqualTo(0);
   }
 
   private JPAQuery getQueryFromEventPattern()
