@@ -14,12 +14,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-//@Transactional
+@Transactional
 public class EventPatternServiceTests extends ServiceTests
 {
   @Autowired
@@ -55,21 +57,55 @@ public class EventPatternServiceTests extends ServiceTests
 
     assertThat(countRowsInTable(eventPatternsTablename)).isEqualTo(10);
     assertThat(eventPatternService.count(qEventPattern.id.isNotNull())).isEqualTo(10);
-    JPAQuery query = getQueryFromEventPattern();
 
+    JPAQuery query = getQueryFromEventPattern();
     BooleanExpression where = qEventPattern.isNotNull();
     query.where(where).orderBy(qEventPattern.id.asc());
     Iterable<EventPattern> result = eventPatternService.getByQuery(query);
 
     int i = 0;
     for (EventPattern ep : result) {
-      assertThat(ep.equals(eventPatterns.get(i)));
+      assertThat(ep).isEqualTo(eventPatterns.get(i));
       i++;
     }
   }
 
+  @Test
   public void testUpdate()
   {
+    ArrayList<EventPattern> eventPatterns = populate();
+    assertThat(countRowsInTable(eventPatternsTablename)).isEqualTo(10);
+
+    Long id = eventPatterns.get(4).getId();
+    EventPattern eventPattern = eventPatternService.getById(id);
+    assertThat(eventPattern).isNotNull();
+
+    Map<String, Object> updates = new HashMap<>();
+
+    Event newEvent = EventGenerator.genEvent(100);
+    Long newDuration = 400L;
+    String newRule = "FREQ=WEEKLY;INTERVAL=1";
+    Long newStartedAt = new Date().getTime();
+    Long newEndedAt = newStartedAt + 300;
+
+    updates.put("event", newEvent);
+    updates.put("duration", newDuration);
+    updates.put("rrule", newRule);
+    updates.put("startedAt", newStartedAt);
+    updates.put("ended_at", newEndedAt);
+
+    newEvent = eventService.save(newEvent);
+    eventPattern = eventPatternService.update(eventPattern, updates);
+    eventPatternService.getRepository().flush();
+
+    for (EventPattern ep : eventPatternService.getByQuery(qEventPattern.isNotNull())) {
+      if (ep.getId().equals(id)) {
+        assertThat(ep).isEqualTo(eventPattern);
+        continue;
+      }
+
+      assertThat(ep).isNotEqualTo(eventPattern);
+    }
 
   }
 

@@ -77,7 +77,6 @@ public class EventServiceTests extends ServiceTests
     Event event = eventService.getById(id);
     assertThat(event).isNotNull();
 
-    System.out.println(event);
     Map<String, Object> updates = new HashMap<>();
 
     String newDetails = "new details";
