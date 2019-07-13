@@ -3,6 +3,7 @@ package com.skillmasters.server.service;
 import com.skillmasters.server.http.middleware.security.SimpleAuthenticationToken;
 import com.skillmasters.server.model.QEvent;
 import com.skillmasters.server.model.QEventPattern;
+import com.skillmasters.server.model.QTask;
 import com.skillmasters.server.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -42,9 +43,13 @@ class ServiceTests {
 
   protected static String eventPatternsTablename = "patterns";
 
+  protected static String taskTablename = "tasks";
+
   protected  QEvent qEvent = QEvent.event;
 
   protected QEventPattern qEventPattern = QEventPattern.eventPattern;
+
+  protected QTask qTask= QTask.task;
 
   @PostConstruct
   private void init()

@@ -60,6 +60,8 @@ public class Event implements IEntity
   private List<EventPattern> patterns;
 
   @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
+  //todo: fix? for some reasons cascade delete doesn't work during tests.
+  @OnDelete(action = OnDeleteAction.CASCADE)
   @JsonIgnore
   private List<Task> tasks;
 
