@@ -94,7 +94,7 @@ public class EventPatternServiceTests extends ServiceTests
     updates.put("startedAt", newStartedAt);
     updates.put("ended_at", newEndedAt);
 
-    newEvent = eventService.save(newEvent);
+    eventService.save(newEvent);
     eventPattern = eventPatternService.update(eventPattern, updates);
     eventPatternService.getRepository().flush();
 
