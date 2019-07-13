@@ -1,8 +1,6 @@
 package com.skillmasters.server.suites;
 
-import com.skillmasters.server.service.EventPatternServiceTests;
-import com.skillmasters.server.service.EventServiceTests;
-import com.skillmasters.server.service.TaskServiceTests;
+import com.skillmasters.server.service.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
@@ -11,8 +9,8 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
   EventServiceTests.class,
   EventPatternServiceTests.class,
-  TaskServiceTests.class
-})
+  TaskServiceTests.class,
+  PermissionServiceTests.class})
 public class TestServiceSuite
 {
 }

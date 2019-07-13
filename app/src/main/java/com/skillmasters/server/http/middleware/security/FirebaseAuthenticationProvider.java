@@ -53,6 +53,12 @@ public class FirebaseAuthenticationProvider extends AbstractUserDetailsAuthentic
     if (authenticationToken.getToken().equals("tester")) {
       return new User("test@test.com", "322", permissionService);
     }
+    if (authenticationToken.getToken().equals("tester1")) {
+      return new User("test1@test.com", "323", permissionService);
+    }
+    if (authenticationToken.getToken().equals("tester2")) {
+      return new User("test2@test.com", "324", permissionService);
+    }
 
     ApiFuture<FirebaseToken> task = firebaseAuth.verifyIdTokenAsync(authenticationToken.getToken());
     try {

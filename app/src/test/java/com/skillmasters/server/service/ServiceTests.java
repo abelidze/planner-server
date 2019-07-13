@@ -54,7 +54,11 @@ class ServiceTests {
   @PostConstruct
   private void init()
   {
-    Authentication auth = manager.authenticate(new SimpleAuthenticationToken("tester"));
+    authUser("tester");
+  }
+
+  protected void authUser(String token) {
+    Authentication auth = manager.authenticate(new SimpleAuthenticationToken(token));
     SecurityContextHolder.getContext().setAuthentication(auth);
     testUser = (User) auth.getPrincipal();
   }
