@@ -36,13 +36,13 @@ public class EventPattern implements IEntity
   @JsonIgnore
   private Event event;
 
-  @NotNull
+  @NotNull(message = "Field duration can't be null")
   @Min(value = 0, message = "Duration can't be less then 0")
   @Column(nullable = false)
   @ApiModelProperty(value = "Duration of a single event's instance")
   private Long duration = 0L;
 
-  @NotNull
+  @NotNull(message = "Field timezone can't be null")
   @Column(nullable = false)
   @ApiModelProperty(value = "Timezone to work in", example = "UTC")
   private String timezone = "UTC";
@@ -59,12 +59,12 @@ public class EventPattern implements IEntity
   @ApiModelProperty(value = "Array of iCal's EXRULE")
   private List<EventPatternExrule> exrules = new ArrayList<>();
 
-  @NotNull
+  @NotNull(message = "Field started_at can't be null")
   @Column(name = "started_at", nullable = false)
   @ApiModelProperty(value = "Start of the first event's instance", example = "1556712345000")
   private Date startedAt = new Date();
 
-  @NotNull
+  @NotNull(message = "Field ended_at can't be null")
   @Column(name = "ended_at", nullable = false)
   @ApiModelProperty(value = "Timestamp until that event can occur", example = "1556712345000")
   private Date endedAt = new Date(Long.MAX_VALUE);
@@ -85,7 +85,7 @@ public class EventPattern implements IEntity
   @AssertTrue(message = "Field ended_at must be greater or equal to started_at")
   private boolean isRangeValid()
   {
-    return !endedAt.before(startedAt);
+    return endedAt == null || startedAt == null || !endedAt.before(startedAt);
   }
 
   @ApiModelProperty(readOnly = true)

@@ -41,7 +41,7 @@ public class EntityService<R extends JpaRepository<T, ID> & QuerydslPredicateExe
   protected R repository;
 
   @PersistenceContext
-  EntityManager entityManager;
+  protected EntityManager entityManager;
 
   protected final Class<T> entityClass;
   protected final String entityName;
@@ -102,6 +102,7 @@ public class EntityService<R extends JpaRepository<T, ID> & QuerydslPredicateExe
   @PreAuthorize("principal.can('DELETE', #entity)")
   public void delete(T entity)
   {
+    permissionService.deleteByEntity(entity);
     repository.delete(entity);
   }
 

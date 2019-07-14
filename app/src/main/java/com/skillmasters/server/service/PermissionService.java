@@ -4,14 +4,13 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import org.springframework.stereotype.Service;
 
 import com.skillmasters.server.repository.PermissionRepository;
-import com.skillmasters.server.model.User;
-import com.skillmasters.server.model.IEntity;
-import com.skillmasters.server.model.Permission;
-import com.skillmasters.server.model.QPermission;
+import com.skillmasters.server.model.*;
 
 @Service
 public class PermissionService extends EntityService<PermissionRepository, Permission, Long>
 {
+  private final QPermission qPermission = QPermission.permission;
+
   public PermissionService()
   {
     super(Permission.class, "PERMISSION");
@@ -42,13 +41,26 @@ public class PermissionService extends EntityService<PermissionRepository, Permi
     action += "_" + entity.getEntityName();
     return repository.exists(
         getHasPermissionQuery(user.getId(), action)
-        .and(QPermission.permission.entityId.in(entity.getOwnerId(), entity.getId().toString()))
+        .and(qPermission.entityId.in(entity.getOwnerId(), entity.getId().toString()))
       );
   }
 
   public BooleanExpression getHasPermissionQuery(String userId, String perm)
   {
-    QPermission qPermission = QPermission.permission;
     return qPermission.userId.eq(userId).and(qPermission.name.eq(perm));
+  }
+
+  public void deleteByEntity(IEntity entity)
+  {
+    if (entity instanceof Event) {
+      Event event = (Event) entity;
+      for (Task task : event.getTasks()) {
+        repository.deleteEntityPermissions(task.getId().toString(), task.getOwnerId(), task.getEntityName());
+      }
+      for (EventPattern pattern : event.getPatterns()) {
+        repository.deleteEntityPermissions(pattern.getId().toString(), pattern.getOwnerId(), pattern.getEntityName());
+      }
+    }
+    repository.deleteEntityPermissions(entity.getId().toString(), entity.getOwnerId(), entity.getEntityName());
   }
 }

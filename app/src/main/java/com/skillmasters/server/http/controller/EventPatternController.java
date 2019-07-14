@@ -111,6 +111,7 @@ public class EventPatternController
   @ApiOperation(value = "Create pattern", response = EventPatternResponse.class)
   @PostMapping("/patterns")
   public EventPatternResponse create(
+    @ApiParam(value = "Event's id")
     @RequestParam(value="event_id", required=true) Long eventId,
     @RequestBody @Validated EventPattern pattern,
     BindingResult binding
