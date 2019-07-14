@@ -17,10 +17,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.xml.crypto.Data;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
-import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -42,6 +40,30 @@ public class PermissionServiceTests extends ServiceTests
 
   @Autowired
   protected TaskService taskService;
+
+  @Test
+  public void testCRUD()
+  {
+    assertThat(countRowsInTable(permissionsTablename)).isEqualTo(0);
+    Permission perm = new Permission();
+    perm = permissionService.save(perm);
+    perm.setOwnerId(testUser.getId());
+
+    permissionService.getRepository().flush();
+    assertThat(countRowsInTable(permissionsTablename)).isEqualTo(1);
+    Map<String, Object> updates= new HashMap<>();
+    updates.put("name","new name");
+
+    perm = permissionService.update(perm, updates);
+    permissionService.getRepository().flush();
+    assertThat(countRowsInTable(permissionsTablename)).isEqualTo(1);
+
+    assertThat(permissionService.getById(perm.getId()).getName()).isEqualTo("new name");
+
+    permissionService.delete(perm);
+    permissionService.getRepository().flush();
+    assertThat(countRowsInTable(permissionsTablename)).isEqualTo(0);
+  }
 
   @Test
   public void testPermissions() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException
@@ -73,6 +95,8 @@ public class PermissionServiceTests extends ServiceTests
       }
 
     }
+
+    authOwningUser();
   }
 
   private void usersCheckPermission(PermissionRequest.ActionType grantedAction, IEntity entity)

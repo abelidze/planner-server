@@ -45,6 +45,8 @@ class ServiceTests {
 
   protected static String taskTablename = "tasks";
 
+  protected static String permissionsTablename = "permissions";
+
   protected  QEvent qEvent = QEvent.event;
 
   protected QEventPattern qEventPattern = QEventPattern.eventPattern;
