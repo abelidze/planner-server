@@ -19,13 +19,13 @@ import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
-@AutoConfigureMockMvc
+//@AutoConfigureMockMvc
 class ServiceTests {
   @PersistenceContext
   EntityManager entityManager;
 
-  @Autowired
-  protected MockMvc mockMvc;
+//  @Autowired
+//  protected MockMvc mockMvc;
 
   @Autowired
   protected JdbcTemplate jdbcTemplate;
@@ -63,6 +63,21 @@ class ServiceTests {
     Authentication auth = manager.authenticate(new SimpleAuthenticationToken(token));
     SecurityContextHolder.getContext().setAuthentication(auth);
     testUser = (User) auth.getPrincipal();
+  }
+
+  protected void authOwningUser()
+  {
+    authUser("tester");
+  }
+
+  protected void authGrantedUser()
+  {
+    authUser("tester1");
+  }
+
+  protected void authNotGrantedUser()
+  {
+    authUser("tester2");
   }
 
   protected int countRowsInTable(String tableName) {

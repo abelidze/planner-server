@@ -212,21 +212,6 @@ public class PermissionServiceTests extends ServiceTests
     return savedEntity;
   }
 
-  private void authOwningUser()
-  {
-    authUser("tester");
-  }
-
-  private void authGrantedUser()
-  {
-    authUser("tester1");
-  }
-
-  private void authNotGrantedUser()
-  {
-    authUser("tester2");
-  }
-
   private void flushAll()
   {
     eventService.getRepository().flush();

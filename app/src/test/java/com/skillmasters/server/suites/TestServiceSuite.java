@@ -10,7 +10,8 @@ import org.junit.runners.Suite;
   EventServiceTests.class,
   EventPatternServiceTests.class,
   TaskServiceTests.class,
-  PermissionServiceTests.class})
+  PermissionServiceTests.class,
+  ShareServiceTests.class})
 public class TestServiceSuite
 {
 }
