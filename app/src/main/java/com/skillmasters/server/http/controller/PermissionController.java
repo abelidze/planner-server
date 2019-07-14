@@ -109,18 +109,25 @@ public class PermissionController
     permissionService.grantPermission(userId, action.name(), retriveEntity(entityId, entityType));
   }
 
-  @ApiOperation(value = "Get all granted permission for your resources")
+  @ApiOperation(value = "Get granted permission for resources")
   @GetMapping("/permissions")
   public PermissionResponse retrieve(
     @AuthenticationPrincipal User user,
     @ApiParam(value = "Get only entities of specified type")
     @RequestParam(value="entity_type", required=false) PermissionRequest.EntityType entityType,
+    @ApiParam(value = "Retrieve permissions for your resources")
+    @RequestParam(value="mine", defaultValue="true") boolean mine,
     @ApiParam(value = "Pagination offset")
     @RequestParam(value="offset", defaultValue="0") long offset,
     @ApiParam(value = "Count of permissions to retrieve")
     @RequestParam(value="count", defaultValue="100") int count
   ) {
-    BooleanExpression query = QPermission.permission.ownerId.eq(user.getId());
+    BooleanExpression query = null;
+    if (mine) {
+      query = QPermission.permission.ownerId.eq(user.getId());
+    } else {
+      query = QPermission.permission.userId.eq(user.getId());
+    }
 
     if (entityType != null) {
       query = QPermission.permission.name.like("%" + entityType.name()).and(query);
@@ -128,7 +135,6 @@ public class PermissionController
 
     return new PermissionResponse().success( permissionService.getByQuery(query, new OffsetPageRequest(offset, count)) );
   }
-
 
   @ApiOperation(value = "Revoke specified permission")
   @DeleteMapping("/permissions/{id}")
