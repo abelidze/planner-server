@@ -3,6 +3,7 @@ package com.skillmasters.server.model;
 import java.util.Collection;
 
 import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -13,14 +14,15 @@ public class User implements UserDetails
 {
   private static final long serialVersionUID = 1L;
 
-  private final PermissionService permissionService;
+  private String id = null;
+  private String username = null;
+  private String photo = null;
   private final boolean enabled = true;
   private final boolean credentialsNonExpired = true;
   private final boolean accountNonLocked = true;
   private final boolean accountNonExpired = true;
-  private final String password = null;
-  private String username = null;
-  private String id = null;
+  @JsonIgnore private final String password = null;
+  @JsonIgnore private final PermissionService permissionService;
 
   public User()
   {
@@ -35,6 +37,7 @@ public class User implements UserDetails
   }
 
   @Override
+  @JsonIgnore
   public Collection<? extends GrantedAuthority> getAuthorities()
   {
     // TODO Auto-generated method stub

@@ -63,7 +63,7 @@ public class FirebaseAuthenticationProvider extends AbstractUserDetailsAuthentic
     ApiFuture<FirebaseToken> task = firebaseAuth.verifyIdTokenAsync(authenticationToken.getToken());
     try {
       FirebaseToken token = task.get();
-      return new User(token.getEmail(), token.getUid(), permissionService);
+      return new User(token.getName(), token.getUid(), permissionService);
     } catch (InterruptedException | ExecutionException e) {
       throw new SessionAuthenticationException(e.getMessage());
     }

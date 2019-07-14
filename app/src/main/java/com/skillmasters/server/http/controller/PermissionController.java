@@ -3,7 +3,12 @@ package com.skillmasters.server.http.controller;
 import java.util.List;
 import java.util.ArrayList;
 import javax.validation.constraints.NotNull;
+
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.google.api.client.util.Strings;
+import com.google.firebase.auth.UserRecord;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -25,19 +30,49 @@ import com.skillmasters.server.model.*;
 public class PermissionController
 {
   @Autowired
-  EventService eventService;
+  private EventService eventService;
 
   @Autowired
-  EventPatternService patternService;
+  private EventPatternService patternService;
 
   @Autowired
-  TaskService taskService;
+  private TaskService taskService;
 
   @Autowired
-  ShareService shareService;
+  private ShareService shareService;
 
   @Autowired
-  PermissionService permissionService;
+  private PermissionService permissionService;
+
+  @Autowired
+  private FirebaseAuth firebaseAuth;
+
+  @ApiOperation(value = "Find user", response = User.class)
+  @GetMapping("/user")
+  public User findUser(
+    @ApiParam(value = "User's id", required=false)
+    @RequestParam(value="user_id", required=false) String userId,
+    @ApiParam(value = "Phone", required=false)
+    @RequestParam(value="phone", required=false) String phone,
+    @ApiParam(value = "Email", required=false)
+    @RequestParam(value="email", required=false) String email
+  ) throws FirebaseAuthException 
+  {
+    UserRecord u = null;
+    if (!Strings.isNullOrEmpty(userId)) {
+      u = firebaseAuth.getUser(userId);
+    } else if (!Strings.isNullOrEmpty(phone)) {
+      u = firebaseAuth.getUserByPhoneNumber(phone);
+    } else if (!Strings.isNullOrEmpty(email)) {
+      u = firebaseAuth.getUserByEmail(email);
+    } else {
+      throw new ResourceNotFoundException();
+    }
+
+    User user = new User(u.getDisplayName(), u.getUid(), permissionService);
+    user.setPhoto(u.getPhotoUrl());
+    return user;
+  }
 
   @ApiOperation(value = "Generate a link for sharing permission on specific entity", produces="text/plain")
   @GetMapping("/share")
