@@ -89,6 +89,7 @@ public class TaskController
     BooleanExpression hasPermission = permissionService.getHasPermissionQuery(userId, "READ_TASK")
         .or(permissionService.getHasPermissionQuery(userId, "READ_EVENT"));
     query.leftJoin(qPermission).on(hasPermission);
+    query.groupBy(qTask.id);
 
     if (id.size() > 0) {
       where = qTask.id.in(id).and(where);

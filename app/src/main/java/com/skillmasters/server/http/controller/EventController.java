@@ -284,6 +284,7 @@ public class EventController
           .or(qEvent.ownerId.eq(qPermission.entityId))
           .and(where);
     }
+    query.groupBy(qEvent.id);
 
     if (createdFrom != null) {
       where = qEvent.createdAt.goe(new Date(createdFrom)).and(where);

@@ -203,6 +203,7 @@ public class EventPatternController
     BooleanExpression hasPermission = permissionService.getHasPermissionQuery(userId, "READ_PATTERN")
         .or(permissionService.getHasPermissionQuery(userId, "READ_EVENT"));
     query.leftJoin(qPermission).on(hasPermission);
+    query.groupBy(qPattern.id);
 
     if (id.size() > 0) {
       where = qPattern.id.in(id).and(where);

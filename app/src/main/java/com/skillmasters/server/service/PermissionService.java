@@ -28,11 +28,18 @@ public class PermissionService extends EntityService<PermissionRepository, Permi
 
   public void grantPermission(String userId, String action, IEntity entity)
   {
+    Permission permission = generatePermission(userId, action, entity);
+    if (repository.exists(existsExpression(permission))) {
+      return;
+    }
     repository.save( generatePermission(userId, action, entity) );
   }
 
   public void grantPermission(Permission permission)
   {
+    if (repository.exists(existsExpression(permission))) {
+      return;
+    }
     repository.save(permission);
   }
 
@@ -62,5 +69,12 @@ public class PermissionService extends EntityService<PermissionRepository, Permi
       }
     }
     repository.deleteEntityPermissions(entity.getId().toString(), entity.getOwnerId(), entity.getEntityName());
+  }
+
+  private BooleanExpression existsExpression(Permission perm)
+  {
+    return qPermission.entityId.eq(perm.getEntityId())
+        .and(qPermission.userId.eq(perm.getUserId()))
+        .and(qPermission.name.eq(perm.getName()));
   }
 }

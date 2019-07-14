@@ -123,7 +123,7 @@ public class PermissionController
     @RequestParam(value="count", defaultValue="100") int count
   ) {
     BooleanExpression query = null;
-    if (mine) {
+    if (mine == true) {
       query = QPermission.permission.ownerId.eq(user.getId());
     } else {
       query = QPermission.permission.userId.eq(user.getId());
