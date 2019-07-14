@@ -61,11 +61,15 @@ public class PermissionService extends EntityService<PermissionRepository, Permi
   {
     if (entity instanceof Event) {
       Event event = (Event) entity;
-      for (Task task : event.getTasks()) {
-        repository.deleteEntityPermissions(task.getId().toString(), task.getOwnerId(), task.getEntityName());
+      if (event.getTasks() != null) {
+        for (Task task : event.getTasks()) {
+          repository.deleteEntityPermissions(task.getId().toString(), task.getOwnerId(), task.getEntityName());
+        }
       }
-      for (EventPattern pattern : event.getPatterns()) {
-        repository.deleteEntityPermissions(pattern.getId().toString(), pattern.getOwnerId(), pattern.getEntityName());
+      if (event.getPatterns() != null) {
+        for (EventPattern pattern : event.getPatterns()) {
+          repository.deleteEntityPermissions(pattern.getId().toString(), pattern.getOwnerId(), pattern.getEntityName());
+        }
       }
     }
     repository.deleteEntityPermissions(entity.getId().toString(), entity.getOwnerId(), entity.getEntityName());
