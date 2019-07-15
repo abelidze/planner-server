@@ -81,6 +81,7 @@ dependencies {
 
 test {
     include "com/skillmasters/server/suites/TestServiceSuite.class"
+    include "com/skillmasters/server/suites/TestGettersSettersSuite.class"
 //    failFast = true
 }
 
