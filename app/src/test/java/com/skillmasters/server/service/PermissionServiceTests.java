@@ -122,6 +122,36 @@ public class PermissionServiceTests extends ServiceTests
     }
   }
 
+  // test for bug#3
+  // https://github.com/abelidze/planner-server/issues/3
+  @Test
+  public void testDuplicateSharedEntities() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException
+  {
+    authGrantedUser();
+    String grantedUserId = testUser.getId();
+
+    List<Class<? extends IEntity>> entities = getShareableEntities();
+
+    for (Class<? extends IEntity> entityClass : entities) {
+      for (PermissionRequest.ActionType action : PermissionRequest.ActionType.values()) {
+        IEntity entity = entityClass.getDeclaredConstructor().newInstance();
+        entity = saveEntity(entity);
+
+        authOwningUser();
+        assertThat(countRowsInTable(permissionsTablename)).isEqualTo(0);
+        for (int i = 0; i < 20; i ++) {
+          permissionService.grantPermission(grantedUserId, action.name(), entity);
+        }
+        flushAll();
+        assertThat(countRowsInTable(permissionsTablename)).isEqualTo(1);
+
+        deleteEntity(entity);
+        assertThat(countRowsInTable(permissionsTablename)).isEqualTo(0);
+      }
+    }
+  }
+
+
   private void usersCheckPermission(PermissionRequest.ActionType grantedAction, IEntity entity)
   {
     // check that granted user can use permission
