@@ -29,39 +29,8 @@ public class CascadeOperationsTests extends ServiceTests
 
   @Autowired
   private EventPatternService eventPatternService;
-  //bug
-  @Test
-  public void testRemoveTasksOnRemoveEvent()
-  {
-    List<Task> tasks = new ArrayList<>();
-    for (int i = 0; i < 10; i++) {
-      Task task = taskService.save(new Task());
-      tasks.add(task);
-    }
 
-    Event event = EventGenerator.genEventWithOwner(220, testUser.getId());
-    event.setTasks(tasks);
-    eventService.save(event);
-    flushAll();
-
-    assertThat(countRowsInTable(eventsTablename)).isEqualTo(1);
-    assertThat(countRowsInTable(taskTablename)).isEqualTo(10);
-
-    int leftCounter = tasks.size();
-    for (Task task : taskService.getByQuery(qTask.isNotNull())) {
-      taskService.delete(task);
-      flushAll();
-      assertThat(countRowsInTable(taskTablename)).isEqualTo(--leftCounter);
-      if (leftCounter != 0) {
-        assertThat(countRowsInTable(eventsTablename)).isEqualTo(1);
-      }
-      else {
-        assertThat(countRowsInTable(eventsTablename)).isEqualTo(0);
-      }
-    }
-  }
-
-  //unfixed bug
+  //todo: unfixed bug
   @Test
   public void testGetTaskOwnerIdFromEvent()
   {
@@ -77,7 +46,7 @@ public class CascadeOperationsTests extends ServiceTests
     assertThat(taskFromDb.getEvent()).isNotNull();
   }
 
-  //unfixed bug
+  //todo: unfixed bug
   @Test
   public void testGetEventFromTask()
   {
