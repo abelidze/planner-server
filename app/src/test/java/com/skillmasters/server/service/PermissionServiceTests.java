@@ -1,19 +1,13 @@
 package com.skillmasters.server.service;
 
 import com.skillmasters.server.common.EventGenerator;
-import com.skillmasters.server.http.middleware.security.SimpleAuthenticationToken;
 import com.skillmasters.server.http.request.PermissionRequest;
-import com.skillmasters.server.misc.ResourceNotFoundException;
 import com.skillmasters.server.model.*;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -95,6 +89,52 @@ public class PermissionServiceTests extends ServiceTests
     authOwningUser();
   }
 
+  @Test
+  public void testGrantPermissionsForAllEntities() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException
+  {
+    authOwningUser();
+    String owningUserId = testUser.getId();
+
+    authGrantedUser();
+    String grantedUserId = testUser.getId();
+
+    authNotGrantedUser();
+    String notGrantedUserId = testUser.getId();
+
+    List<Class<? extends IEntity>> entityClasses = getShareableEntities();
+
+    for (Class<? extends IEntity> entityClass : entityClasses) {
+      List<IEntity> entities = new ArrayList<>(10);
+      for (int i = 0; i < 10; i++) {
+        entities.add(saveEntity(entityClass.getDeclaredConstructor().newInstance()));
+      }
+
+      for (PermissionRequest.ActionType action : PermissionRequest.ActionType.values()) {
+        authOwningUser();
+
+        PermissionRequest.EntityType entityType = null;
+        switch (entities.get(0).getEntityName()) {
+          case "EVENT":
+            entityType = PermissionRequest.EntityType.EVENT;
+            break;
+          case "PATTERN":
+            entityType = PermissionRequest.EntityType.PATTERN;
+            break;
+          case "TASK":
+            entityType = PermissionRequest.EntityType.TASK;
+            break;
+        }
+
+        assert entityType != null;
+        permissionService.grantPermission(grantedUserId, action.name(), entityType.name());
+        for (IEntity entity : entities) {
+          usersCheckPermission(action, entity);
+        }
+      }
+    }
+    authOwningUser();
+  }
+
   // test for bug#2
   // https://github.com/abelidze/planner-server/issues/2
   @Test
@@ -150,7 +190,6 @@ public class PermissionServiceTests extends ServiceTests
       }
     }
   }
-
 
   private void usersCheckPermission(PermissionRequest.ActionType grantedAction, IEntity entity)
   {
@@ -302,5 +341,4 @@ public class PermissionServiceTests extends ServiceTests
     taskService.getRepository().flush();
 
   }
-
 }
