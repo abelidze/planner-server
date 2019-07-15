@@ -10,7 +10,8 @@ import org.junit.runners.Suite;
   EventPatternTests.class,
   PermissionTests.class,
   TaskTests.class,
-  UserTests.class})
+  UserTests.class,
+  EventPatternExruleTests.class})
 public class TestGettersSettersSuite
 {
 }
