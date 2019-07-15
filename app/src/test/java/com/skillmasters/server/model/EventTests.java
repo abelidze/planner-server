@@ -60,4 +60,5 @@ public class EventTests extends ModelTests
     assertThat(e.getPatterns().get(0)).isEqualTo(ep1);
     assertThat(e.getPatterns().get(1)).isEqualTo(ep2);
   }
+
 }
