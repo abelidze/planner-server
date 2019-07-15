@@ -2,6 +2,7 @@ package com.skillmasters.server.model;
 
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.Date;
@@ -57,13 +58,13 @@ public class Event implements IEntity
   //todo: fix? for some reasons cascade delete doesn't work during tests.
   @OnDelete(action = OnDeleteAction.CASCADE)
   @JsonIgnore
-  private List<EventPattern> patterns;
+  private List<EventPattern> patterns = new ArrayList<>();
 
   @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
   //todo: fix? for some reasons cascade delete doesn't work during tests.
   @OnDelete(action = OnDeleteAction.CASCADE)
   @JsonIgnore
-  private List<Task> tasks;
+  private List<Task> tasks = new ArrayList<>();
 
   public Event()
   {

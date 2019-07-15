@@ -64,36 +64,44 @@ public class EventServiceTests extends ServiceTests
     String newLocation = "new location";
 
     List<EventPattern> newEpList = new ArrayList<>();
+    List<Task> newTaskList = new ArrayList<>();
+
     for (int i = 0; i < 10; i++) {
-      newEpList.add(epg.genEventPattern());
+      EventPattern ep = epg.genEventPattern();
+      ep.setEvent(event);
+      ep = eventPatternService.save(ep);
+      newEpList.add(ep);
+
+      Task t = new Task();
+      t.setEvent(event);
+      t = taskService.save(t);
+      newTaskList.add(t);
     }
     updates.put("patterns", newEpList);
-//    updates.put("tasks", Arrays.asList(t));
+    updates.put("tasks", newTaskList);
 
     updates.put("details", newDetails);
     updates.put("name", newName);
     updates.put("location", newLocation);
 
-
     Event newEvent = eventService.update(event, updates);
-    eventService.getRepository().flush();
+
+    flushAll();
 
     assertThat(countRowsInTable(eventsTablename)).isEqualTo(10);
 
     for (Event e : eventService.getByQuery(qEvent.isNotNull())) {
       if (e.getId().equals(id)) {
         assertThat(e).isEqualTo(newEvent);
-        //todo: fix this please. I beg.
+        //todo: fix bug?
         assertThat(e.getPatterns()).isNotNull();
-//        assertThat(e.getDetails()).isEqualTo(newDetails);
-//        assertThat(e.getName()).isEqualTo(newName);
-//        assertThat(e.getLocation()).isEqualTo(newLocation);
+        assertThat(e.getPatterns().size()).isEqualTo(10);
+        assertThat(e.getTasks()).isNotNull();
+        assertThat(e.getTasks().size()).isEqualTo(10);
+        
         continue;
       }
       assertThat(e).isNotEqualTo(newEvent);
-//      assertThat(e.getDetails()).isNotEqualTo(newDetails);
-//      assertThat(e.getName()).isNotEqualTo(newName);
-//      assertThat(e.getLocation()).isNotEqualTo(newLocation);
     }
   }
 
