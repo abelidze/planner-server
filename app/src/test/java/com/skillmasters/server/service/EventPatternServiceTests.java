@@ -25,12 +25,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Transactional
 public class EventPatternServiceTests extends ServiceTests
 {
-  @Autowired
-  protected EventPatternService eventPatternService;
-
-  @Autowired
-  protected EventService eventService;
-
   private ArrayList<EventPattern> populate()
   {
     ArrayList<EventPattern> eventPatterns = new ArrayList<>(10);

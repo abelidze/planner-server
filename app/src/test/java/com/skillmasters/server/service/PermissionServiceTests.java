@@ -103,6 +103,7 @@ public class PermissionServiceTests extends ServiceTests
 
     List<Class<? extends IEntity>> entityClasses = getShareableEntities();
 
+    int permCounter = 0;
     for (Class<? extends IEntity> entityClass : entityClasses) {
       List<IEntity> entities = new ArrayList<>(10);
       for (int i = 0; i < 10; i++) {
@@ -126,7 +127,13 @@ public class PermissionServiceTests extends ServiceTests
         }
 
         assert entityType != null;
-        permissionService.grantPermission(grantedUserId, action.name(), entityType.name());
+        //also check duplicates
+        permCounter++;
+        for (int i = 0; i < 5; i++) {
+          permissionService.grantPermission(grantedUserId, action.name(), entityType.name());
+        }
+        assertThat(countRowsInTable(permissionsTablename)).isEqualTo(permCounter);
+
         for (IEntity entity : entities) {
           usersCheckPermission(action, entity);
         }
@@ -284,11 +291,9 @@ public class PermissionServiceTests extends ServiceTests
         break;
 
       case "PATTERN":
-        EventPattern eventPattern = (EventPattern) entity;
+//        EventPattern eventPattern = (EventPattern) entity;
+        EventPattern eventPattern = epg.genEventPattern();
         eventPattern.setEvent(event);
-        Date curDate = new Date();
-        eventPattern.setStartedAt(curDate);
-        eventPattern.setEndedAt(new Date(curDate.getTime() + 1000));
         savedEntity = eventPatternService.save(eventPattern);
         break;
 
@@ -332,13 +337,5 @@ public class PermissionServiceTests extends ServiceTests
     entities.add(EventPattern.class);
     entities.add(Task.class);
     return entities;
-  }
-
-  private void flushAll()
-  {
-    eventService.getRepository().flush();
-    eventPatternService.getRepository().flush();
-    taskService.getRepository().flush();
-
   }
 }

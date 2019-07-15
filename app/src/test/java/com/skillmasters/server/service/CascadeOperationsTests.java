@@ -21,15 +21,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Transactional
 public class CascadeOperationsTests extends ServiceTests
 {
-  @Autowired
-  private EventService eventService;
-
-  @Autowired
-  private TaskService taskService;
-
-  @Autowired
-  private EventPatternService eventPatternService;
-
   //todo: unfixed bug
   @Test
   public void testGetTaskOwnerIdFromEvent()
@@ -62,13 +53,4 @@ public class CascadeOperationsTests extends ServiceTests
     assertThat(event.getTasks()).isNotNull();
     assertThat(event.getTasks().size()).isEqualTo(1);
   }
-
-  private void flushAll()
-  {
-    eventService.getRepository().flush();
-    eventPatternService.getRepository().flush();
-    taskService.getRepository().flush();
-
-  }
-
 }
