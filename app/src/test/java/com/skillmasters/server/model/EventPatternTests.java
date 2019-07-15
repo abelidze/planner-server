@@ -5,6 +5,9 @@ import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
@@ -32,7 +35,15 @@ public class EventPatternTests extends ModelTests
     ep.setRrule(testString);
     assertThat(ep.getRrule()).isEqualTo(testString);
 
-    //todo: exrules
+    EventPatternExrule epe1 = new EventPatternExrule();
+    EventPatternExrule epe2 = new EventPatternExrule();
+    List<EventPatternExrule> eventPatternExruleList = new ArrayList<>();
+    eventPatternExruleList.add(epe1);
+    eventPatternExruleList.add(epe2);
+
+    ep.setExrules(eventPatternExruleList);
+    assertThat(ep.getExrules().get(0)).isEqualTo(epe1);
+    assertThat(ep.getExrules().get(1)).isEqualTo(epe2);
 
     ep.setStartedAt(testDateStart);
     assertThat(ep.getStartedAt()).isEqualTo(testDateStart);
