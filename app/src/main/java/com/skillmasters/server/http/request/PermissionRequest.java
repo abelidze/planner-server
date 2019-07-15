@@ -21,7 +21,6 @@ public class PermissionRequest
     TASK,
   }
 
-  @NotNull
   @ApiModelProperty(example = "0")
   private Long entityId;
 

@@ -26,21 +26,41 @@ public class PermissionService extends EntityService<PermissionRepository, Permi
     return permission;
   }
 
-  public void grantPermission(String userId, String action, IEntity entity)
+  public Permission generatePermission(String userId, String action, String entity)
+  {
+    String ownerId = getCurrentUser().getId();
+    Permission permission = new Permission();
+    permission.setName(action + "_" + entity);
+    permission.setUserId(userId);
+    permission.setOwnerId(ownerId);
+    permission.setEntityId(ownerId);
+    return permission;
+  }
+
+  public Permission grantPermission(String userId, String action, String entity)
   {
     Permission permission = generatePermission(userId, action, entity);
     if (repository.exists(existsExpression(permission))) {
-      return;
+      return null;
     }
-    repository.save( generatePermission(userId, action, entity) );
+    return repository.save(permission);
   }
 
-  public void grantPermission(Permission permission)
+  public Permission grantPermission(String userId, String action, IEntity entity)
+  {
+    Permission permission = generatePermission(userId, action, entity);
+    if (repository.exists(existsExpression(permission))) {
+      return null;
+    }
+    return repository.save(permission);
+  }
+
+  public Permission grantPermission(Permission permission)
   {
     if (repository.exists(existsExpression(permission))) {
-      return;
+      return null;
     }
-    repository.save(permission);
+    return repository.save(permission);
   }
 
   public boolean hasPermission(User user, String action, IEntity entity)

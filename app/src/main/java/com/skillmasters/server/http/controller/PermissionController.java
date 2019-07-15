@@ -77,19 +77,24 @@ public class PermissionController
   @ApiOperation(value = "Generate a link for sharing permission on specific entity", produces="text/plain")
   @GetMapping("/share")
   public String share(
-    @ApiParam(value = "Allowed entity's id", required=true)
-    @RequestParam(value="entity_id", required=true) Long entityId,
+    @ApiParam(value = "Allowed entity's id. Share all entities of requested type if not set", required=false)
+    @RequestParam(value="entity_id", required=false) Long entityId,
     @ApiParam(value = "Allowed entity: EVENT, PATTERN, TASK", required=true)
     @RequestParam(value="entity_type", required=true) PermissionRequest.EntityType entityType,
     @ApiParam(value = "Allowed action: READ, UPDATE, DELETE", required=true)
     @RequestParam(value="action", required=true) PermissionRequest.ActionType action
   ) {
-    if (entityId == null || entityType == null || action == null) {
+    if (entityType == null || action == null) {
       throw new IllegalArgumentException("Invalid request parameters");
     }
 
     // Generate permission object and store it
-    Permission perm = permissionService.generatePermission(null, action.name(), retriveEntity(entityId, entityType));
+    Permission perm = null;
+    if (entityId == null) {
+      perm = permissionService.generatePermission(null, action.name(), entityType.name());
+    } else {
+      perm = permissionService.generatePermission(null, action.name(), retriveEntity(entityId, entityType));
+    }
     String token = shareService.cachePermission(perm);
     return ServletUriComponentsBuilder.fromCurrentRequestUri().pathSegment(token).toUriString();
   }
@@ -105,8 +110,12 @@ public class PermissionController
     // Generate permission objects and store them
     List<Permission> list = new ArrayList();
     for (PermissionRequest r : permissions) {
-      IEntity entity = retriveEntity(r.getEntityId(), r.getEntityType());
-      list.add( permissionService.generatePermission(null, r.getAction().name(), entity) );
+      if (r.getEntityId() == null) {
+        list.add( permissionService.generatePermission(null, r.getAction().name(), r.getEntityType().name()) );
+      } else {
+        IEntity entity = retriveEntity(r.getEntityId(), r.getEntityType());
+        list.add( permissionService.generatePermission(null, r.getAction().name(), entity) );
+      }
     }
     String token = shareService.cachePermissionList(list);
     return ServletUriComponentsBuilder.fromCurrentRequestUri().pathSegment(token).toUriString();
@@ -114,7 +123,7 @@ public class PermissionController
 
   @ApiOperation(value = "Activate generated share-link")
   @GetMapping("/share/{token}")
-  public void share(@AuthenticationPrincipal User user, @PathVariable String token)
+  public PermissionResponse share(@AuthenticationPrincipal User user, @PathVariable String token)
   {
     List<Permission> permissions = shareService.validateToken(token);
     if (permissions == null) {
@@ -124,24 +133,34 @@ public class PermissionController
       perm.setUserId(user.getId());
       permissionService.grantPermission(perm);
     }
+    return new PermissionResponse().success(permissions);
   }
 
   @ApiOperation(value = "Grant permission to user for specific entity")
   @GetMapping("/grant")
-  public void grant(
+  public PermissionResponse grant(
     @ApiParam(value = "Unique user's id", required=true)
     @RequestParam(value="user_id", required=true) String userId,
-    @ApiParam(value = "Allowed entity's id", required=true)
-    @RequestParam(value="entity_id", required=true) Long entityId,
+    @ApiParam(value = "Allowed entity's id. Grant all entities of requested type if not set", required=false)
+    @RequestParam(value="entity_id", required=false) Long entityId,
     @ApiParam(value = "Allowed entity: EVENT, PATTERN, TASK", required=true)
     @RequestParam(value="entity_type", required=true) PermissionRequest.EntityType entityType,
     @ApiParam(value = "Allowed action: READ, UPDATE, DELETE", required=true)
     @RequestParam(value="action", required=true) PermissionRequest.ActionType action
   ) {
-    if (userId == null || entityId == null || entityType == null || action == null) {
-      throw new IllegalArgumentException("Invalid request parameters");
+    if (userId == null || entityType == null || action == null) {
+      return new PermissionResponse().error(400, "Invalid request parameters");
     }
-    permissionService.grantPermission(userId, action.name(), retriveEntity(entityId, entityType));
+    Permission perm = null;
+    if (entityId == null) {
+      perm = permissionService.grantPermission(userId, action.name(), entityType.name());
+    } else {
+      perm = permissionService.grantPermission(userId, action.name(), retriveEntity(entityId, entityType));
+    }
+    if (perm == null) {
+      return new PermissionResponse().error(204, "Permission already exists");
+    }
+    return new PermissionResponse().success(perm);
   }
 
   @ApiOperation(value = "Get granted permission for resources")
