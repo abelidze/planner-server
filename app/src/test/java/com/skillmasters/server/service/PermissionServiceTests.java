@@ -77,11 +77,7 @@ public class PermissionServiceTests extends ServiceTests
     authNotGrantedUser();
     String notGrantedUserId = testUser.getId();
 
-
-    List<Class<? extends IEntity>> entities = new ArrayList<>();
-    entities.add(Event.class);
-    entities.add(EventPattern.class);
-    entities.add(Task.class);
+    List<Class<? extends IEntity>> entities = getShareableEntities();
 
     for (Class<? extends IEntity> entityClass : entities) {
       IEntity entity = entityClass.getDeclaredConstructor().newInstance();
@@ -97,6 +93,33 @@ public class PermissionServiceTests extends ServiceTests
     }
 
     authOwningUser();
+  }
+
+  // test for bug#2
+  // https://github.com/abelidze/planner-server/issues/2
+  @Test
+  public void testRemoveDanglingEntities() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException
+  {
+    authGrantedUser();
+    String grantedUserId = testUser.getId();
+
+    List<Class<? extends IEntity>> entities = getShareableEntities();
+
+    for (Class<? extends IEntity> entityClass : entities) {
+      for (PermissionRequest.ActionType action : PermissionRequest.ActionType.values()) {
+        IEntity entity = entityClass.getDeclaredConstructor().newInstance();
+        entity = saveEntity(entity);
+
+        authOwningUser();
+        assertThat(countRowsInTable(permissionsTablename)).isEqualTo(0);
+        permissionService.grantPermission(grantedUserId, action.name(), entity);
+        flushAll();
+        assertThat(countRowsInTable(permissionsTablename)).isEqualTo(1);
+
+        deleteEntity(entity);
+        assertThat(countRowsInTable(permissionsTablename)).isEqualTo(0);
+      }
+    }
   }
 
   private void usersCheckPermission(PermissionRequest.ActionType grantedAction, IEntity entity)
@@ -212,6 +235,36 @@ public class PermissionServiceTests extends ServiceTests
     return savedEntity;
   }
 
+  private void deleteEntity(IEntity entity)
+  {
+    authOwningUser();
+
+    switch (entity.getEntityName()) {
+      case "EVENT":
+        eventService.delete((Event) entity);
+        break;
+
+      case "PATTERN":
+        eventPatternService.delete((EventPattern) entity);
+        break;
+
+      case "TASK":
+        taskService.delete((Task) entity);
+        break;
+    }
+
+    flushAll();
+  }
+
+  private List<Class<? extends IEntity>> getShareableEntities()
+  {
+    List<Class<? extends IEntity>> entities = new ArrayList<>();
+    entities.add(Event.class);
+    entities.add(EventPattern.class);
+    entities.add(Task.class);
+    return entities;
+  }
+
   private void flushAll()
   {
     eventService.getRepository().flush();
@@ -219,6 +272,5 @@ public class PermissionServiceTests extends ServiceTests
     taskService.getRepository().flush();
 
   }
-
 
 }
