@@ -55,6 +55,7 @@ public class EventPattern implements IEntity
   @ApiModelProperty(example = "FREQ=WEEKLY;INTERVAL=2;BYDAY=TU,TH")
   private String exrule;
 
+  @NotNull(message = "Exrules can't be null")
   @OneToMany(mappedBy = "pattern", cascade = CascadeType.ALL)
   @ApiModelProperty(value = "Array of iCal's EXRULE")
   private List<EventPatternExrule> exrules = new ArrayList<>();
