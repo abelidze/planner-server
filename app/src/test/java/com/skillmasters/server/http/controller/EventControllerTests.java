@@ -1,6 +1,5 @@
 package com.skillmasters.server.http.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.skillmasters.server.common.CreateEventRequestBuilder;
 import com.skillmasters.server.common.ListEventsRequestBuilder;
 import com.skillmasters.server.http.response.EventResponse;
@@ -11,16 +10,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -47,15 +42,23 @@ public class EventControllerTests extends ControllerTests
   @Test
   public void testCreateEvent() throws Exception
   {
-    CreateEventRequestBuilder b = new CreateEventRequestBuilder();
-    b.details("some details").location("FEFU").name("my name").status("retarded");
+    CreateEventRequestBuilder createBuilder = new CreateEventRequestBuilder();
+    createBuilder.details("some details").location("FEFU").name("my name").status("ultra busy");
 
-    EventResponse createResponse = authorizedOkResultResponse(HttpMethod.POST, eventsEndpoint, b, EventResponse.class);
+//    EventResponse createResponse = authorizedOkResultResponse(HttpMethod.POST, eventsEndpoint, createBuilder, EventResponse.class);
+    authorizedOkResultResponse(HttpMethod.POST, eventsEndpoint, createBuilder, EventResponse.class);
 
-    ListEventsRequestBuilder b1 = new ListEventsRequestBuilder();
-    EventResponse response = authorizedOkResultResponse(HttpMethod.GET, eventsEndpoint, b1, EventResponse.class);
+    ListEventsRequestBuilder listBuilder = new ListEventsRequestBuilder();
+    EventResponse response = authorizedOkResultResponse(HttpMethod.GET, eventsEndpoint, listBuilder, EventResponse.class);
     List<Event> events = response.getData();
     assertThat(events.size()).isEqualTo(1);
     assertThat(events.get(0).getDetails()).isEqualTo("some details");
+    assertThat(events.get(0).getLocation()).isEqualTo("FEFU");
+    assertThat(events.get(0).getName()).isEqualTo("my name");
+    assertThat(events.get(0).getStatus()).isEqualTo("ultra busy");
+
+    assertThat(events.get(0).getId()).isNotNull().isInstanceOf(Long.class);
+    assertThat(events.get(0).getOwnerId()).isEqualTo(testerId);
+    assertThat(events.get(0).getCreatedAt()).isCloseTo(new Date(), 10000);
   }
 }

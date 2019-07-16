@@ -37,6 +37,8 @@ public class ControllerTests
 
   protected static String eventsEndpoint = apiPrefix + "/events";
 
+  protected String testerId = "322";
+
   private Gson gson = new Gson();
 
   private MockHttpServletRequestBuilder requestMethod(HttpMethod method, String url)
