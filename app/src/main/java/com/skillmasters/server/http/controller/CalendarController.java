@@ -28,6 +28,7 @@ import biweekly.io.TimezoneInfo;
 import biweekly.io.TimezoneAssignment;
 import biweekly.io.scribe.property.RecurrenceRuleScribe;
 
+import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.multipart.MultipartFile;
@@ -242,7 +243,7 @@ public class CalendarController
           tzInfo.setTimezone(eventCopy.getDateEnd(), tza);
 
           String rrule = pattern.getRrule();
-          if (rrule != null) {
+          if (!Strings.isNullOrEmpty(rrule)) {
             eventCopy.setRecurrenceRule( scribe.parseText(rrule, null, new ICalParameters(), context) );
           }
           ical.addEvent(eventCopy);
