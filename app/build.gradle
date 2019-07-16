@@ -75,9 +75,13 @@ dependencies {
     // runtimeOnly 'org.xerial:sqlite-jdbc:3.28.0'
     runtimeOnly 'com.github.Txture:sqlite-jdbc:10cb68a'
     runtimeOnly 'com.h2database:h2:1.4.199'
-    // runtimeOnly 'org.postgresql:postgresql'
+    runtimeOnly 'org.postgresql:postgresql:42.2.6'
 
 }
+
+// bootRun {
+//   args = ["--spring.profiles.active=prod"]
+// }
 
 test {
     include "com/skillmasters/server/suites/TestServiceSuite.class"
