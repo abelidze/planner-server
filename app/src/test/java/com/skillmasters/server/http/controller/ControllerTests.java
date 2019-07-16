@@ -1,28 +1,25 @@
 package com.skillmasters.server.http.controller;
 
-import ch.qos.logback.core.AppenderBase;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.google.gson.Gson;
 import com.skillmasters.server.common.AppRequestBuilder;
+import com.skillmasters.server.common.CreateEventRequestBuilder;
+import com.skillmasters.server.http.middleware.security.FirebaseAuthenticationTokenFilter;
 import com.skillmasters.server.http.response.EventResponse;
 import com.skillmasters.server.http.response.Response;
-import org.apache.http.protocol.HTTP;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.ResultActions;
-import com.skillmasters.server.http.middleware.security.FirebaseAuthenticationTokenFilter;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.util.MultiValueMap;
 
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -113,4 +110,26 @@ public class ControllerTests
         .readValue(result.getResponse().getContentAsString(), cls);
     return response;
   }
+
+
+  /*
+  SECTION OF INSERT HELPERS
+   */
+  protected EventResponse insertEvent() throws Exception
+  {
+    CreateEventRequestBuilder createBuilder = new CreateEventRequestBuilder();
+    createBuilder.details("details").location("under the bridge").name("chilling").status("mega free");
+    return authorizedOkResultResponse(HttpMethod.POST, eventsEndpoint, createBuilder, EventResponse.class);
+  }
+
+  protected List<EventResponse> insertEvents(int amount) throws Exception
+  {
+    List<EventResponse> eventsList = new ArrayList<EventResponse>(amount);
+    for (int i = 0; i < amount; i++) {
+      eventsList.add(insertEvent());
+    }
+
+    return eventsList;
+  }
+
 }
