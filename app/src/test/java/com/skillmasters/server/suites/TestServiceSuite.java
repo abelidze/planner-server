@@ -11,8 +11,8 @@ import org.junit.runners.Suite;
   EventPatternServiceTests.class,
   TaskServiceTests.class,
   PermissionServiceTests.class,
-  ShareServiceTests.class})
-//  CascadeOperationsTests.class})
+  ShareServiceTests.class,
+  CascadeOperationsTests.class})
 public class TestServiceSuite
 {
 }
