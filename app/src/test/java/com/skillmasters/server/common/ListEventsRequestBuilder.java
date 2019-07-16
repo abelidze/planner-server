@@ -4,46 +4,46 @@ import java.util.List;
 
 ///api/v1/events
 //    Get a list of available events
-public class ListEventsRequestBuilder extends AppRequestBuilder
+public class ListEventsRequestBuilder extends AppRequestBuilder<ListEventsRequestBuilder>
 {
   // setters
-  public void id(List<Long> id)
+  public ListEventsRequestBuilder id(List<Long> id)
   {
-    set("id", id);
+    return set("id", id);
   }
 
-  public void ownerId(String ownerId)
+  public ListEventsRequestBuilder ownerId(String ownerId)
   {
-    set("owner_id", ownerId);
+    return set("owner_id", ownerId);
   }
 
-  public void from(Long from)
+  public ListEventsRequestBuilder from(Long from)
   {
-    set("from", from);
+    return set("from", from);
   }
 
-  public void to(Long to)
+  public ListEventsRequestBuilder to(Long to)
   {
-    set("to", to);
+    return set("to", to);
   }
 
-  public void createdFrom(Long from)
+  public ListEventsRequestBuilder createdFrom(Long from)
   {
-    set("created_from", from);
+    return set("created_from", from);
   }
 
-  public void createdTo(Long to)
+  public ListEventsRequestBuilder createdTo(Long to)
   {
-    set("created_to", to);
+    return set("created_to", to);
   }
 
-  public void updatedFrom(Long from)
+  public ListEventsRequestBuilder updatedFrom(Long from)
   {
-    set("updated_from", from);
+    return set("updated_from", from);
   }
 
-  public void updatedTo(Long to)
+  public ListEventsRequestBuilder updatedTo(Long to)
   {
-    set("updated_to", to);
+    return set("updated_to", to);
   }
 }

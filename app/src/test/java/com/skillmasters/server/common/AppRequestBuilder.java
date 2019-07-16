@@ -5,42 +5,56 @@ import org.springframework.util.MultiValueMap;
 
 import java.util.*;
 
-public class AppRequestBuilder
+public class AppRequestBuilder<T extends AppRequestBuilder>
 {
-  protected MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+  // for post parameters
+  protected Map<String, Object> map = new HashMap<>();
+  // for get parameters
+  protected MultiValueMap<String, String> mvmap = new LinkedMultiValueMap<>();
 
-  public MultiValueMap<String, String> build()
+  public MultiValueMap<String, String> buildGet()
+  {
+    return mvmap;
+  }
+
+  public Map<String, Object> buildPost()
   {
     return map;
   }
 
-  public void offset(Long offset)
+  public T offset(Long offset)
   {
-    set("offset", offset);
+    return set("offset", offset);
   }
 
-  public void count(Long count)
+  public T count(Long count)
   {
-    set("count", count);
+    return set("count", count);
   }
 
-  public void set(String k, Long v)
+  public T set(String k, Long v)
   {
-    map.set(k, v.toString());
+    mvmap.set(k, v.toString());
+    map.put(k, v);
+    return (T) this;
   }
 
-  public void set(String k, String v)
+  public T set(String k, String v)
   {
-    map.set(k, v);
+    mvmap.set(k, v);
+    map.put(k, v);
+    return (T) this;
   }
 
-  public void set(String k, List<Long> v)
+  public T set(String k, List<Long> v)
   {
     List<String> strList = new ArrayList<>();
     for (Long l : v) {
       strList.add(l.toString());
     }
-    map.put(k, strList);
+    mvmap.put(k, strList);
+    map.put(k, v);
+    return (T) this;
   }
 
 }

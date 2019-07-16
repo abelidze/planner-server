@@ -1,11 +1,16 @@
 package com.skillmasters.server.http.controller;
 
+import ch.qos.logback.core.AppenderBase;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.google.gson.Gson;
 import com.skillmasters.server.common.AppRequestBuilder;
 import com.skillmasters.server.http.response.EventResponse;
 import com.skillmasters.server.http.response.Response;
+import org.apache.http.protocol.HTTP;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
@@ -17,8 +22,9 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.util.MultiValueMap;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
@@ -31,15 +37,51 @@ public class ControllerTests
 
   protected static String eventsEndpoint = apiPrefix + "/events";
 
-  private MockHttpServletRequestBuilder getAuthorized(String url)
+  private Gson gson = new Gson();
+
+  private MockHttpServletRequestBuilder requestMethod(HttpMethod method, String url)
   {
-    return get(url).header(FirebaseAuthenticationTokenFilter.TOKEN_HEADER, "tester")
-        .accept(MediaType.APPLICATION_JSON);
+    switch (method) {
+      case GET:
+        return get(url);
+      case POST:
+        return post(url);
+      case PUT:
+        return put(url);
+      case PATCH:
+        return patch(url);
+      case DELETE:
+        return delete(url);
+      case OPTIONS:
+        return options(url);
+      case HEAD:
+        return head(url);
+    }
+    assert false;
+    return null;
   }
 
-  protected MockHttpServletRequestBuilder getAuthorized(String url, MultiValueMap<String, String> params)
+  private MockHttpServletRequestBuilder authorizedRequest(HttpMethod method, String url)
   {
-    return getAuthorized(url).params(params);
+    return requestMethod(method, url)
+        .header(FirebaseAuthenticationTokenFilter.TOKEN_HEADER, "tester")
+        .accept(MediaType.APPLICATION_JSON)
+        .contentType(MediaType.APPLICATION_JSON);
+  }
+
+  private MockHttpServletRequestBuilder setParams(HttpMethod method, MockHttpServletRequestBuilder rb, AppRequestBuilder b)
+  {
+    if (method == HttpMethod.GET) {
+      return rb.params(b.buildGet());
+    }
+
+    return rb.content(gson.toJson(b.buildPost()));
+  }
+
+  protected MockHttpServletRequestBuilder authorizedRequest(HttpMethod method, String url, AppRequestBuilder b)
+  {
+    //
+    return setParams(method, authorizedRequest(method, url), b);
   }
 
   protected ResultActions performReqOk(RequestBuilder req) throws Exception
@@ -47,22 +89,26 @@ public class ControllerTests
     return mockMvc.perform(req).andExpect(status().isOk());
   }
 
-  protected EventResponse parseEventResponse(MockHttpServletResponse resp) throws IOException
-  {
-    return new ObjectMapper().readValue(resp.getContentAsString(), EventResponse.class);
-  }
+//  protected EventResponse parseEventResponse(MockHttpServletResponse resp) throws IOException
+//  {
+//    return new ObjectMapper().readValue(resp.getContentAsString(), EventResponse.class);
+//  }
 
-  protected MvcResult getAuthorizedOkResult(String url, AppRequestBuilder b) throws Exception
+  protected MvcResult authorizedOkResult(HttpMethod method, String url, AppRequestBuilder b) throws Exception
   {
-    MockHttpServletRequestBuilder req = getAuthorized(eventsEndpoint, b.build());
+    MockHttpServletRequestBuilder req = authorizedRequest(method, url, b);
     ResultActions resultActions = performReqOk(req);
     return resultActions.andReturn();
   }
 
-  protected <R extends Response> R getAuthorizedOkResultResponse(String url, AppRequestBuilder b, Class<R> cls) throws Exception
+  protected <R extends Response> R authorizedOkResultResponse(HttpMethod method,
+                                                                 String url,
+                                                                 AppRequestBuilder b, Class<R> cls
+  ) throws Exception
   {
-    MvcResult result = getAuthorizedOkResult(url, b);
-    R response = new ObjectMapper().readValue(result.getResponse().getContentAsString(), cls);
+    MvcResult result = authorizedOkResult(method, url, b);
+    R response = new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
+        .readValue(result.getResponse().getContentAsString(), cls);
     return response;
   }
 }
