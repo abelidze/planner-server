@@ -120,10 +120,12 @@ public class EventPatternController
       return new EventPatternResponse().error(400, binding.getAllErrors().get(0).getDefaultMessage());
     }
 
-    if (pattern.getEndedAt().getTime() == Long.MAX_VALUE && pattern.getRrule() == null) {
-      pattern.setEndedAt(new Date(pattern.getStartedAt().getTime() + pattern.getDuration()));
-    } else if (pattern.getDuration() <= 0) {
-      pattern.setDuration(pattern.getEndedAt().getTime() - pattern.getStartedAt().getTime());
+    if (pattern.getRrule() == null) {
+      if (pattern.getEndedAt().getTime() == Long.MAX_VALUE) {
+        pattern.setEndedAt(new Date(pattern.getStartedAt().getTime() + pattern.getDuration()));
+      } else if (pattern.getDuration() <= 0) {
+        pattern.setDuration(pattern.getEndedAt().getTime() - pattern.getStartedAt().getTime());
+      }
     }
 
     Event entity = eventService.getById(eventId);

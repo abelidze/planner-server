@@ -115,7 +115,7 @@ public class EventController
     for (Event event : events) {
       for (EventPattern pattern : event.getPatterns()) {
         String rruleStr = pattern.getRrule();
-        if (rruleStr == null) {
+        if (Strings.isNullOrEmpty(rruleStr)) {
           response.addInstance(event, pattern);
         } else {
           Date start = pattern.getStartedAt();
