@@ -61,13 +61,26 @@ public class CalendarController
   @Autowired
   ParseContext context;
 
-  @ApiOperation(value = "Import iCal calendar for current user", response = ObjectResponse.class)
-  @PostMapping("/import")
-  public ObjectResponse calendarImport(@AuthenticationPrincipal User user, @RequestParam MultipartFile file) throws IOException
+  @ApiOperation(value = "Import iCal calendar for current user from string", response = ObjectResponse.class)
+  @PostMapping("/import/raw")
+  public ObjectResponse importFromString(@AuthenticationPrincipal User user, @RequestBody String str) throws IOException
   {
-    // Configure ical
-    ICalendar ical = Biweekly.parse(file.getInputStream()).first();
+    ICalendar ical = Biweekly.parse(str).first();
+    calendarImport(user, ical);
+    return new ObjectResponse().success();
+  }
 
+  @ApiOperation(value = "Import iCal calendar for current user from file", response = ObjectResponse.class)
+  @PostMapping("/import")
+  public ObjectResponse importFromFile(@AuthenticationPrincipal User user, @RequestParam MultipartFile file) throws IOException
+  {
+    ICalendar ical = Biweekly.parse(file.getInputStream()).first();
+    calendarImport(user, ical);
+    return new ObjectResponse().success();
+  }
+
+  public void calendarImport(User user, ICalendar ical)
+  {
     // Deal with timezones
     TimezoneInfo tzInfo = ical.getTimezoneInfo();
     WriteContext ctx = new WriteContext(ICalVersion.V2_0, tzInfo, tzInfo.getDefaultTimezone());
@@ -191,8 +204,6 @@ public class CalendarController
 
       taskService.save(task);
     }
-
-    return new ObjectResponse().success();
   }
 
   @ApiOperation(value = "Export current user calendar to iCal / .ics", produces = "text/calendar")

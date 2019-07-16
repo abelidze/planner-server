@@ -67,6 +67,7 @@ public class EntityService<R extends JpaRepository<T, ID> & QuerydslPredicateExe
     return this.updateAndSave( this.getById(id), updates );
   }
 
+  @PreAuthorize("principal.can('UPDATE', #entity)")
   public T updateAndSave(T entity, Map<String, Object> updates)
   {
     return repository.save( this.update(entity, updates) );

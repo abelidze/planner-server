@@ -57,7 +57,8 @@ public class User implements UserDetails
 
   public boolean isOwner(IEntity entity)
   {
-    return entity.getOwnerId().equals( this.getId() );
+    return entity.getOwnerId().equals(id)
+        || (entity instanceof Permission && ((Permission) entity).getUserId().equals(id));
   }
 
 }
