@@ -2,6 +2,7 @@ package com.skillmasters.server.http.controller;
 
 import com.skillmasters.server.common.CreateEventRequestBuilder;
 import com.skillmasters.server.common.ListEventsRequestBuilder;
+import com.skillmasters.server.common.UpdateEventRequestBuilder;
 import com.skillmasters.server.http.response.EventResponse;
 import com.skillmasters.server.model.Event;
 import org.junit.Test;
@@ -114,6 +115,17 @@ public class EventControllerTests extends ControllerTests
     EventResponse response = authorizedOkResultResponse(HttpMethod.GET, eventsEndpoint, b, EventResponse.class);
     assertThat(response.getCount()).isEqualTo(expectedEventsAmount);
     assertThat(response.getData().size()).isEqualTo(expectedEventsAmount);
+  }
+
+  //todo: fix?
+  @Test
+  public void voidTestUpdateEvent() throws Exception
+  {
+    EventResponse er = insertEvent();
+    UpdateEventRequestBuilder b = new UpdateEventRequestBuilder();
+    b.ownerId("HAXED");
+    EventResponse response = authorizedOkResultResponse(HttpMethod.PATCH, eventsEndpoint+"/"+er.getData().get(0).getId(), b, EventResponse.class);
+    assertThat(response.getData().get(0).getOwnerId()).isEqualTo("322");
   }
 }
 
