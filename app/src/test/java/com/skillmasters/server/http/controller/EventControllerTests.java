@@ -103,7 +103,7 @@ public class EventControllerTests extends ControllerTests
     Date end = new Date();
 
     testGetEventsByFromToHelper(0L, start.getTime(), 0);
-    testGetEventsByFromToHelper(end.getTime(), Long.MAX_VALUE, 0);
+    testGetEventsByFromToHelper(end.getTime()+10000, Long.MAX_VALUE, 0);
     testGetEventsByFromToHelper(start.getTime()-10000, end.getTime()+10000, 2);
   }
 
