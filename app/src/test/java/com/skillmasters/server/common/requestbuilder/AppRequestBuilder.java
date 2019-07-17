@@ -1,4 +1,4 @@
-package com.skillmasters.server.common;
+package com.skillmasters.server.common.requestbuilder;
 
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;

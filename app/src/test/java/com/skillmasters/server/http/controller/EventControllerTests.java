@@ -1,8 +1,8 @@
 package com.skillmasters.server.http.controller;
 
-import com.skillmasters.server.common.CreateEventRequestBuilder;
-import com.skillmasters.server.common.ListEventsRequestBuilder;
-import com.skillmasters.server.common.UpdateEventRequestBuilder;
+import com.skillmasters.server.common.requestbuilder.event.CreateEventRequestBuilder;
+import com.skillmasters.server.common.requestbuilder.event.ListEventsRequestBuilder;
+import com.skillmasters.server.common.requestbuilder.event.UpdateEventRequestBuilder;
 import com.skillmasters.server.http.response.EventResponse;
 import com.skillmasters.server.model.Event;
 import org.junit.Test;
@@ -10,7 +10,6 @@ import org.junit.runner.RunWith;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
-import org.springframework.test.annotation.Commit;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -119,13 +118,46 @@ public class EventControllerTests extends ControllerTests
 
   //todo: fix?
   @Test
-  public void voidTestUpdateEvent() throws Exception
+  public void testUpdateEventSetOwnerIdBug() throws Exception
   {
     EventResponse er = insertEvent();
     UpdateEventRequestBuilder b = new UpdateEventRequestBuilder();
     b.ownerId("HAXED");
     EventResponse response = authorizedOkResultResponse(HttpMethod.PATCH, eventsEndpoint+"/"+er.getData().get(0).getId(), b, EventResponse.class);
-    assertThat(response.getData().get(0).getOwnerId()).isEqualTo("322");
+    assertThat(response.getData().get(0).getOwnerId()).isNotEqualTo("HAXED");
+  }
+
+  //todo: fix
+  @Test
+  public void testUpdateEventSetIdBug() throws Exception
+  {
+    EventResponse er = insertEvent();
+    UpdateEventRequestBuilder b = new UpdateEventRequestBuilder();
+    b.id(3003L);
+    EventResponse response = authorizedOkResultResponse(HttpMethod.PATCH, eventsEndpoint+"/"+er.getData().get(0).getId(), b, EventResponse.class);
+    assertThat(response.getData().get(0).getId()).isNotEqualTo(3003L);
+  }
+
+  //todo: fix
+  @Test
+  public void testUpdateEvent() throws Exception
+  {
+    EventResponse er = insertEvent();
+    UpdateEventRequestBuilder updateBuilder = new UpdateEventRequestBuilder();
+    updateBuilder.name("new name").details("new details").status("new status") .location("new location");
+    EventResponse updateResponse = authorizedOkResultResponse(HttpMethod.PATCH,
+        eventsEndpoint+"/"+er.getData().get(0).getId(), updateBuilder, EventResponse.class);
+
+    ListEventsRequestBuilder listBuilder = new ListEventsRequestBuilder();
+    EventResponse listResponse = authorizedOkResultResponse(HttpMethod.GET, eventsEndpoint, listBuilder, EventResponse.class);
+    assertThat(listResponse.getCount()).isEqualTo(1);
+    assertThat(listResponse.getData().size()).isEqualTo(1);
+
+    Event updatedEvent = listResponse.getData().get(0);
+    assertThat(updatedEvent.getName()).isEqualTo("new name");
+    assertThat(updatedEvent.getDetails()).isEqualTo("new details");
+    assertThat(updatedEvent.getStatus()).isEqualTo("new status");
+    assertThat(updatedEvent.getLocation()).isEqualTo("new location");
   }
 }
 

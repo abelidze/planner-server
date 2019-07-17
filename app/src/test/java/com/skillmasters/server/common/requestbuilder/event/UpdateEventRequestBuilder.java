@@ -1,4 +1,4 @@
-package com.skillmasters.server.common;
+package com.skillmasters.server.common.requestbuilder.event;
 
 public class UpdateEventRequestBuilder extends CreateEventRequestBuilder
 {
