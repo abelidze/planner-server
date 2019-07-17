@@ -2,6 +2,9 @@ package com.skillmasters.server.http.controller;
 
 import com.skillmasters.server.common.requestbuilder.AppRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.task.ListTasksRequestBuilder;
+import com.skillmasters.server.common.requestbuilder.task.UpdateTaskRequestBuilder;
+import com.skillmasters.server.http.response.TaskResponse;
+import com.skillmasters.server.mock.model.TaskMock;
 import com.skillmasters.server.mock.response.TaskResponseMock;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,6 +13,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Date;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -48,6 +54,27 @@ public class TaskControllerTests extends ControllerTests
         HttpMethod.GET, tasksEndpoint, new AppRequestBuilder(), TaskResponseMock.class);
 
     assertThat(afterDeleteResp.getData().size()).isEqualTo(0);
+  }
+
+  @Test
+  public void testUpdateEvent() throws Exception
+  {
+    TaskMock taskMock = insertTask().getData().get(0);
+    UpdateTaskRequestBuilder b = new UpdateTaskRequestBuilder();
+    Date newDeadline = new Date();
+    b.name("new name").details("new details").status("new status")
+        .deadlineAt(newDeadline.getTime());
+
+
+    List<TaskMock> tasks = getAllTasks();
+    assertThat(tasks.size()).isEqualTo(1);
+    TaskMock task = tasks.get(0);
+    TaskMock updatedTask = updateTask(task, b);
+    assertThat(updatedTask.getName()).isEqualTo("new name");
+    assertThat(updatedTask.getDetails()).isEqualTo("new details");
+    assertThat(updatedTask.getStatus()).isEqualTo("new status");
+    assertThat(updatedTask.getDeadlineAt()).isEqualTo(newDeadline);
+
   }
 
 }

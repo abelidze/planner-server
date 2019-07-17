@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 import com.skillmasters.server.common.requestbuilder.AppRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.event.CreateEventRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.task.ListTasksRequestBuilder;
+import com.skillmasters.server.common.requestbuilder.task.UpdateTaskRequestBuilder;
 import com.skillmasters.server.http.middleware.security.FirebaseAuthenticationTokenFilter;
 import com.skillmasters.server.http.response.EventResponse;
 import com.skillmasters.server.http.response.Response;
@@ -189,5 +190,11 @@ public class ControllerTests
         new ListTasksRequestBuilder(), TaskResponseMock.class);
 
     return resp.getData();
+  }
+
+  protected TaskMock updateTask(TaskMock task, UpdateTaskRequestBuilder b) throws Exception
+  {
+    return authorizedOkResultResponse(HttpMethod.PATCH, tasksEndpoint+"/"+ task.getId(),
+        b, TaskResponseMock.class).getData().get(0);
   }
 }
