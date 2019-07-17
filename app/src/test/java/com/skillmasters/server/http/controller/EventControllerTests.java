@@ -216,4 +216,14 @@ public class EventControllerTests extends ControllerTests
       assertThat(listResponse.getData().size()).isEqualTo(delCounter);
     }
   }
+
+  @Test
+  public void testDeleteEvent404() throws Exception
+  {
+    Long id = 5021L;
+    MvcResult result = performReq404(authorizedRequest(HttpMethod.DELETE,
+        eventsEndpoint+"/"+id,
+        new ListEventsRequestBuilder()
+    )).andReturn();
+  }
 }
