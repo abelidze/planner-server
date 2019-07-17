@@ -171,5 +171,26 @@ public class EventControllerTests extends ControllerTests
     MvcResult updateResponse = performReq404(authorizedRequest(HttpMethod.PATCH, eventsEndpoint+"/"+id,
         updateBuilder)).andReturn();
   }
-}
 
+  @Test
+  public void testGetEventById() throws Exception
+  {
+    EventResponse createEventResponse = insertEvent();
+    ListEventsRequestBuilder b = new ListEventsRequestBuilder();
+    Long id = createEventResponse.getData().get(0).getId();
+
+    EventResponse response = authorizedOkResultResponse(HttpMethod.GET, eventsEndpoint+"/"+id, b, EventResponse.class);
+    assertThat(response.getCount()).isEqualTo(1);
+    assertThat(response.getData().size()).isEqualTo(1);
+  }
+
+  @Test
+  public void testGetEventById404() throws Exception
+  {
+    Long id = 202L;
+    MvcResult result = performReq404(authorizedRequest(HttpMethod.GET,
+        eventsEndpoint+"/"+id,
+        new ListEventsRequestBuilder()
+    )).andReturn();
+  }
+}
