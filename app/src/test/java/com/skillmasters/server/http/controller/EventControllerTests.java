@@ -201,9 +201,7 @@ public class EventControllerTests extends ControllerTests
     int delCounter = 10;
     for (int i = 0; i < createResponses.size(); i++) {
       ListEventsRequestBuilder b = new ListEventsRequestBuilder();
-      Long id = createResponses.get(i).getData().get(0).getId();
-      EventResponse delResponse = authorizedOkResultResponse(
-          HttpMethod.DELETE, eventsEndpoint+"/"+id, b, EventResponse.class);
+      deleteEvent(createResponses.get(i).getData().get(0));
 
       delCounter--;
       EventResponse listResponse = authorizedOkResultResponse(

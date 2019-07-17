@@ -10,6 +10,7 @@ import com.skillmasters.server.http.middleware.security.FirebaseAuthenticationTo
 import com.skillmasters.server.http.response.EventResponse;
 import com.skillmasters.server.http.response.Response;
 import com.skillmasters.server.http.response.TaskResponse;
+import com.skillmasters.server.mock.TaskMock;
 import com.skillmasters.server.mock.TaskResponseMock;
 import com.skillmasters.server.model.Event;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -158,6 +159,20 @@ public class ControllerTests
   {
     EventResponse eventResponse = insertEvent();
     return insertTask(eventResponse.getData().get(0), new AppRequestBuilder());
+  }
+
+  protected EventResponse deleteEvent(Event event) throws Exception
+  {
+    Long id = event.getId();
+    return authorizedOkResultResponse(
+        HttpMethod.DELETE, eventsEndpoint+"/"+id, new AppRequestBuilder(), EventResponse.class);
+  }
+
+  protected EventResponse deleteTask(TaskMock taskMock) throws Exception
+  {
+    Long id = taskMock.getId();
+    return authorizedOkResultResponse(
+        HttpMethod.DELETE, tasksEndpoint+"/"+id, new AppRequestBuilder(), EventResponse.class);
   }
 
 }
