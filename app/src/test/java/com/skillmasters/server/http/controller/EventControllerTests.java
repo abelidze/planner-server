@@ -220,10 +220,14 @@ public class EventControllerTests extends ControllerTests
   {
     // also inserts event;
     insertTask();
-    List<Event> events = getEvents();
-    assertThat(events.size()).isEqualTo(1);
+
+    List<Event> events = getAllEvents();
+    assertThat(getAllEvents().size()).isEqualTo(1);
+    assertThat(getAllTasks().size()).isEqualTo(1);
+    
     deleteEvent(events.get(0));
-    assertThat(getEvents().size()).isEqualTo(0);
+    assertThat(getAllEvents().size()).isEqualTo(0);
+    assertThat(getAllTasks().size()).isEqualTo(0);
   }
 
   @Test

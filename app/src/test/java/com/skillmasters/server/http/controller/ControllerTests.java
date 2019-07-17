@@ -5,9 +5,11 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.google.gson.Gson;
 import com.skillmasters.server.common.requestbuilder.AppRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.event.CreateEventRequestBuilder;
+import com.skillmasters.server.common.requestbuilder.task.ListTasksRequestBuilder;
 import com.skillmasters.server.http.middleware.security.FirebaseAuthenticationTokenFilter;
 import com.skillmasters.server.http.response.EventResponse;
 import com.skillmasters.server.http.response.Response;
+import com.skillmasters.server.http.response.TaskResponse;
 import com.skillmasters.server.mock.model.TaskMock;
 import com.skillmasters.server.mock.response.TaskResponseMock;
 import com.skillmasters.server.model.Event;
@@ -174,9 +176,18 @@ public class ControllerTests
   }
 
 
-  protected List<Event> getEvents() throws Exception
+  protected List<Event> getAllEvents() throws Exception
   {
-    EventResponse resp = authorizedOkResultResponse(HttpMethod.GET, eventsEndpoint, new AppRequestBuilder(), EventResponse.class);
+    EventResponse resp = authorizedOkResultResponse(HttpMethod.GET, eventsEndpoint,
+        new AppRequestBuilder(), EventResponse.class);
+    return resp.getData();
+  }
+
+  protected List<TaskMock> getAllTasks() throws Exception
+  {
+    TaskResponseMock resp = authorizedOkResultResponse(HttpMethod.GET, tasksEndpoint,
+        new ListTasksRequestBuilder(), TaskResponseMock.class);
+
     return resp.getData();
   }
 }
