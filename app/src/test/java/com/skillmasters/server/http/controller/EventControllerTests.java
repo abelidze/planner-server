@@ -11,6 +11,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
@@ -134,19 +135,20 @@ public class EventControllerTests extends ControllerTests
     EventResponse er = insertEvent();
     UpdateEventRequestBuilder b = new UpdateEventRequestBuilder();
     b.id(3003L);
-    EventResponse response = authorizedOkResultResponse(HttpMethod.PATCH, eventsEndpoint+"/"+er.getData().get(0).getId(), b, EventResponse.class);
+    Long id = er.getData().get(0).getId();
+    EventResponse response = authorizedOkResultResponse(HttpMethod.PATCH, eventsEndpoint+"/"+ id, b, EventResponse.class);
     assertThat(response.getData().get(0).getId()).isNotEqualTo(3003L);
   }
 
-  //todo: fix
   @Test
   public void testUpdateEvent() throws Exception
   {
     EventResponse er = insertEvent();
     UpdateEventRequestBuilder updateBuilder = new UpdateEventRequestBuilder();
     updateBuilder.name("new name").details("new details").status("new status") .location("new location");
-    EventResponse updateResponse = authorizedOkResultResponse(HttpMethod.PATCH,
-        eventsEndpoint+"/"+er.getData().get(0).getId(), updateBuilder, EventResponse.class);
+    Long id = er.getData().get(0).getId();
+    EventResponse updateResponse = authorizedOkResultResponse(HttpMethod.PATCH, eventsEndpoint+"/"+ id,
+        updateBuilder, EventResponse.class);
 
     ListEventsRequestBuilder listBuilder = new ListEventsRequestBuilder();
     EventResponse listResponse = authorizedOkResultResponse(HttpMethod.GET, eventsEndpoint, listBuilder, EventResponse.class);
@@ -158,6 +160,16 @@ public class EventControllerTests extends ControllerTests
     assertThat(updatedEvent.getDetails()).isEqualTo("new details");
     assertThat(updatedEvent.getStatus()).isEqualTo("new status");
     assertThat(updatedEvent.getLocation()).isEqualTo("new location");
+  }
+
+  @Test
+  public void testUpdateEvent404() throws Exception
+  {
+    UpdateEventRequestBuilder updateBuilder = new UpdateEventRequestBuilder();
+    updateBuilder.name("new name").details("new details").status("new status") .location("new location");
+    Long id = 123L;
+    MvcResult updateResponse = performReq404(authorizedRequest(HttpMethod.PATCH, eventsEndpoint+"/"+id,
+        updateBuilder)).andReturn();
   }
 }
 

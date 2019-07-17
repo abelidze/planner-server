@@ -88,6 +88,11 @@ public class ControllerTests
     return mockMvc.perform(req).andExpect(status().isOk());
   }
 
+  protected ResultActions performReq404(RequestBuilder req) throws Exception
+  {
+    return mockMvc.perform(req).andExpect(status().isNotFound());
+  }
+
 //  protected EventResponse parseEventResponse(MockHttpServletResponse resp) throws IOException
 //  {
 //    return new ObjectMapper().readValue(resp.getContentAsString(), EventResponse.class);
