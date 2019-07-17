@@ -5,13 +5,11 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.google.gson.Gson;
 import com.skillmasters.server.common.requestbuilder.AppRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.event.CreateEventRequestBuilder;
-import com.skillmasters.server.common.requestbuilder.task.CreateTaskRequestBuilder;
 import com.skillmasters.server.http.middleware.security.FirebaseAuthenticationTokenFilter;
 import com.skillmasters.server.http.response.EventResponse;
 import com.skillmasters.server.http.response.Response;
-import com.skillmasters.server.http.response.TaskResponse;
-import com.skillmasters.server.mock.TaskMock;
-import com.skillmasters.server.mock.TaskResponseMock;
+import com.skillmasters.server.mock.model.TaskMock;
+import com.skillmasters.server.mock.response.TaskResponseMock;
 import com.skillmasters.server.model.Event;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -175,4 +173,10 @@ public class ControllerTests
         HttpMethod.DELETE, tasksEndpoint+"/"+id, new AppRequestBuilder(), EventResponse.class);
   }
 
+
+  protected List<Event> getEvents() throws Exception
+  {
+    EventResponse resp = authorizedOkResultResponse(HttpMethod.GET, eventsEndpoint, new AppRequestBuilder(), EventResponse.class);
+    return resp.getData();
+  }
 }

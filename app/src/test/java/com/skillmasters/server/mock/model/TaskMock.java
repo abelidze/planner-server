@@ -1,4 +1,4 @@
-package com.skillmasters.server.mock;
+package com.skillmasters.server.mock.model;
 
 import com.skillmasters.server.model.Event;
 import com.skillmasters.server.model.Task;

@@ -216,6 +216,17 @@ public class EventControllerTests extends ControllerTests
   }
 
   @Test
+  public void testDeleteTasksOnDeleteEvent() throws Exception
+  {
+    // also inserts event;
+    insertTask();
+    List<Event> events = getEvents();
+    assertThat(events.size()).isEqualTo(1);
+    deleteEvent(events.get(0));
+    assertThat(getEvents().size()).isEqualTo(0);
+  }
+
+  @Test
   public void testDeleteEvent404() throws Exception
   {
     Long id = 5021L;
