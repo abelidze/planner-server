@@ -5,9 +5,13 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.google.gson.Gson;
 import com.skillmasters.server.common.requestbuilder.AppRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.event.CreateEventRequestBuilder;
+import com.skillmasters.server.common.requestbuilder.task.CreateTaskRequestBuilder;
 import com.skillmasters.server.http.middleware.security.FirebaseAuthenticationTokenFilter;
 import com.skillmasters.server.http.response.EventResponse;
 import com.skillmasters.server.http.response.Response;
+import com.skillmasters.server.http.response.TaskResponse;
+import com.skillmasters.server.mock.TaskResponseMock;
+import com.skillmasters.server.model.Event;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.HttpMethod;
@@ -33,6 +37,8 @@ public class ControllerTests
   private static String apiPrefix = "/api/v1";
 
   protected static String eventsEndpoint = apiPrefix + "/events";
+
+  protected static String tasksEndpoint = apiPrefix + "/tasks";
 
   protected String testerId = "322";
 
@@ -135,6 +141,23 @@ public class ControllerTests
     }
 
     return eventsList;
+  }
+
+  protected TaskResponseMock insertTask(Event event, AppRequestBuilder b) throws Exception
+  {
+    Long eventId = event.getId();
+    return authorizedOkResultResponse(HttpMethod.POST, tasksEndpoint+"?event_id="+eventId, b, TaskResponseMock.class);
+  }
+
+  protected TaskResponseMock insertTask(Event event) throws Exception
+  {
+    return insertTask(event, new AppRequestBuilder());
+  }
+
+  protected TaskResponseMock insertTask() throws Exception
+  {
+    EventResponse eventResponse = insertEvent();
+    return insertTask(eventResponse.getData().get(0), new AppRequestBuilder());
   }
 
 }

@@ -1,13 +1,13 @@
 package com.skillmasters.server.common.requestbuilder.event;
 
-public class UpdateEventRequestBuilder extends CreateEventRequestBuilder
+public class UpdateEventRequestBuilder extends CreateEventRequestBuilderGeneric<UpdateEventRequestBuilder>
 {
-  public CreateEventRequestBuilder id(Long id)
+  public UpdateEventRequestBuilder id(Long id)
   {
     return set("id", id);
   }
 
-  public CreateEventRequestBuilder ownerId(String ownerId)
+  public UpdateEventRequestBuilder ownerId(String ownerId)
   {
     return set("owner_id", ownerId);
   }
