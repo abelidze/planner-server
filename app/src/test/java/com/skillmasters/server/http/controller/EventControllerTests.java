@@ -193,4 +193,27 @@ public class EventControllerTests extends ControllerTests
         new ListEventsRequestBuilder()
     )).andReturn();
   }
+
+  @Test
+  public void testDeleteEvent() throws Exception
+  {
+    List<EventResponse> createResponses = insertEvents(10);
+    int delCounter = 10;
+    for (int i = 0; i < createResponses.size(); i++) {
+      ListEventsRequestBuilder b = new ListEventsRequestBuilder();
+      Long id = createResponses.get(i).getData().get(0).getId();
+      EventResponse delResponse = authorizedOkResultResponse(
+          HttpMethod.DELETE, eventsEndpoint+"/"+id, b, EventResponse.class);
+
+      delCounter--;
+      EventResponse listResponse = authorizedOkResultResponse(
+          HttpMethod.GET,
+          eventsEndpoint,
+          new ListEventsRequestBuilder(),
+          EventResponse.class);
+
+      assertThat(listResponse.getCount()).isEqualTo(delCounter);
+      assertThat(listResponse.getData().size()).isEqualTo(delCounter);
+    }
+  }
 }
