@@ -305,4 +305,9 @@ public class ControllerTests
   {
     return authorizedOkResultResponse(HttpMethod.GET, patternsEndpoint, b, EventPatternResponseMock.class);
   }
+
+  protected EventPatternResponseMock getPatterns(ListTasksRequestBuilder b) throws Exception
+  {
+    return authorizedOkResultResponse(HttpMethod.GET, patternsEndpoint, b, EventPatternResponseMock.class);
+  }
 }

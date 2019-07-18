@@ -152,4 +152,23 @@ public class EventPatternControllerTests extends ControllerTests
     }
   }
 
+  @Test
+  public void testGetPatternsByEventIds() throws Exception
+  {
+    Event event1 = insertEvent().getData().get(0);
+    Event event2 = insertEvent().getData().get(0);
+
+    List<EventPatternMock> patterns1 = insertPatterns(event1, 13);
+    List<EventPatternMock> patterns2 = insertPatterns(event2, 7);
+
+    ListPatternsRequestBuilder b = new ListPatternsRequestBuilder();
+    b.events(Arrays.asList(event1.getId(), event2.getId()));
+
+    EventPatternResponseMock response = getPatterns(b);
+    assertThat(response.getCount()).isEqualTo(20);
+
+    List<EventPatternMock> result = response.getData();
+    assertThat(result.size()).isEqualTo(20);
+  }
+
 }
