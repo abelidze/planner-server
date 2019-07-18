@@ -8,24 +8,26 @@ import com.skillmasters.server.common.requestbuilder.event.CreateEventRequestBui
 import com.skillmasters.server.common.requestbuilder.pattern.CreatePatternRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.pattern.ListPatternsRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.pattern.UpdatePatternRequestBuilder;
+import com.skillmasters.server.common.requestbuilder.permission.GrantRequestBuilder;
+import com.skillmasters.server.common.requestbuilder.permission.PermissionsRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.task.CreateTaskRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.task.ListTasksRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.task.UpdateTaskRequestBuilder;
 import com.skillmasters.server.http.middleware.security.FirebaseAuthenticationTokenFilter;
-import com.skillmasters.server.http.response.EventPatternResponse;
-import com.skillmasters.server.http.response.EventResponse;
-import com.skillmasters.server.http.response.Response;
-import com.skillmasters.server.http.response.TaskResponse;
+import com.skillmasters.server.http.request.PermissionRequest;
+import com.skillmasters.server.http.response.*;
 import com.skillmasters.server.mock.model.EventPatternMock;
 import com.skillmasters.server.mock.model.TaskMock;
 import com.skillmasters.server.mock.response.EventPatternResponseMock;
 import com.skillmasters.server.mock.response.TaskResponseMock;
 import com.skillmasters.server.model.Event;
 import com.skillmasters.server.model.EventPattern;
+import com.skillmasters.server.model.Permission;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.RequestBuilder;
@@ -53,11 +55,19 @@ public class ControllerTests
 
   protected static String patternsEndpoint = apiPrefix + "/patterns";
 
+  protected static String permissionsEndpoint = apiPrefix + "/permissions";
+
+  protected static String grantEndpoint = apiPrefix + "/grant";
+
+  protected static String shareEndpoint = apiPrefix + "/share";
+
+  protected static String userEndpoint = apiPrefix + "/user";
+
   protected String testerId = "322";
 
   private Gson gson = new Gson();
 
-  private MockHttpServletRequestBuilder requestMethod(HttpMethod method, String url)
+  protected MockHttpServletRequestBuilder requestMethod(HttpMethod method, String url)
   {
     switch (method) {
       case GET:
@@ -120,8 +130,8 @@ public class ControllerTests
   }
 
   protected <R extends Response> R authorizedOkResultResponse(HttpMethod method,
-                                                                 String url,
-                                                                 AppRequestBuilder b, Class<R> cls
+                                                              String url,
+                                                              AppRequestBuilder b, Class<R> cls
   ) throws Exception
   {
     MvcResult result = authorizedOkResult(method, url, b);
@@ -170,7 +180,7 @@ public class ControllerTests
   {
     Long id = event.getId();
     return authorizedOkResultResponse(
-        HttpMethod.DELETE, eventsEndpoint+"/"+id, new AppRequestBuilder(), EventResponse.class);
+        HttpMethod.DELETE, eventsEndpoint + "/" + id, new AppRequestBuilder(), EventResponse.class);
   }
 
 
@@ -183,7 +193,7 @@ public class ControllerTests
 
   protected TaskResponseMock insertTask(Long eventId, AppRequestBuilder b) throws Exception
   {
-    return authorizedOkResultResponse(HttpMethod.POST, tasksEndpoint+"?event_id="+eventId, b, TaskResponseMock.class);
+    return authorizedOkResultResponse(HttpMethod.POST, tasksEndpoint + "?event_id=" + eventId, b, TaskResponseMock.class);
   }
 
   protected TaskResponseMock insertTask(Long eventId) throws Exception
@@ -245,7 +255,7 @@ public class ControllerTests
   protected TaskResponseMock getTaskOkById(Long id) throws Exception
   {
     return authorizedOkResultResponse(
-        HttpMethod.GET, tasksEndpoint+"/"+id, new AppRequestBuilder(), TaskResponseMock.class);
+        HttpMethod.GET, tasksEndpoint + "/" + id, new AppRequestBuilder(), TaskResponseMock.class);
   }
 
   protected TaskResponseMock getTasks(ListTasksRequestBuilder b) throws Exception
@@ -257,12 +267,12 @@ public class ControllerTests
   {
     Long id = taskMock.getId();
     return authorizedOkResultResponse(
-        HttpMethod.DELETE, tasksEndpoint+"/"+id, new AppRequestBuilder(), EventResponse.class);
+        HttpMethod.DELETE, tasksEndpoint + "/" + id, new AppRequestBuilder(), EventResponse.class);
   }
 
   protected TaskMock updateTask(TaskMock task, UpdateTaskRequestBuilder b) throws Exception
   {
-    return authorizedOkResultResponse(HttpMethod.PATCH, tasksEndpoint+"/"+ task.getId(),
+    return authorizedOkResultResponse(HttpMethod.PATCH, tasksEndpoint + "/" + task.getId(),
         b, TaskResponseMock.class).getData().get(0);
   }
 
@@ -280,8 +290,9 @@ public class ControllerTests
 
   protected EventPatternResponseMock insertPattern(Long eventId, AppRequestBuilder b) throws Exception
   {
-    return authorizedOkResultResponse(HttpMethod.POST, patternsEndpoint+"?event_id="+eventId, b, EventPatternResponseMock.class);
+    return authorizedOkResultResponse(HttpMethod.POST, patternsEndpoint + "?event_id=" + eventId, b, EventPatternResponseMock.class);
   }
+
   protected EventPatternResponseMock insertPattern(CreatePatternRequestBuilder b) throws Exception
   {
     return insertPattern(insertEvent().getData().get(0), b);
@@ -315,7 +326,35 @@ public class ControllerTests
 
   protected EventPatternMock updatePattern(EventPatternMock pattern, UpdatePatternRequestBuilder b) throws Exception
   {
-    return authorizedOkResultResponse(HttpMethod.PATCH, patternsEndpoint+"/"+ pattern.getId(),
+    return authorizedOkResultResponse(HttpMethod.PATCH, patternsEndpoint + "/" + pattern.getId(),
         b, EventPatternResponseMock.class).getData().get(0);
+  }
+
+  // PERMISSIONS
+  protected PermissionResponse grantPermission(String userId, Long entityId, PermissionRequest.EntityType entityType,
+                                               PermissionRequest.ActionType action) throws Exception
+  {
+    GrantRequestBuilder b = new GrantRequestBuilder();
+
+    b.userId(userId).entityId(entityId).entityType(entityType).action(action);
+    return authorizedOkResultResponse(HttpMethod.GET, grantEndpoint, b, PermissionResponse.class);
+  }
+
+  protected PermissionResponse listPermissions(String userToken, PermissionRequest.EntityType entityType,
+                                               Boolean mine, int status) throws Exception
+  {
+    PermissionsRequestBuilder b = new PermissionsRequestBuilder();
+    b.entityType(entityType).mine(mine);
+    MockHttpServletRequestBuilder rb = requestMethod(HttpMethod.GET, permissionsEndpoint)
+        .header(FirebaseAuthenticationTokenFilter.TOKEN_HEADER, userToken)
+        .accept(MediaType.APPLICATION_JSON)
+        .contentType(MediaType.APPLICATION_JSON).params(b.buildGet());
+
+    MockHttpServletResponse response = mockMvc.perform(rb).andReturn().getResponse();
+
+    assertThat(response.getStatus()).isEqualTo(status);
+
+    return new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
+        .readValue(response.getContentAsString(), PermissionResponse.class);
   }
 }

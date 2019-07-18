@@ -1,5 +1,7 @@
 package com.skillmasters.server.common.requestbuilder;
 
+import com.skillmasters.server.http.request.PermissionRequest;
+import com.skillmasters.server.model.Permission;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -42,6 +44,20 @@ public class AppRequestBuilder<T extends AppRequestBuilder>
   public T set(String k, String v)
   {
     mvmap.set(k, v);
+    map.put(k, v);
+    return (T) this;
+  }
+
+  public T set(String k, Boolean v)
+  {
+    mvmap.set(k, v.toString());
+    map.put(k, v);
+    return (T) this;
+  }
+
+  public T set(String k, Enum v)
+  {
+    mvmap.set(k, v.toString().toUpperCase());
     map.put(k, v);
     return (T) this;
   }
