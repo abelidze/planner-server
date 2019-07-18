@@ -1,9 +1,7 @@
 package com.skillmasters.server.http.controller;
 
 import com.skillmasters.server.common.requestbuilder.permission.GrantRequestBuilder;
-import com.skillmasters.server.common.requestbuilder.permission.PermissionsRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.permission.ShareRequestBuilder;
-import com.skillmasters.server.http.middleware.security.FirebaseAuthenticationTokenFilter;
 import com.skillmasters.server.http.request.PermissionRequest;
 import com.skillmasters.server.http.response.PermissionResponse;
 import com.skillmasters.server.model.IEntity;
@@ -13,10 +11,7 @@ import org.junit.runner.RunWith;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -50,9 +45,11 @@ public class PermissionControllerTests extends ControllerTests
 
         grantPermission(grantedUserId, entity.getId(), entityType, actionType);
         //owner
-        assertThat(permissionIsInList(ownerToken, entityType, actionType, entity.getId().toString(), true)).isTrue();
-        assertThat(permissionIsInList(grantedUserToken, entityType, actionType, entity.getId().toString(), false)).isTrue();
-        assertThat(permissionIsInList(notGrantedUserToken, entityType, actionType, entity.getId().toString(), false)).isFalse();
+//        assertThat(isInPermissionList(ownerToken, ownerId, entityType, actionType, entity.getId().toString(), true)).isTrue();
+        assertThat(isInPermissionList(grantedUserToken, grantedUserId, entityType,
+            actionType, entity.getId().toString(), false)).isTrue();
+        assertThat(isInPermissionList(notGrantedUserToken, notGrantedUserId,
+            entityType, actionType, entity.getId().toString(), false)).isFalse();
       }
     }
   }
@@ -71,7 +68,7 @@ public class PermissionControllerTests extends ControllerTests
     return null;
   }
 
-  private Boolean permissionIsInList(String userToken,
+  private Boolean isInPermissionList(String userToken, String userId,
                                      PermissionRequest.EntityType entityType,
                                      PermissionRequest.ActionType actionType,
                                      String entityId, Boolean mine) throws Exception
@@ -80,7 +77,7 @@ public class PermissionControllerTests extends ControllerTests
     String name = actionType.name() + "_" + entityType.toString().toUpperCase();
     int metCounter = 0;
     for (Permission perm : response.getData()) {
-      if (perm.getEntityId().equals(entityId) && perm.getName().equals(name)) {
+      if (perm.getEntityId().equals(entityId) && perm.getName().equals(name) && perm.getUserId().equals(userId)) {
         metCounter += 1;
       }
     }
@@ -116,9 +113,9 @@ public class PermissionControllerTests extends ControllerTests
         String shareLink = getShareLink(b, 200);
         activateShareLink(shareLink, grantedUserToken, grantedUserId, 200);
 
-        assertThat(permissionIsInList(ownerToken, entityType, actionType, entity.getId().toString(), true)).isTrue();
-        assertThat(permissionIsInList(grantedUserToken, entityType, actionType, entity.getId().toString(), false)).isTrue();
-        assertThat(permissionIsInList(notGrantedUserToken, entityType, actionType, entity.getId().toString(), false)).isFalse();
+//        assertThat(isInPermissionList(ownerToken, ownerId, entityType, actionType, entity.getId().toString(), true)).isTrue();
+        assertThat(isInPermissionList(grantedUserToken, grantedUserId, entityType, actionType, entity.getId().toString(), false)).isTrue();
+        assertThat(isInPermissionList(notGrantedUserToken, notGrantedUserId, entityType, actionType, entity.getId().toString(), false)).isFalse();
       }
     }
   }
@@ -145,10 +142,37 @@ public class PermissionControllerTests extends ControllerTests
         activateShareLink(shareLink, grantedUserToken, grantedUserId, 200);
 
         for (IEntity entity : entities) {
-          assertThat(permissionIsInList(ownerToken, entityType, actionType, entity.getId().toString(), true)).isTrue();
-          assertThat(permissionIsInList(grantedUserToken, entityType, actionType, entity.getId().toString(), false)).isTrue();
-          assertThat(permissionIsInList(notGrantedUserToken, entityType, actionType, entity.getId().toString(), false)).isFalse();
+//          assertThat(isInPermissionList(ownerToken, ownerId, entityType, actionType, entity.getId().toString(), true)).isTrue();
+          assertThat(isInPermissionList(grantedUserToken, grantedUserId,
+              entityType, actionType, entity.getId().toString(), false)).isTrue();
+          assertThat(isInPermissionList(notGrantedUserToken, notGrantedUserId,
+              entityType, actionType, entity.getId().toString(), false)).isFalse();
         }
+      }
+    }
+  }
+
+  @Test
+  public void testRevokePermissions() throws Exception
+  {
+    for (PermissionRequest.EntityType entityType : PermissionRequest.EntityType.values()) {
+      for (PermissionRequest.ActionType actionType : PermissionRequest.ActionType.values()) {
+        IEntity entity = insertEntity(entityType);
+
+        PermissionResponse resp = grantPermission(grantedUserId, entity.getId(), entityType, actionType);
+        //owner
+//        assertThat(isInPermissionList(ownerToken, ownerId, entityType, actionType, entity.getId().toString(), true)).isTrue();
+        assertThat(isInPermissionList(grantedUserToken, grantedUserId,
+            entityType, actionType, entity.getId().toString(), false)).isTrue();
+        assertThat(isInPermissionList(notGrantedUserToken, notGrantedUserId,
+            entityType, actionType, entity.getId().toString(), false)).isFalse();
+
+        revokePermission(resp.getData().get(0).getId());
+
+//        assertThat(isInPermissionList(ownerToken, ownerId, entityType, actionType, entity.getId().toString(), true)).isTrue();
+        assertThat(isInPermissionList(grantedUserToken, grantedUserId, entityType, actionType, entity.getId().toString(), false)).isFalse();
+        assertThat(isInPermissionList(notGrantedUserToken, notGrantedUserId,entityType, actionType, entity.getId().toString(), false)).isFalse();
+
       }
     }
   }

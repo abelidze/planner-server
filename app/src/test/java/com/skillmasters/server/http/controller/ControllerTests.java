@@ -395,4 +395,9 @@ public class ControllerTests
         .readValue(response.getContentAsString(), PermissionResponse.class);
 
   }
+
+  protected PermissionResponse revokePermission(Long id) throws Exception
+  {
+    return authorizedOkResultResponse(HttpMethod.DELETE, permissionsEndpoint+"/"+id, PermissionResponse.class);
+  }
 }
