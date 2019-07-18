@@ -1,6 +1,7 @@
 package com.skillmasters.server.http.controller;
 
 import java.util.List;
+import java.util.Date;
 import java.util.ArrayList;
 import javax.validation.constraints.NotNull;
 
@@ -171,20 +172,51 @@ public class PermissionController
     @RequestParam(value="entity_type", required=false) PermissionRequest.EntityType entityType,
     @ApiParam(value = "Retrieve permissions for your resources")
     @RequestParam(value="mine", defaultValue="true") boolean mine,
+    @ApiParam(value = "Array of permissions's id")
+    @RequestParam(value="id", defaultValue="") List<Long> id,
+    @ApiParam(value = "Timestamp after that permission was created")
+    @RequestParam(value="created_from", required=false) Long createdFrom,
+    @ApiParam(value = "Timestamp before that permission was created")
+    @RequestParam(value="created_to", required=false) Long createdTo,
+    @ApiParam(value = "Timestamp after that permission was updated")
+    @RequestParam(value="updated_from", required=false) Long updatedFrom,
+    @ApiParam(value = "Timestamp before that permission was updated")
+    @RequestParam(value="updated_to", required=false) Long updatedTo,
     @ApiParam(value = "Pagination offset")
     @RequestParam(value="offset", defaultValue="0") long offset,
     @ApiParam(value = "Count of permissions to retrieve")
     @RequestParam(value="count", defaultValue="100") int count
   ) {
+    QPermission qPermission = QPermission.permission;
     BooleanExpression query = null;
     if (mine == true) {
-      query = QPermission.permission.ownerId.eq(user.getId());
+      query = qPermission.ownerId.eq(user.getId());
     } else {
-      query = QPermission.permission.userId.eq(user.getId());
+      query = qPermission.userId.eq(user.getId());
+    }
+
+    if (id.size() > 0) {
+      query = qPermission.id.in(id).and(query);
+    }
+
+    if (createdFrom != null) {
+      query = qPermission.createdAt.goe(new Date(createdFrom)).and(query);
+    }
+
+    if (createdTo != null) {
+      query = qPermission.createdAt.loe(new Date(createdTo)).and(query);
+    }
+
+    if (updatedFrom != null) {
+      query = qPermission.updatedAt.goe(new Date(updatedFrom)).and(query);
+    }
+
+    if (updatedTo != null) {
+      query = qPermission.updatedAt.loe(new Date(updatedTo)).and(query);
     }
 
     if (entityType != null) {
-      query = QPermission.permission.name.like("%" + entityType.name()).and(query);
+      query = qPermission.name.like("%" + entityType.name()).and(query);
     }
 
     return new PermissionResponse().success( permissionService.getByQuery(query, new OffsetPageRequest(offset, count)) );
