@@ -66,8 +66,8 @@ public class EventControllerTests extends ControllerTests
   public void testGetEventsByIds() throws Exception
   {
     List<EventResponse> events = insertEvents(10);
-    ListEventsRequestBuilder b = new ListEventsRequestBuilder();
     List<Long> ids = new ArrayList(10);
+    ListEventsRequestBuilder b = new ListEventsRequestBuilder();
 
     for (EventResponse er : events) {
       for (Event e : er.getData()) {
@@ -124,7 +124,8 @@ public class EventControllerTests extends ControllerTests
     EventResponse er = insertEvent();
     UpdateEventRequestBuilder b = new UpdateEventRequestBuilder();
     b.ownerId("HAXED");
-    EventResponse response = authorizedOkResultResponse(HttpMethod.PATCH, eventsEndpoint+"/"+er.getData().get(0).getId(), b, EventResponse.class);
+    EventResponse response = authorizedOkResultResponse(
+        HttpMethod.PATCH, eventsEndpoint+"/"+er.getData().get(0).getId(), b, EventResponse.class);
     assertThat(response.getData().get(0).getOwnerId()).isNotEqualTo("HAXED");
   }
 
