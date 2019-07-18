@@ -7,10 +7,12 @@ import com.skillmasters.server.common.requestbuilder.AppRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.event.CreateEventRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.pattern.CreatePatternRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.pattern.ListPatternsRequestBuilder;
+import com.skillmasters.server.common.requestbuilder.pattern.UpdatePatternRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.task.CreateTaskRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.task.ListTasksRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.task.UpdateTaskRequestBuilder;
 import com.skillmasters.server.http.middleware.security.FirebaseAuthenticationTokenFilter;
+import com.skillmasters.server.http.response.EventPatternResponse;
 import com.skillmasters.server.http.response.EventResponse;
 import com.skillmasters.server.http.response.Response;
 import com.skillmasters.server.http.response.TaskResponse;
@@ -309,5 +311,11 @@ public class ControllerTests
   protected EventPatternResponseMock getPatterns(ListTasksRequestBuilder b) throws Exception
   {
     return authorizedOkResultResponse(HttpMethod.GET, patternsEndpoint, b, EventPatternResponseMock.class);
+  }
+
+  protected EventPatternMock updatePattern(EventPatternMock pattern, UpdatePatternRequestBuilder b) throws Exception
+  {
+    return authorizedOkResultResponse(HttpMethod.PATCH, patternsEndpoint+"/"+ pattern.getId(),
+        b, EventPatternResponseMock.class).getData().get(0);
   }
 }

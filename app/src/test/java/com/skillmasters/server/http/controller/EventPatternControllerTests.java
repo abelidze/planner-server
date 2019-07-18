@@ -3,6 +3,7 @@ package com.skillmasters.server.http.controller;
 import com.skillmasters.server.common.requestbuilder.event.ListEventsRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.pattern.CreatePatternRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.pattern.ListPatternsRequestBuilder;
+import com.skillmasters.server.common.requestbuilder.pattern.UpdatePatternRequestBuilder;
 import com.skillmasters.server.http.response.EventPatternResponse;
 import com.skillmasters.server.mock.model.EventPatternMock;
 import com.skillmasters.server.mock.response.EventPatternResponseMock;
@@ -190,6 +191,38 @@ public class EventPatternControllerTests extends ControllerTests
   {
     Long notExistingEventId = 2222L;
     performReq404(authorizedRequest(HttpMethod.GET, patternsEndpoint+"/"+notExistingEventId));
+  }
+
+  @Test
+  public void testUpdatePatternById404() throws Exception
+  {
+    Long notExistingEventId = 2222L;
+    performReq404(authorizedRequest(HttpMethod.PATCH, patternsEndpoint+"/"+notExistingEventId, new UpdatePatternRequestBuilder()));
+  }
+
+  @Test
+  public void testDeletePatternById404() throws Exception
+  {
+    Long notExistingEventId = 2222L;
+    performReq404(authorizedRequest(HttpMethod.DELETE, patternsEndpoint+"/"+notExistingEventId));
+  }
+
+  @Test
+  public void testUpdate() throws Exception
+  {
+    EventPatternMock pattern = insertPattern().getData().get(0);
+    UpdatePatternRequestBuilder b = new UpdatePatternRequestBuilder();
+
+    b.duration(300000L);
+    b.rrule("FREQ=YEARLY;BYMONTH=1");
+
+    List<EventPatternMock> allPatterns = getAllPatterns();
+    assertThat(allPatterns.size()).isEqualTo(1);
+    EventPatternMock patternMock = allPatterns.get(0);
+
+    EventPatternMock updatedPattern = updatePattern(pattern, b);
+    assertThat(updatedPattern.getDuration()).isEqualTo(300000L);
+    assertThat(updatedPattern.getRrule()).isEqualTo("FREQ=YEARLY;BYMONTH=1");
   }
 
 }
