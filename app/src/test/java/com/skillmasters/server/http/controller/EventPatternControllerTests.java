@@ -171,4 +171,25 @@ public class EventPatternControllerTests extends ControllerTests
     assertThat(result.size()).isEqualTo(20);
   }
 
+  @Test
+  public void testGetPatternById() throws Exception
+  {
+    insertPattern().getData().get(0);
+    EventPatternMock pattern = insertPattern().getData().get(0);
+
+    EventPatternResponseMock response = authorizedOkResultResponse(
+        HttpMethod.GET, patternsEndpoint+"/"+pattern.getId(), EventPatternResponseMock.class);
+
+    assertThat(response.getCount()).isEqualTo(1);
+    EventPatternMock ep = response.getData().get(0);
+    assertThat(ep).isEqualTo(pattern);
+  }
+
+  @Test
+  public void testGetPatternById404() throws Exception
+  {
+    Long notExistingEventId = 2222L;
+    performReq404(authorizedRequest(HttpMethod.GET, patternsEndpoint+"/"+notExistingEventId));
+  }
+
 }
