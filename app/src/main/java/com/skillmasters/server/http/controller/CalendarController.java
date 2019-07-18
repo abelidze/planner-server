@@ -224,12 +224,31 @@ public class CalendarController
       String uid = e.getId().toString();
       VEvent event = new VEvent();
       event.setUid(uid); // <-- dangerous thing due to `eventCopy`, needed for todos, but...
-      event.setSummary(e.getName());
-      event.setDescription(e.getDetails());
-      event.setStatus(new Status(e.getStatus()));
-      event.setLocation(e.getLocation());
-      event.setCreated(e.getCreatedAt());
-      event.setLastModified(e.getUpdatedAt());
+
+      if (!Strings.isNullOrEmpty(e.getName())) {
+        event.setSummary(e.getName());
+      }
+
+      if (!Strings.isNullOrEmpty(e.getDetails())) {
+        event.setDescription(e.getDetails());
+      }
+
+      Status eventStatus = new Status(e.getStatus());
+      if (!Strings.isNullOrEmpty(eventStatus.getValue())) {
+        event.setStatus(eventStatus);
+      }
+
+      if (!Strings.isNullOrEmpty(e.getLocation())) {
+        event.setLocation(e.getLocation());
+      }
+
+      if (e.getCreatedAt() != null) {
+        event.setCreated(e.getCreatedAt());
+      }
+
+      if (e.getUpdatedAt() != null) {
+        event.setLastModified(e.getUpdatedAt());
+      }
 
       List<EventPattern> patterns = e.getPatterns();
       List<Task> tasks = e.getTasks();
@@ -267,13 +286,36 @@ public class CalendarController
           VTodo todo = new VTodo();
           todo.addRelatedTo(uid);
           todo.setOrganizer(user.getUsername());
-          todo.setSummary(task.getName());
-          todo.setDescription(task.getDetails());
-          todo.setLocation(e.getLocation());
-          todo.setStatus(new Status(task.getStatus()));
-          todo.setDateDue(task.getDeadlineAt());
-          todo.setCreated(task.getCreatedAt());
-          todo.setLastModified(task.getUpdatedAt());
+
+          if (!Strings.isNullOrEmpty(task.getName())) {
+            todo.setSummary(task.getName());
+          }
+
+          if (!Strings.isNullOrEmpty(task.getDetails())) {
+            todo.setDescription(task.getDetails());
+          }
+
+          if (!Strings.isNullOrEmpty(e.getLocation())) {
+            todo.setLocation(e.getLocation());
+          }
+
+          Status taskStatus = new Status(task.getStatus());
+          if (!Strings.isNullOrEmpty(taskStatus.getValue())) {
+            todo.setStatus(taskStatus);
+          }
+
+          if (task.getDeadlineAt() != null) {
+            todo.setDateDue(task.getDeadlineAt());
+          }
+
+          if (task.getCreatedAt() != null) {
+            todo.setCreated(task.getCreatedAt());
+          }
+
+          if (task.getUpdatedAt() != null) {
+            todo.setLastModified(task.getUpdatedAt());
+          }
+
           ical.addTodo(todo);
         }
       }
