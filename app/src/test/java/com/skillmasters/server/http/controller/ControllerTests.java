@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.google.gson.Gson;
 import com.skillmasters.server.common.requestbuilder.AppRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.event.CreateEventRequestBuilder;
+import com.skillmasters.server.common.requestbuilder.task.CreateTaskRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.task.ListTasksRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.task.UpdateTaskRequestBuilder;
 import com.skillmasters.server.http.middleware.security.FirebaseAuthenticationTokenFilter;
@@ -29,6 +30,7 @@ import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @AutoConfigureMockMvc
 public class ControllerTests
@@ -68,7 +70,7 @@ public class ControllerTests
     return null;
   }
 
-  private MockHttpServletRequestBuilder authorizedRequest(HttpMethod method, String url)
+  protected MockHttpServletRequestBuilder authorizedRequest(HttpMethod method, String url)
   {
     return requestMethod(method, url)
         .header(FirebaseAuthenticationTokenFilter.TOKEN_HEADER, "tester")
@@ -101,11 +103,6 @@ public class ControllerTests
     return mockMvc.perform(req).andExpect(status().isNotFound());
   }
 
-//  protected EventResponse parseEventResponse(MockHttpServletResponse resp) throws IOException
-//  {
-//    return new ObjectMapper().readValue(resp.getContentAsString(), EventResponse.class);
-//  }
-
   protected MvcResult authorizedOkResult(HttpMethod method, String url, AppRequestBuilder b) throws Exception
   {
     MockHttpServletRequestBuilder req = authorizedRequest(method, url, b);
@@ -124,10 +121,18 @@ public class ControllerTests
     return response;
   }
 
+  protected <R extends Response> R authorizedOkResultResponse(HttpMethod method, String url, Class<R> cls
+  ) throws Exception
+  {
+    return authorizedOkResultResponse(method, url, new AppRequestBuilder(), cls);
+  }
+
 
   /*
-  SECTION OF INSERT HELPERS
+  SECTION OF HELPERS
    */
+
+  // EVENT
   protected EventResponse insertEvent() throws Exception
   {
     CreateEventRequestBuilder createBuilder = new CreateEventRequestBuilder();
@@ -145,10 +150,36 @@ public class ControllerTests
     return eventsList;
   }
 
+  protected List<Event> getAllEvents() throws Exception
+  {
+    EventResponse resp = authorizedOkResultResponse(HttpMethod.GET, eventsEndpoint,
+        new AppRequestBuilder(), EventResponse.class);
+    return resp.getData();
+  }
+
+  protected EventResponse deleteEvent(Event event) throws Exception
+  {
+    Long id = event.getId();
+    return authorizedOkResultResponse(
+        HttpMethod.DELETE, eventsEndpoint+"/"+id, new AppRequestBuilder(), EventResponse.class);
+  }
+
+
+  // TASK
   protected TaskResponseMock insertTask(Event event, AppRequestBuilder b) throws Exception
   {
     Long eventId = event.getId();
+    return insertTask(eventId, b);
+  }
+
+  protected TaskResponseMock insertTask(Long eventId, AppRequestBuilder b) throws Exception
+  {
     return authorizedOkResultResponse(HttpMethod.POST, tasksEndpoint+"?event_id="+eventId, b, TaskResponseMock.class);
+  }
+
+  protected TaskResponseMock insertTask(Long eventId) throws Exception
+  {
+    return insertTask(eventId, new AppRequestBuilder());
   }
 
   protected TaskResponseMock insertTask(Event event) throws Exception
@@ -162,26 +193,36 @@ public class ControllerTests
     return insertTask(eventResponse.getData().get(0), new AppRequestBuilder());
   }
 
-  protected EventResponse deleteEvent(Event event) throws Exception
+  protected TaskResponseMock insertTask(CreateTaskRequestBuilder b) throws Exception
   {
-    Long id = event.getId();
-    return authorizedOkResultResponse(
-        HttpMethod.DELETE, eventsEndpoint+"/"+id, new AppRequestBuilder(), EventResponse.class);
+    EventResponse eventResponse = insertEvent();
+    return insertTask(eventResponse.getData().get(0), b);
   }
 
-  protected EventResponse deleteTask(TaskMock taskMock) throws Exception
+  protected List<TaskMock> insertTasks(int amount) throws Exception
   {
-    Long id = taskMock.getId();
-    return authorizedOkResultResponse(
-        HttpMethod.DELETE, tasksEndpoint+"/"+id, new AppRequestBuilder(), EventResponse.class);
+    List<TaskMock> result = new ArrayList<>(amount);
+    for (int i = 0; i < amount; i++) {
+      TaskResponseMock insertOneResponse = insertTask();
+      assertThat(insertOneResponse.getData().size()).isEqualTo(1);
+      TaskMock t = insertOneResponse.getData().get(0);
+      result.add(t);
+    }
+    return result;
   }
 
-
-  protected List<Event> getAllEvents() throws Exception
+  protected TaskResponseMock insertTaskWithStatus(String status) throws Exception
   {
-    EventResponse resp = authorizedOkResultResponse(HttpMethod.GET, eventsEndpoint,
-        new AppRequestBuilder(), EventResponse.class);
-    return resp.getData();
+    CreateTaskRequestBuilder b = new CreateTaskRequestBuilder();
+    b.status(status);
+    return insertTask(b);
+  }
+
+  protected TaskResponseMock insertTaskWithDeadline(Long deadline) throws Exception
+  {
+    CreateTaskRequestBuilder b = new CreateTaskRequestBuilder();
+    b.deadlineAt(deadline);
+    return insertTask(b);
   }
 
   protected List<TaskMock> getAllTasks() throws Exception
@@ -190,6 +231,24 @@ public class ControllerTests
         new ListTasksRequestBuilder(), TaskResponseMock.class);
 
     return resp.getData();
+  }
+
+  protected TaskResponseMock getTaskOkById(Long id) throws Exception
+  {
+    return authorizedOkResultResponse(
+        HttpMethod.GET, tasksEndpoint+"/"+id, new AppRequestBuilder(), TaskResponseMock.class);
+  }
+
+  protected TaskResponseMock getTasks(ListTasksRequestBuilder b) throws Exception
+  {
+    return authorizedOkResultResponse(HttpMethod.GET, tasksEndpoint, b, TaskResponseMock.class);
+  }
+
+  protected EventResponse deleteTask(TaskMock taskMock) throws Exception
+  {
+    Long id = taskMock.getId();
+    return authorizedOkResultResponse(
+        HttpMethod.DELETE, tasksEndpoint+"/"+id, new AppRequestBuilder(), EventResponse.class);
   }
 
   protected TaskMock updateTask(TaskMock task, UpdateTaskRequestBuilder b) throws Exception
