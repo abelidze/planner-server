@@ -1,5 +1,9 @@
 package com.skillmasters.server.http.controller;
 
+import biweekly.Biweekly;
+import biweekly.ICalVersion;
+import biweekly.ICalendar;
+import biweekly.ValidationWarnings;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.google.gson.Gson;
@@ -66,6 +70,8 @@ public class ControllerTests
   protected static String shareEndpoint = apiPrefix + "/share";
 
   protected static String userEndpoint = apiPrefix + "/user";
+
+  protected static String exportEndpoint = apiPrefix + "/export";
 
   protected String testerId = "322";
 
@@ -399,5 +405,23 @@ public class ControllerTests
   protected PermissionResponse revokePermission(Long id) throws Exception
   {
     return authorizedOkResultResponse(HttpMethod.DELETE, permissionsEndpoint+"/"+id, PermissionResponse.class);
+  }
+
+  // iCal
+
+  protected ICalendar export(String userToken) throws Exception
+  {
+    MockHttpServletRequestBuilder rb = requestMethod(HttpMethod.GET, exportEndpoint)
+        .header(FirebaseAuthenticationTokenFilter.TOKEN_HEADER, userToken)
+        .accept("text/calendar");
+
+    MockHttpServletResponse response = mockMvc.perform(rb).andReturn().getResponse();
+
+    ICalendar ical = Biweekly.parse(response.getContentAsString()).first();
+    ValidationWarnings warnings = ical.validate(ICalVersion.V2_0);
+    assertThat(warnings.isEmpty()).isTrue();
+
+    assertThat(ical).isNotNull();
+    return  ical;
   }
 }
