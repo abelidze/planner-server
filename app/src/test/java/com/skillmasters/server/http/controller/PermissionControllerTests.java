@@ -1,6 +1,7 @@
 package com.skillmasters.server.http.controller;
 
 import com.skillmasters.server.common.requestbuilder.permission.GrantRequestBuilder;
+import com.skillmasters.server.common.requestbuilder.permission.ShareRequestBuilder;
 import com.skillmasters.server.http.middleware.security.FirebaseAuthenticationTokenFilter;
 import com.skillmasters.server.http.request.PermissionRequest;
 import com.skillmasters.server.http.response.PermissionResponse;
@@ -34,7 +35,7 @@ public class PermissionControllerTests extends ControllerTests
 
   private static String ownerId = "322";
   private static String grantedUserId = "323";
-  private static String notGrantedUserId = "333";
+  private static String notGrantedUserId = "324";
 
   @Test
   public void testCreateList() throws Exception
@@ -43,9 +44,7 @@ public class PermissionControllerTests extends ControllerTests
       for (PermissionRequest.ActionType actionType : PermissionRequest.ActionType.values()) {
         IEntity entity = insertEntity(entityType);
 
-//        for (int i = 0; i < 10; i++) {
         grantPermission(grantedUserId, entity.getId(), entityType, actionType);
-//        }
         //owner
         assertThat(permissionIsInList(ownerToken, entityType, actionType, entity.getId().toString(), true)).isTrue();
         assertThat(permissionIsInList(grantedUserToken, entityType, actionType, entity.getId().toString(), false)).isTrue();
@@ -74,9 +73,6 @@ public class PermissionControllerTests extends ControllerTests
                                      String entityId, Boolean mine) throws Exception
   {
     PermissionResponse response = listPermissions(userToken, entityType, mine, 200);
-
-
-
     String name = actionType.name() + "_" + entityType.toString().toUpperCase();
     int metCounter = 0;
     for (Permission perm : response.getData()) {
@@ -100,6 +96,25 @@ public class PermissionControllerTests extends ControllerTests
         GrantRequestBuilder b = new GrantRequestBuilder();
         b.userId(grantedUserId).entityId(entity.getId()).entityType(entityType).action(actionType);
         mockMvc.perform(authorizedRequest(HttpMethod.GET, grantEndpoint).params(b.buildGet())).andExpect(status().is(204));
+      }
+    }
+  }
+
+  @Test
+  public void testSharePermissions() throws Exception
+  {
+    for (PermissionRequest.EntityType entityType : PermissionRequest.EntityType.values()) {
+      for (PermissionRequest.ActionType actionType : PermissionRequest.ActionType.values()) {
+        IEntity entity = insertEntity(entityType);
+
+        ShareRequestBuilder b = new ShareRequestBuilder();
+        b.action(actionType).entityId(entity.getId()).entityType(entityType);
+        String shareLink = getShareLink(b, 200);
+        activateShareLink(shareLink, grantedUserToken, grantedUserId, 200);
+        
+        assertThat(permissionIsInList(ownerToken, entityType, actionType, entity.getId().toString(), true)).isTrue();
+        assertThat(permissionIsInList(grantedUserToken, entityType, actionType, entity.getId().toString(), false)).isTrue();
+        assertThat(permissionIsInList(notGrantedUserToken, entityType, actionType, entity.getId().toString(), false)).isFalse();
       }
     }
   }

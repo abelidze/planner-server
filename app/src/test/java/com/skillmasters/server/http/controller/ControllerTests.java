@@ -10,6 +10,7 @@ import com.skillmasters.server.common.requestbuilder.pattern.ListPatternsRequest
 import com.skillmasters.server.common.requestbuilder.pattern.UpdatePatternRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.permission.GrantRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.permission.PermissionsRequestBuilder;
+import com.skillmasters.server.common.requestbuilder.permission.ShareRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.task.CreateTaskRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.task.ListTasksRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.task.UpdateTaskRequestBuilder;
@@ -356,5 +357,25 @@ public class ControllerTests
 
     return new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
         .readValue(response.getContentAsString(), PermissionResponse.class);
+  }
+
+  protected String getShareLink(ShareRequestBuilder b, int status) throws Exception
+  {
+    return mockMvc.perform(requestMethod(HttpMethod.GET, shareEndpoint)
+        .header(FirebaseAuthenticationTokenFilter.TOKEN_HEADER, "tester")
+        .accept(MediaType.TEXT_PLAIN).params(b.buildGet())).andExpect(status().is(status)).andReturn().getResponse().getContentAsString();
+  }
+
+  protected PermissionResponse activateShareLink(String link, String userToken, String userId, int status) throws Exception
+  {
+    MockHttpServletRequestBuilder rb = requestMethod(HttpMethod.GET, link)
+        .header(FirebaseAuthenticationTokenFilter.TOKEN_HEADER, userToken)
+        .accept(MediaType.APPLICATION_JSON)
+        .contentType(MediaType.APPLICATION_JSON);
+    MockHttpServletResponse response = mockMvc.perform(rb).andExpect(status().is(status)).andReturn().getResponse();
+
+    return new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
+        .readValue(response.getContentAsString(), PermissionResponse.class);
+
   }
 }
