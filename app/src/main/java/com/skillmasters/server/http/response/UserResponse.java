@@ -1,5 +1,6 @@
 package com.skillmasters.server.http.response;
 
+import com.google.firebase.auth.UserRecord;
 import com.skillmasters.server.model.User;
 
 public class UserResponse extends Response<UserResponse.UserDto, UserResponse>
@@ -9,6 +10,8 @@ public class UserResponse extends Response<UserResponse.UserDto, UserResponse>
     public String id = null;
     public String username = null;
     public String photo = null;
+    public String email = null;
+    public String phone = null;
     public boolean enabled = true;
     public boolean credentialsNonExpired = true;
     public boolean accountNonLocked = true;
@@ -35,6 +38,15 @@ public class UserResponse extends Response<UserResponse.UserDto, UserResponse>
       this.id = uid;
       this.username = username;
       this.photo = photo;
+    }
+
+    public UserDto(UserRecord user)
+    {
+      this.id = user.getUid();
+      this.username = user.getDisplayName();
+      this.photo = user.getPhotoUrl();
+      this.email = user.getEmail();
+      this.phone = user.getPhoneNumber();
     }
   }
 

@@ -54,30 +54,63 @@ public class PermissionController
   @ApiOperation(value = "Find user", response = UserResponse.class)
   @GetMapping("/user")
   public UserResponse findUser(
-    @ApiParam(value = "User's id", required=false)
-    @RequestParam(value="user_id", required=false) String userId,
-    @ApiParam(value = "Phone", required=false)
-    @RequestParam(value="phone", required=false) String phone,
-    @ApiParam(value = "Email", required=false)
-    @RequestParam(value="email", required=false) String email
+    @ApiParam(value = "User's id")
+    @RequestParam(value="user_id", defaultValue="") List<String> userId,
+    @ApiParam(value = "Phone")
+    @RequestParam(value="phone", defaultValue="") List<String> phone,
+    @ApiParam(value = "Email")
+    @RequestParam(value="email", defaultValue="") List<String> email
   ) {
     UserRecord u = null;
-    try {
-      if (!Strings.isNullOrEmpty(userId)) {
-        u = firebaseAuth.getUser(userId);
-      } else if (!Strings.isNullOrEmpty(phone)) {
-        u = firebaseAuth.getUserByPhoneNumber(phone);
-      } else if (!Strings.isNullOrEmpty(email)) {
-        u = firebaseAuth.getUserByEmail(email);
-      } else {
-        throw new ResourceNotFoundException();
+    List<UserResponse.UserDto> list = new ArrayList<>();
+    long requestedCount = userId.size() + phone.size() + email.size();
+
+    for (String id : userId) {
+      try {
+        if (!Strings.isNullOrEmpty(id)) {
+          u = firebaseAuth.getUser(id);
+          list.add( new UserResponse.UserDto(u) );
+        } else if (requestedCount == 1) {
+          throw new ResourceNotFoundException();
+        }
+      } catch (FirebaseAuthException ex) {
+        if (requestedCount == 1) {
+          return new UserResponse().error(404, ex.getMessage());
+        }
       }
-    } catch (FirebaseAuthException ex) {
-      return new UserResponse().error(404, ex.getMessage());
     }
 
-    UserResponse.UserDto user = new UserResponse.UserDto(u.getUid(), u.getDisplayName(), u.getPhotoUrl());
-    return new UserResponse().success(user);
+    for (String em : email) {
+      try {
+        if (!Strings.isNullOrEmpty(em)) {
+          u = firebaseAuth.getUserByEmail(em);
+          list.add( new UserResponse.UserDto(u) );
+        } else if (requestedCount == 1) {
+          throw new ResourceNotFoundException();
+        }
+      } catch (FirebaseAuthException ex) {
+        if (requestedCount == 1) {
+          return new UserResponse().error(404, ex.getMessage());
+        }
+      }
+    }
+
+    for (String ph : phone) {
+      try {
+        if (!Strings.isNullOrEmpty(ph)) {
+          u = firebaseAuth.getUserByPhoneNumber(ph);
+          list.add( new UserResponse.UserDto(u) );
+        } else if (requestedCount == 1) {
+          throw new ResourceNotFoundException();
+        }
+      } catch (FirebaseAuthException ex) {
+        if (requestedCount == 1) {
+          return new UserResponse().error(404, ex.getMessage());
+        }
+      }
+    }
+
+    return new UserResponse().success(list);
   }
 
   @ApiOperation(value = "Generate a link for sharing permission on specific entity", produces="text/plain")
