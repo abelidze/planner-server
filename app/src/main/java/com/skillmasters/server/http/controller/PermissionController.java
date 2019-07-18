@@ -11,6 +11,7 @@ import com.google.firebase.auth.UserRecord;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 
+import org.springframework.context.annotation.Lazy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -46,6 +47,7 @@ public class PermissionController
   @Autowired
   private PermissionService permissionService;
 
+  @Lazy
   @Autowired
   private FirebaseAuth firebaseAuth;
 
