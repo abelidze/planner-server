@@ -1,6 +1,7 @@
 package com.skillmasters.server.http.controller;
 
 import com.skillmasters.server.common.requestbuilder.permission.GrantRequestBuilder;
+import com.skillmasters.server.common.requestbuilder.permission.PermissionsRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.permission.ShareRequestBuilder;
 import com.skillmasters.server.http.middleware.security.FirebaseAuthenticationTokenFilter;
 import com.skillmasters.server.http.request.PermissionRequest;
@@ -17,6 +18,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -111,10 +115,40 @@ public class PermissionControllerTests extends ControllerTests
         b.action(actionType).entityId(entity.getId()).entityType(entityType);
         String shareLink = getShareLink(b, 200);
         activateShareLink(shareLink, grantedUserToken, grantedUserId, 200);
-        
+
         assertThat(permissionIsInList(ownerToken, entityType, actionType, entity.getId().toString(), true)).isTrue();
         assertThat(permissionIsInList(grantedUserToken, entityType, actionType, entity.getId().toString(), false)).isTrue();
         assertThat(permissionIsInList(notGrantedUserToken, entityType, actionType, entity.getId().toString(), false)).isFalse();
+      }
+    }
+  }
+
+  @Test
+  public void testShareMultiplePermissions() throws Exception
+  {
+    for (PermissionRequest.EntityType entityType : PermissionRequest.EntityType.values()) {
+      for (PermissionRequest.ActionType actionType : PermissionRequest.ActionType.values()) {
+        List<IEntity> entities = new ArrayList<>(10);
+        List<ShareRequestBuilder> permissions = new ArrayList<>(10);
+
+        for (int i = 0; i < 10; i++) {
+          IEntity entity = insertEntity(entityType);
+          entities.add(entity);
+
+          ShareRequestBuilder p = new ShareRequestBuilder();
+          p.entityType(entityType).action(actionType).entityId(entity.getId());
+
+          permissions.add(p);
+        }
+
+        String shareLink = getMultipleShareLink(permissions, 200);
+        activateShareLink(shareLink, grantedUserToken, grantedUserId, 200);
+
+        for (IEntity entity : entities) {
+          assertThat(permissionIsInList(ownerToken, entityType, actionType, entity.getId().toString(), true)).isTrue();
+          assertThat(permissionIsInList(grantedUserToken, entityType, actionType, entity.getId().toString(), false)).isTrue();
+          assertThat(permissionIsInList(notGrantedUserToken, entityType, actionType, entity.getId().toString(), false)).isFalse();
+        }
       }
     }
   }

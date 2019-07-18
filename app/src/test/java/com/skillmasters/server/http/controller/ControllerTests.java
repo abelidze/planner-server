@@ -3,6 +3,7 @@ package com.skillmasters.server.http.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.skillmasters.server.common.requestbuilder.AppRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.event.CreateEventRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.pattern.CreatePatternRequestBuilder;
@@ -36,7 +37,9 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -364,6 +367,20 @@ public class ControllerTests
     return mockMvc.perform(requestMethod(HttpMethod.GET, shareEndpoint)
         .header(FirebaseAuthenticationTokenFilter.TOKEN_HEADER, "tester")
         .accept(MediaType.TEXT_PLAIN).params(b.buildGet())).andExpect(status().is(status)).andReturn().getResponse().getContentAsString();
+  }
+
+  protected String getMultipleShareLink(List<ShareRequestBuilder> permissions, int status) throws Exception
+  {
+    List<Map<String, Object>> permissionsForQuery = new ArrayList<>();
+    for (ShareRequestBuilder rb : permissions) {
+      permissionsForQuery.add(rb.buildPost());
+    }
+    return mockMvc.perform(requestMethod(HttpMethod.POST, shareEndpoint)
+        .header(FirebaseAuthenticationTokenFilter.TOKEN_HEADER, "tester")
+        .accept(MediaType.TEXT_PLAIN)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(gson.toJson(permissionsForQuery)))
+        .andExpect(status().is(status)).andReturn().getResponse().getContentAsString();
   }
 
   protected PermissionResponse activateShareLink(String link, String userToken, String userId, int status) throws Exception
