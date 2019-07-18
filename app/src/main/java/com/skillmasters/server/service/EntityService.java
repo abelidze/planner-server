@@ -77,6 +77,11 @@ public class EntityService<R extends JpaRepository<T, ID> & QuerydslPredicateExe
   public T update(T entity, Map<String, Object> updates)
   {
     updates.forEach((k, v) -> {
+      // hack, badcoder
+      if (k.equals("id") || k.equals("owner_id")) {
+        return;
+      }
+
       String fieldName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, k);
       Field field = ReflectionUtils.findField(entityClass, fieldName);
       if (field != null) {
