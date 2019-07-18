@@ -48,7 +48,7 @@ import com.skillmasters.server.model.QPermission;
 public class EventController
 {
   @Autowired
-  EventService service;
+  EventService eventService;
 
   @Autowired
   PermissionService permissionService;
@@ -89,7 +89,6 @@ public class EventController
     @RequestParam(value="updated_to", required=false) Long updatedTo
   ) {
     EventInstanceResponse response = new EventInstanceResponse();
-    JPAQuery query = generateGetQuery(user, id, ownerId, from, to, createdFrom, createdTo, updatedFrom, updatedTo);
 
     Date fromDate;
     if (from == null) {
@@ -111,7 +110,8 @@ public class EventController
     df.setTimeZone(utcTimezone);
 
     Date eventDate;
-    Iterable<Event> events = service.getByQuery(query);
+    JPAQuery query = generateGetQuery(user, id, ownerId, from, to, createdFrom, createdTo, updatedFrom, updatedTo);
+    Iterable<Event> events = eventService.getByQuery(query);
     for (Event event : events) {
       for (EventPattern pattern : event.getPatterns()) {
         String rruleStr = pattern.getRrule();
@@ -137,7 +137,7 @@ public class EventController
           } else {
             advanceDate = new Date(fromDate.getTime() - pattern.getDuration());
           }
-          if (fromDate.after(start) && start.before(advanceDate)) {
+          if (start.before(advanceDate)) {
             dateIt.advanceTo(advanceDate);
           }
 
@@ -181,14 +181,14 @@ public class EventController
     @RequestParam(value="count", defaultValue="100") int count
   ) {
     JPAQuery query = generateGetQuery(user, id, ownerId, from, to, createdFrom, createdTo, updatedFrom, updatedTo);
-    return new EventResponse().success( service.getByQuery(query, new OffsetPageRequest(offset, count)) );
+    return new EventResponse().success( eventService.getByQuery(query, new OffsetPageRequest(offset, count)) );
   }
 
   @ApiOperation(value = "Get event by id", response = EventResponse.class)
   @GetMapping("/events/{id}")
   public EventResponse retrieveById(@PathVariable Long id)
   {
-    Event entity = service.getById(id);
+    Event entity = eventService.getById(id);
     if (entity == null) {
       return new EventResponse().error(404, "Event not found");
     }
@@ -207,7 +207,7 @@ public class EventController
     }
 
     event.setOwnerId(user.getId());
-    return new EventResponse().success( service.save(event) );
+    return new EventResponse().success( eventService.save(event) );
   }
 
   @ApiImplicitParams(
@@ -225,27 +225,27 @@ public class EventController
     @RequestBody Map<String, Object> updates,
     BindingResult binding
   ) {
-    Event entity = service.getById(id);
+    Event entity = eventService.getById(id);
     if (entity == null) {
       return new EventResponse().error(404, "Event not found");
     }
-    service.update(entity, updates);
+    eventService.update(entity, updates);
     validator.validate(entity, binding);
     if (binding.hasErrors()) {
       return new EventResponse().error(400, binding.getAllErrors().get(0).getDefaultMessage());
     }
-    return new EventResponse().success( service.save(entity) );
+    return new EventResponse().success( eventService.save(entity) );
   }
 
   @ApiOperation(value = "Delete event")
   @DeleteMapping("/events/{id}")
   public EventResponse delete(@PathVariable Long id)
   {
-    Event entity = service.getById(id);
+    Event entity = eventService.getById(id);
     if (entity == null) {
       return new EventResponse().error(404, "Event not found");
     }
-    service.delete(entity);
+    eventService.delete(entity);
     return new EventResponse().success();
   }
 

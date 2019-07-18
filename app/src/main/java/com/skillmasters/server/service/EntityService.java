@@ -84,23 +84,25 @@ public class EntityService<R extends JpaRepository<T, ID> & QuerydslPredicateExe
 
       String fieldName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, k);
       Field field = ReflectionUtils.findField(entityClass, fieldName);
-      if (field != null) {
-        ReflectionUtils.makeAccessible(field);
-        final Class<?> type = field.getType();
-        if (v != null) {
-          if (type.equals(Long.class)) {
-            ReflectionUtils.setField(field, entity, ((Number) v).longValue());
-            return;
-          } else if (type.equals(Date.class)) {
-            ReflectionUtils.setField(field, entity, new Date( ((Number) v).longValue() ));
-            return;
-          } else if (type.equals(List.class)) {
-            // ReflectionUtils.setField(field, entity, new ArrayList<>( ((Number) v).longValue() ));
-            return;
-          }
-        }
-        ReflectionUtils.setField(field, entity, v);
+      if (field == null) {
+        return;
       }
+
+      ReflectionUtils.makeAccessible(field);
+      final Class<?> type = field.getType();
+      if (v != null) {
+        if (type.equals(Long.class)) {
+          ReflectionUtils.setField(field, entity, ((Number) v).longValue());
+          return;
+        } else if (type.equals(Date.class)) {
+          ReflectionUtils.setField(field, entity, new Date( ((Number) v).longValue() ));
+          return;
+        } else if (type.equals(List.class)) {
+          // ReflectionUtils.setField(field, entity, new ArrayList<>( ((Number) v).longValue() ));
+          return;
+        }
+      }
+      ReflectionUtils.setField(field, entity, v);
     });
     return entity;
   }

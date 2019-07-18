@@ -80,7 +80,7 @@ public class PermissionServiceTests extends ServiceTests
 
       for (PermissionRequest.ActionType action : PermissionRequest.ActionType.values()) {
         authOwningUser();
-        permissionService.grantPermission(grantedUserId, action.name(), entity);
+        permissionService.grant(grantedUserId, action.name(), entity);
         usersCheckPermission(action, entity);
       }
 
@@ -130,7 +130,7 @@ public class PermissionServiceTests extends ServiceTests
         //also check duplicates
         permCounter++;
         for (int i = 0; i < 5; i++) {
-          permissionService.grantPermission(grantedUserId, action.name(), entityType.name());
+          permissionService.grant(grantedUserId, action.name(), entityType.name());
         }
         assertThat(countRowsInTable(permissionsTablename)).isEqualTo(permCounter);
 
@@ -159,7 +159,7 @@ public class PermissionServiceTests extends ServiceTests
 
         authOwningUser();
         assertThat(countRowsInTable(permissionsTablename)).isEqualTo(0);
-        permissionService.grantPermission(grantedUserId, action.name(), entity);
+        permissionService.grant(grantedUserId, action.name(), entity);
         flushAll();
         assertThat(countRowsInTable(permissionsTablename)).isEqualTo(1);
 
@@ -187,7 +187,7 @@ public class PermissionServiceTests extends ServiceTests
         authOwningUser();
         assertThat(countRowsInTable(permissionsTablename)).isEqualTo(0);
         for (int i = 0; i < 20; i ++) {
-          permissionService.grantPermission(grantedUserId, action.name(), entity);
+          permissionService.grant(grantedUserId, action.name(), entity);
         }
         flushAll();
         assertThat(countRowsInTable(permissionsTablename)).isEqualTo(1);

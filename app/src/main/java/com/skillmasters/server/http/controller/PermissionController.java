@@ -76,8 +76,7 @@ public class PermissionController
       return new UserResponse().error(404, ex.getMessage());
     }
 
-    User user = new User(u.getDisplayName(), u.getUid(), permissionService);
-    user.setPhoto(u.getPhotoUrl());
+    UserResponse.UserDto user = new UserResponse.UserDto(u.getUid(), u.getDisplayName(), u.getPhotoUrl());
     return new UserResponse().success(user);
   }
 
@@ -98,9 +97,9 @@ public class PermissionController
     // Generate permission object and store it
     Permission perm = null;
     if (entityId == null) {
-      perm = permissionService.generatePermission(null, action.name(), entityType.name());
+      perm = permissionService.generate(null, action.name(), entityType.name());
     } else {
-      perm = permissionService.generatePermission(null, action.name(), retriveEntity(entityId, entityType));
+      perm = permissionService.generate(null, action.name(), retriveEntity(entityId, entityType));
     }
     String token = shareService.cachePermission(perm);
     return ServletUriComponentsBuilder.fromCurrentRequestUri().pathSegment(token).toUriString();
@@ -118,10 +117,10 @@ public class PermissionController
     List<Permission> list = new ArrayList();
     for (PermissionRequest r : permissions) {
       if (r.getEntityId() == null) {
-        list.add( permissionService.generatePermission(null, r.getAction().name(), r.getEntityType().name()) );
+        list.add( permissionService.generate(null, r.getAction().name(), r.getEntityType().name()) );
       } else {
         IEntity entity = retriveEntity(r.getEntityId(), r.getEntityType());
-        list.add( permissionService.generatePermission(null, r.getAction().name(), entity) );
+        list.add( permissionService.generate(null, r.getAction().name(), entity) );
       }
     }
     String token = shareService.cachePermissionList(list);
@@ -138,7 +137,7 @@ public class PermissionController
     }
     for (Permission perm : permissions) {
       perm.setUserId(user.getId());
-      permissionService.grantPermission(perm);
+      permissionService.grant(perm);
     }
     return new PermissionResponse().success(permissions);
   }
@@ -160,9 +159,9 @@ public class PermissionController
     }
     Permission perm = null;
     if (entityId == null) {
-      perm = permissionService.grantPermission(userId, action.name(), entityType.name());
+      perm = permissionService.grant(userId, action.name(), entityType.name());
     } else {
-      perm = permissionService.grantPermission(userId, action.name(), retriveEntity(entityId, entityType));
+      perm = permissionService.grant(userId, action.name(), retriveEntity(entityId, entityType));
     }
     if (perm == null) {
       return new PermissionResponse().error(204, "Permission already exists");

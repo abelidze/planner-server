@@ -34,7 +34,7 @@ import com.skillmasters.server.model.*;
 public class TaskController
 {
   @Autowired
-  TaskService service;
+  TaskService taskService;
 
   @Autowired
   EventService eventService;
@@ -128,14 +128,14 @@ public class TaskController
     }
 
     query.where(where);
-    return new TaskResponse().success( service.getByQuery(query, new OffsetPageRequest(offset, count)) );
+    return new TaskResponse().success( taskService.getByQuery(query, new OffsetPageRequest(offset, count)) );
   }
 
   @ApiOperation(value = "Get task by id", response = TaskResponse.class)
   @GetMapping("/tasks/{id}")
   public TaskResponse retrieveById(@PathVariable Long id)
   {
-    Task entity = service.getById(id);
+    Task entity = taskService.getById(id);
     if (entity == null) {
       return new TaskResponse().error(404, "Task not found");
     }
@@ -158,7 +158,7 @@ public class TaskController
       return new TaskResponse().error(404, "Event not found");
     }
     task.setEvent(entity);
-    return new TaskResponse().success( service.save(task) );
+    return new TaskResponse().success( taskService.save(task) );
   }
 
   @ApiImplicitParams(
@@ -176,27 +176,27 @@ public class TaskController
     @RequestBody Map<String, Object> updates,
     BindingResult binding
   ) {
-    Task entity = service.getById(id);
+    Task entity = taskService.getById(id);
     if (entity == null) {
       return new TaskResponse().error(404, "Task not found");
     }
-    service.update(entity, updates);
+    taskService.update(entity, updates);
     validator.validate(entity, binding);
     if (binding.hasErrors()) {
       return new TaskResponse().error(400, binding.getAllErrors().get(0).getDefaultMessage());
     }
-    return new TaskResponse().success( service.save(entity) );
+    return new TaskResponse().success( taskService.save(entity) );
   }
 
   @ApiOperation(value = "Delete task")
   @DeleteMapping("/tasks/{id}")
   public TaskResponse delete(@PathVariable Long id)
   {
-    Task entity = service.getById(id);
+    Task entity = taskService.getById(id);
     if (entity == null) {
       return new TaskResponse().error(404, "Task not found");
     }
-    service.delete(entity);
+    taskService.delete(entity);
     return new TaskResponse().success();
   }
 }

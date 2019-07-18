@@ -16,7 +16,7 @@ public class PermissionService extends EntityService<PermissionRepository, Permi
     super(Permission.class, "PERMISSION");
   }
 
-  public Permission generatePermission(String userId, String action, IEntity entity)
+  public Permission generate(String userId, String action, IEntity entity)
   {
     Permission permission = new Permission();
     permission.setName(action + "_" + entity.getEntityName());
@@ -26,7 +26,7 @@ public class PermissionService extends EntityService<PermissionRepository, Permi
     return permission;
   }
 
-  public Permission generatePermission(String userId, String action, String entity)
+  public Permission generate(String userId, String action, String entity)
   {
     String ownerId = getCurrentUser().getId();
     Permission permission = new Permission();
@@ -37,25 +37,25 @@ public class PermissionService extends EntityService<PermissionRepository, Permi
     return permission;
   }
 
-  public Permission grantPermission(String userId, String action, String entity)
+  public Permission grant(String userId, String action, String entity)
   {
-    Permission permission = generatePermission(userId, action, entity);
+    Permission permission = generate(userId, action, entity);
     if (repository.exists(existsExpression(permission))) {
       return null;
     }
     return repository.save(permission);
   }
 
-  public Permission grantPermission(String userId, String action, IEntity entity)
+  public Permission grant(String userId, String action, IEntity entity)
   {
-    Permission permission = generatePermission(userId, action, entity);
+    Permission permission = generate(userId, action, entity);
     if (repository.exists(existsExpression(permission))) {
       return null;
     }
     return repository.save(permission);
   }
 
-  public Permission grantPermission(Permission permission)
+  public Permission grant(Permission permission)
   {
     if (repository.exists(existsExpression(permission))) {
       return null;
@@ -79,6 +79,10 @@ public class PermissionService extends EntityService<PermissionRepository, Permi
 
   public void deleteByEntity(IEntity entity)
   {
+    if (entity instanceof Permission) {
+      return;
+    }
+
     if (entity instanceof Event) {
       Event event = (Event) entity;
       if (event.getTasks() != null) {
@@ -92,6 +96,7 @@ public class PermissionService extends EntityService<PermissionRepository, Permi
         }
       }
     }
+
     repository.deleteEntityPermissions(entity.getId().toString(), entity.getOwnerId(), entity.getEntityName());
   }
 

@@ -47,7 +47,7 @@ public class FirebaseAuthenticationProvider extends AbstractUserDetailsAuthentic
 
     // backdoor. Request by Sergey
     if (authenticationToken.getToken().equals("serega_mem")) {
-      return new User("sergo@zink.ovic", "227", permissionService);
+      return new User("sergo@zink.ovic", User.DEFAULT_USER_ID, permissionService);
     }
     // pls don't remove. tests depend on this token.
     if (authenticationToken.getToken().equals("tester")) {

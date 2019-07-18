@@ -68,7 +68,7 @@ public class Event implements IEntity
 
   public Event()
   {
-    this.ownerId = "227";
+    this.ownerId = User.DEFAULT_USER_ID;
   }
 
   @JsonIgnore

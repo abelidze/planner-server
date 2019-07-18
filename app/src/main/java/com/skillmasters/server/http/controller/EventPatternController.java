@@ -36,7 +36,7 @@ import com.skillmasters.server.model.*;
 public class EventPatternController
 {
   @Autowired
-  EventPatternService service;
+  EventPatternService patternService;
 
   @Autowired
   PermissionService permissionService;
@@ -94,14 +94,14 @@ public class EventPatternController
     }
 
     JPAQuery query = generateGetQuery(user, id, events, from, to, createdFrom, createdTo, updatedFrom, updatedTo);
-    return new EventPatternResponse().success( service.getByQuery(query, new OffsetPageRequest(offset, count)) );
+    return new EventPatternResponse().success( patternService.getByQuery(query, new OffsetPageRequest(offset, count)) );
   }
 
   @ApiOperation(value = "Get pattern by id", response = EventPatternResponse.class)
   @GetMapping("/patterns/{id}")
   public EventPatternResponse retrieveById(@PathVariable Long id)
   {
-    EventPattern entity = service.getById(id);
+    EventPattern entity = patternService.getById(id);
     if (entity == null) {
       return new EventPatternResponse().error(404, "EventPattern not found");
     }
@@ -138,7 +138,7 @@ public class EventPatternController
     }
 
     pattern.setEvent(entity);
-    return new EventPatternResponse().success( service.save(pattern) );
+    return new EventPatternResponse().success( patternService.save(pattern) );
   }
 
   @ApiImplicitParams(
@@ -156,27 +156,27 @@ public class EventPatternController
     @RequestBody Map<String, Object> updates,
     BindingResult binding
   ) {
-    EventPattern entity = service.getById(id);
+    EventPattern entity = patternService.getById(id);
     if (entity == null) {
       return new EventPatternResponse().error(404, "EventPattern not found");
     }
-    service.update(entity, updates);
+    patternService.update(entity, updates);
     validator.validate(entity, binding);
     if (binding.hasErrors()) {
       return new EventPatternResponse().error(400, binding.getAllErrors().get(0).getDefaultMessage());
     }
-    return new EventPatternResponse().success( service.save(entity) );
+    return new EventPatternResponse().success( patternService.save(entity) );
   }
 
   @ApiOperation(value = "Delete pattern")
   @DeleteMapping("/patterns/{id}")
   public EventPatternResponse delete(@PathVariable Long id)
   {
-    EventPattern entity = service.getById(id);
+    EventPattern entity = patternService.getById(id);
     if (entity == null) {
       return new EventPatternResponse().error(404, "EventPattern not found");
     }
-    service.delete(entity);
+    patternService.delete(entity);
     return new EventPatternResponse().success();
   }
 

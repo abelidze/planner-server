@@ -12,8 +12,8 @@ import com.skillmasters.server.service.PermissionService;
 @Data
 public class User implements UserDetails
 {
-  @JsonIgnore
-  private static final long serialVersionUID = 1L;
+  @JsonIgnore public static final String DEFAULT_USER_ID = "227";
+  @JsonIgnore private static final long serialVersionUID = 1L;
 
   private String id = null;
   private String username = null;
