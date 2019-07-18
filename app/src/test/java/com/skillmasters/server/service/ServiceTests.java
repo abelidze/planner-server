@@ -25,7 +25,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 //@AutoConfigureMockMvc
-class ServiceTests {
+public class ServiceTests {
   @PersistenceContext
   EntityManager entityManager;
 

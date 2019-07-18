@@ -68,12 +68,12 @@ public class EventServiceTests extends ServiceTests
 
     for (int i = 0; i < 10; i++) {
       EventPattern ep = epg.genEventPattern();
-      ep.setEvent(event);
+      event.addPattern(ep);
       ep = eventPatternService.save(ep);
       newEpList.add(ep);
 
       Task t = new Task();
-      t.setEvent(event);
+      event.addTask(t);
       t = taskService.save(t);
       newTaskList.add(t);
     }

@@ -77,6 +77,18 @@ public class Event implements IEntity
     return "EVENT";
   }
 
+  public void addTask(Task task)
+  {
+    task.setEvent(this);
+    this.tasks.add(task);
+  }
+
+  public void addPattern(EventPattern pattern)
+  {
+    pattern.setEvent(this);
+    this.patterns.add(pattern);
+  }
+
   // @Override
   // public String toString()
   // {

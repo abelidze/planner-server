@@ -21,15 +21,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Transactional
 public class CascadeOperationsTests extends ServiceTests
 {
-  //todo: unfixed bug
   @Test
   public void testGetTaskOwnerIdFromEvent()
   {
-    Task task = taskService.save(new Task());
+    Task task = new Task();
     Event event = EventGenerator.genEventWithOwner(220, testUser.getId());
-    event.setTasks(Arrays.asList(task));
-
-    event = eventService.save(event);
+    event.addTask(task);
+    eventService.save(event);
+    taskService.save(task);
     flushAll();
 
     Task taskFromDb = taskService.getById(task.getId());
@@ -37,20 +36,19 @@ public class CascadeOperationsTests extends ServiceTests
     assertThat(taskFromDb.getEvent()).isNotNull();
   }
 
-  //todo: unfixed bug
   @Test
   public void testGetEventFromTask()
   {
     Task task = new Task();
-
-    Event event = eventService.save(EventGenerator.genEventWithOwner(220, testUser.getId()));
-    task.setEvent(event);
+    Event event = EventGenerator.genEventWithOwner(220, testUser.getId());
+    event.getTasks().add(task);
+    eventService.save(event);
     taskService.save(task);
     flushAll();
 
     Event eventFromDb = eventService.getById(event.getId());
     assertThat(eventFromDb).isNotNull();
-    assertThat(event.getTasks()).isNotNull();
-    assertThat(event.getTasks().size()).isEqualTo(1);
+    assertThat(eventFromDb.getTasks()).isNotNull();
+    assertThat(eventFromDb.getTasks().size()).isEqualTo(1);
   }
 }
