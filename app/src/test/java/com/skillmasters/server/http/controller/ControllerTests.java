@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 import com.skillmasters.server.common.requestbuilder.AppRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.event.CreateEventRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.pattern.CreatePatternRequestBuilder;
+import com.skillmasters.server.common.requestbuilder.pattern.ListPatternsRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.task.CreateTaskRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.task.ListTasksRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.task.UpdateTaskRequestBuilder;
@@ -284,6 +285,15 @@ public class ControllerTests
     return insertPattern(insertEvent().getData().get(0), b);
   }
 
+  protected List<EventPatternMock> insertPatterns(Event event, int amount) throws Exception
+  {
+    List<EventPatternMock> patternsList = new ArrayList<>(amount);
+    for (int i = 0; i < amount; i++) {
+      patternsList.add(insertPattern(event.getId(), new AppRequestBuilder()).getData().get(0));
+    }
+    return patternsList;
+  }
+
   protected List<EventPatternMock> getAllPatterns() throws Exception
   {
     EventPatternResponseMock resp = authorizedOkResultResponse(HttpMethod.GET, patternsEndpoint,
@@ -291,4 +301,8 @@ public class ControllerTests
     return resp.getData();
   }
 
+  protected EventPatternResponseMock getPatterns(ListPatternsRequestBuilder b) throws Exception
+  {
+    return authorizedOkResultResponse(HttpMethod.GET, patternsEndpoint, b, EventPatternResponseMock.class);
+  }
 }

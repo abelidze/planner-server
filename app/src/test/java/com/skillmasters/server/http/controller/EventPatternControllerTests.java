@@ -1,5 +1,6 @@
 package com.skillmasters.server.http.controller;
 
+import com.skillmasters.server.common.requestbuilder.event.ListEventsRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.pattern.CreatePatternRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.pattern.ListPatternsRequestBuilder;
 import com.skillmasters.server.http.response.EventPatternResponse;
@@ -8,17 +9,18 @@ import com.skillmasters.server.mock.response.EventPatternResponseMock;
 import com.skillmasters.server.model.Event;
 import com.skillmasters.server.model.EventPattern;
 import com.skillmasters.server.model.EventPatternExrule;
+import com.skillmasters.server.service.EventPatternService;
+import com.skillmasters.server.service.EventService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -109,12 +111,10 @@ public class EventPatternControllerTests extends ControllerTests
 //  public void testGetPatternsForEventBug() throws Exception
 //  {
 //    Event event = insertEvent().getData().get(0);
-//
 //    for (int i = 0; i < 20; i++) {
 //      CreatePatternRequestBuilder createBuilder = new CreatePatternRequestBuilder();
 //      createBuilder.duration(200L);
 //      insertPattern(event.getId(), createBuilder);
-//
 //      ListPatternsRequestBuilder b = new ListPatternsRequestBuilder();
 //
 //      EventPatternResponseMock response = authorizedOkResultResponse(HttpMethod.GET,
@@ -124,5 +124,32 @@ public class EventPatternControllerTests extends ControllerTests
 //
 //    }
 //  }
+
+  @Test
+  public void testGetPatternsSeveralIds() throws Exception
+  {
+    Event event = insertEvent().getData().get(0);
+    List<EventPatternMock> createPatterns = insertPatterns(event, 14);
+    Map<Long, Boolean> idsSubset = new HashMap<>();
+
+    idsSubset.put(createPatterns.get(1).getId(), false);
+    idsSubset.put(createPatterns.get(3).getId(), false);
+    idsSubset.put(createPatterns.get(7).getId(), false);
+
+    ListPatternsRequestBuilder b = new ListPatternsRequestBuilder();
+    b.id(new ArrayList<>(idsSubset.keySet()));
+
+    EventPatternResponseMock getTasksResponse = getPatterns(b);
+    assertThat(getTasksResponse.getCount()).isEqualTo(3);
+    assertThat(getTasksResponse.getData().size()).isEqualTo(3);
+
+    for (EventPatternMock t : getTasksResponse.getData()) {
+      idsSubset.put(t.getId(), true);
+    }
+
+    for (Boolean v : idsSubset.values()) {
+      assertThat(v).isTrue();
+    }
+  }
 
 }
