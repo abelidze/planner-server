@@ -49,7 +49,7 @@ public class PermissionController
   @Autowired
   private FirebaseAuth firebaseAuth;
 
-  @ApiOperation(value = "Find user", response = User.class)
+  @ApiOperation(value = "Find user", response = UserResponse.class)
   @GetMapping("/user")
   public UserResponse findUser(
     @ApiParam(value = "User's id", required=false)

@@ -12,6 +12,7 @@ import com.skillmasters.server.service.PermissionService;
 @Data
 public class User implements UserDetails
 {
+  @JsonIgnore
   private static final long serialVersionUID = 1L;
 
   private String id = null;
@@ -55,6 +56,7 @@ public class User implements UserDetails
         || (this.permissionService != null && this.permissionService.hasPermission(this, action, entity));
   }
 
+  @JsonIgnore
   public boolean isOwner(IEntity entity)
   {
     return entity.getOwnerId().equals(id)
