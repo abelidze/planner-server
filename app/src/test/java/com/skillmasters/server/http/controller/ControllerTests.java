@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.google.gson.Gson;
 import com.skillmasters.server.common.requestbuilder.AppRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.event.CreateEventRequestBuilder;
+import com.skillmasters.server.common.requestbuilder.pattern.CreatePatternRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.task.CreateTaskRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.task.ListTasksRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.task.UpdateTaskRequestBuilder;
@@ -12,9 +13,12 @@ import com.skillmasters.server.http.middleware.security.FirebaseAuthenticationTo
 import com.skillmasters.server.http.response.EventResponse;
 import com.skillmasters.server.http.response.Response;
 import com.skillmasters.server.http.response.TaskResponse;
+import com.skillmasters.server.mock.model.EventPatternMock;
 import com.skillmasters.server.mock.model.TaskMock;
+import com.skillmasters.server.mock.response.EventPatternResponseMock;
 import com.skillmasters.server.mock.response.TaskResponseMock;
 import com.skillmasters.server.model.Event;
+import com.skillmasters.server.model.EventPattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.HttpMethod;
@@ -43,6 +47,8 @@ public class ControllerTests
   protected static String eventsEndpoint = apiPrefix + "/events";
 
   protected static String tasksEndpoint = apiPrefix + "/tasks";
+
+  protected static String patternsEndpoint = apiPrefix + "/patterns";
 
   protected String testerId = "322";
 
@@ -256,4 +262,33 @@ public class ControllerTests
     return authorizedOkResultResponse(HttpMethod.PATCH, tasksEndpoint+"/"+ task.getId(),
         b, TaskResponseMock.class).getData().get(0);
   }
+
+  // PATTERN
+  protected EventPatternResponseMock insertPattern() throws Exception
+  {
+    EventResponse eventResponse = insertEvent();
+    return insertPattern(eventResponse.getData().get(0), new AppRequestBuilder());
+  }
+
+  protected EventPatternResponseMock insertPattern(Event event, AppRequestBuilder b) throws Exception
+  {
+    return insertPattern(event.getId(), b);
+  }
+
+  protected EventPatternResponseMock insertPattern(Long eventId, AppRequestBuilder b) throws Exception
+  {
+    return authorizedOkResultResponse(HttpMethod.POST, patternsEndpoint+"?event_id="+eventId, b, EventPatternResponseMock.class);
+  }
+  protected EventPatternResponseMock insertPattern(CreatePatternRequestBuilder b) throws Exception
+  {
+    return insertPattern(insertEvent().getData().get(0), b);
+  }
+
+  protected List<EventPatternMock> getAllPatterns() throws Exception
+  {
+    EventPatternResponseMock resp = authorizedOkResultResponse(HttpMethod.GET, patternsEndpoint,
+        new AppRequestBuilder(), EventPatternResponseMock.class);
+    return resp.getData();
+  }
+
 }

@@ -46,10 +46,10 @@ public class AppRequestBuilder<T extends AppRequestBuilder>
     return (T) this;
   }
 
-  public T set(String k, List<Long> v)
+  public T set(String k, List<?> v)
   {
     List<String> strList = new ArrayList<>();
-    for (Long l : v) {
+    for (Object l : v) {
       strList.add(l.toString());
     }
     mvmap.put(k, strList);
