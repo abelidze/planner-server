@@ -19,6 +19,7 @@ import io.swagger.annotations.*;
 
 import com.skillmasters.server.http.request.PermissionRequest;
 import com.skillmasters.server.http.response.PermissionResponse;
+import com.skillmasters.server.http.response.UserResponse;
 import com.skillmasters.server.misc.ResourceNotFoundException;
 import com.skillmasters.server.misc.PermissionDeniedException;
 import com.skillmasters.server.misc.OffsetPageRequest;
@@ -50,29 +51,32 @@ public class PermissionController
 
   @ApiOperation(value = "Find user", response = User.class)
   @GetMapping("/user")
-  public User findUser(
+  public UserResponse findUser(
     @ApiParam(value = "User's id", required=false)
     @RequestParam(value="user_id", required=false) String userId,
     @ApiParam(value = "Phone", required=false)
     @RequestParam(value="phone", required=false) String phone,
     @ApiParam(value = "Email", required=false)
     @RequestParam(value="email", required=false) String email
-  ) throws FirebaseAuthException 
-  {
+  ) {
     UserRecord u = null;
-    if (!Strings.isNullOrEmpty(userId)) {
-      u = firebaseAuth.getUser(userId);
-    } else if (!Strings.isNullOrEmpty(phone)) {
-      u = firebaseAuth.getUserByPhoneNumber(phone);
-    } else if (!Strings.isNullOrEmpty(email)) {
-      u = firebaseAuth.getUserByEmail(email);
-    } else {
-      throw new ResourceNotFoundException();
+    try {
+      if (!Strings.isNullOrEmpty(userId)) {
+        u = firebaseAuth.getUser(userId);
+      } else if (!Strings.isNullOrEmpty(phone)) {
+        u = firebaseAuth.getUserByPhoneNumber(phone);
+      } else if (!Strings.isNullOrEmpty(email)) {
+        u = firebaseAuth.getUserByEmail(email);
+      } else {
+        throw new ResourceNotFoundException();
+      }
+    } catch (FirebaseAuthException ex) {
+      return new UserResponse().error(404, ex.getMessage());
     }
 
     User user = new User(u.getDisplayName(), u.getUid(), permissionService);
     user.setPhoto(u.getPhotoUrl());
-    return user;
+    return new UserResponse().success(user);
   }
 
   @ApiOperation(value = "Generate a link for sharing permission on specific entity", produces="text/plain")

@@ -589,11 +589,21 @@ API GCM на данный момент могло обновиться, поэт
 **HTTP 200**
 ```
 {
-   "id": 2,
-   "name": "ExampleUser",
-   "photo": "https://example.com",
-   "phone": "88005553535",
-   "email": "user@example.com"
+   "success": true,
+   "status": 200,
+   "count": 1,
+   "offset": 0,
+   "data": [
+      {
+         "id": "9d46T2czeKB9FC65Jyc2",
+         "username": "ExampleUser",
+         "photo": null,
+         "enabled": true,
+         "credentials_non_expired": true,
+         "account_non_locked": true,
+         "account_non_expired": true
+      }
+   ]
 }
 ```
 
