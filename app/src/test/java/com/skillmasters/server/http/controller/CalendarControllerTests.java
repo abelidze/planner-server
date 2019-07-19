@@ -1,6 +1,9 @@
 package com.skillmasters.server.http.controller;
 
 import biweekly.ICalendar;
+import com.skillmasters.server.common.requestbuilder.event.CreateEventRequestBuilder;
+import com.skillmasters.server.common.requestbuilder.pattern.CreatePatternRequestBuilder;
+import com.skillmasters.server.common.requestbuilder.task.CreateTaskRequestBuilder;
 import com.skillmasters.server.http.middleware.security.FirebaseAuthenticationTokenFilter;
 import com.skillmasters.server.http.response.EventResponse;
 import org.junit.Test;
@@ -10,10 +13,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.core.parameters.P;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -39,20 +44,43 @@ public class CalendarControllerTests extends ControllerTests
   public void testImport() throws Exception
   {
     List<EventResponse> events = insertEvents(20);
-    ICalendar ical = export("tester");
-    assertThat(ical).isNotNull();
+    entityManager.flush();
+    entityManager.clear();
+    //add some patterns
+    CreatePatternRequestBuilder createPatternRequestBuilder = new CreatePatternRequestBuilder();
+    createPatternRequestBuilder.startedAt(new GregorianCalendar(2018, 2, 2).getTimeInMillis());
+    createPatternRequestBuilder.endedAt(new GregorianCalendar(2019, 2, 2).getTimeInMillis());
+    insertPattern(events.get(4).getData().get(0), createPatternRequestBuilder);
+    entityManager.flush();
+    entityManager.clear();
+    CreateTaskRequestBuilder createTaskRequestBuilder = new CreateTaskRequestBuilder();
+    insertTask(events.get(8).getData().get(0), createTaskRequestBuilder);
+    entityManager.flush();
+    entityManager.clear();
+
+    assertThat(getAllEvents().size()).isEqualTo(20);
+    assertThat(getAllTasks().size()).isEqualTo(1);
+    assertThat(getAllPatterns().size()).isEqualTo(1);
+
+    String icalStr = export("tester").write();
+    assertThat(icalStr).isNotEmpty();
 
     for (EventResponse er : events) {
       deleteEvent(er.getData().get(0));
     }
+    entityManager.flush();
+    entityManager.clear();
 
     assertThat(getAllEvents().size()).isEqualTo(0);
     assertThat(getAllTasks().size()).isEqualTo(0);
     assertThat(getAllPatterns().size()).isEqualTo(0);
 
-    importCal(ical, "tester");
+    importCal(icalStr, "tester");
+    entityManager.flush();
+    entityManager.clear();
     assertThat(getAllEvents().size()).isEqualTo(20);
-
+    assertThat(getAllTasks().size()).isEqualTo(1);
+    assertThat(getAllPatterns().size()).isEqualTo(1);
   }
 
   @Test

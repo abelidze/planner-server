@@ -446,11 +446,11 @@ public class ControllerTests
     return  ical;
   }
 
-  protected void importCal(ICalendar calendar, String userToken) throws Exception
+  protected void importCal(String icalStr, String userToken) throws Exception
   {
     MockHttpServletRequestBuilder rb = requestMethod(HttpMethod.POST, importEndpoint+"/raw")
         .header(FirebaseAuthenticationTokenFilter.TOKEN_HEADER, userToken)
-        .contentType(MediaType.TEXT_PLAIN).content(calendar.write());
+        .contentType(MediaType.TEXT_PLAIN).content(icalStr);
 
     MockHttpServletResponse response = mockMvc.perform(rb).andExpect(status().isOk()).andReturn().getResponse();
   }

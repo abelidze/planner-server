@@ -5,8 +5,10 @@ import com.skillmasters.server.common.requestbuilder.task.CreateTaskRequestBuild
 import com.skillmasters.server.common.requestbuilder.task.ListTasksRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.task.UpdateTaskRequestBuilder;
 import com.skillmasters.server.http.response.TaskResponse;
+import com.skillmasters.server.mock.model.EventMock;
 import com.skillmasters.server.mock.model.TaskMock;
 import com.skillmasters.server.mock.response.TaskResponseMock;
+import com.skillmasters.server.model.Event;
 import com.skillmasters.server.model.Task;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -89,6 +91,12 @@ public class TaskControllerTests extends ControllerTests
   public void testGetByEventId() throws Exception
   {
     List<TaskMock> tasks = insertTasks(10);
+
+    entityManager.flush();
+    entityManager.clear();
+    for (Event e : getAllEvents()) {
+      assertThat(e.getTasks().size()).isNotEqualTo(0);
+    }
 
     for (TaskMock task : tasks) {
       ListTasksRequestBuilder b = new ListTasksRequestBuilder();
