@@ -4,8 +4,11 @@ services:
   db:
     restart: always
     image: postgres:11.4-alpine
+    container_name: planner-db
     ports:
       - "5432:5432"
+    volumes:
+      - /srv/pgdata:/var/lib/postgresql/data
     environment:
       POSTGRES_DB: postgres
       POSTGRES_USER: postgres
@@ -26,6 +29,7 @@ services:
   app:
     restart: always
     image: gradle:5.2.1-jdk8-alpine
+    container_name: planner-app
     working_dir: /srv
     expose:
       - "8080"
