@@ -121,7 +121,7 @@ public class EventPatternController
     }
 
     if (pattern.getRrule() == null) {
-      if (pattern.getEndedAt().getTime() == Long.MAX_VALUE) {
+      if (pattern.getEndedAt().getTime() >= EventPattern.MAX_TIME) {
         pattern.setEndedAt(new Date(pattern.getStartedAt().getTime() + pattern.getDuration()));
       } else if (pattern.getDuration() <= 0) {
         pattern.setDuration(pattern.getEndedAt().getTime() - pattern.getStartedAt().getTime());

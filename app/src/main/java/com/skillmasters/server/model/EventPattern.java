@@ -26,6 +26,8 @@ import io.swagger.annotations.ApiModelProperty;
 @SequenceGenerator(name = "patternId", sequenceName = "pattern_seq", allocationSize = 1)
 public class EventPattern implements IEntity
 {
+  public static final long MAX_TIME = 253402300799000L;
+
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "patternId")
   @ApiModelProperty(value = "Pattern's unique id", readOnly = true)
@@ -63,14 +65,16 @@ public class EventPattern implements IEntity
   private List<EventPatternExrule> exrules = new ArrayList<>();
 
   @NotNull(message = "Field started_at can't be null")
-  @Column(name = "started_at", nullable = false)
+  @Column(name = "started_at")
+  @Temporal(TemporalType.TIMESTAMP)
   @ApiModelProperty(value = "Start of the first event's instance", example = "1556712345000")
   private Date startedAt = new Date();
 
   @NotNull(message = "Field ended_at can't be null")
-  @Column(name = "ended_at", nullable = false)
+  @Column(name = "ended_at")
+  @Temporal(TemporalType.TIMESTAMP)
   @ApiModelProperty(value = "Timestamp until that event can occur", example = "1556712345000")
-  private Date endedAt = new Date(Long.MAX_VALUE);
+  private Date endedAt = new Date(EventPattern.MAX_TIME);
 
   @CreationTimestamp
   @ApiModelProperty(value = "Creation timestamp", readOnly = true, example = "1556712345000")

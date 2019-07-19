@@ -99,7 +99,7 @@ public class EventController
 
     Date toDate;
     if (to == null) {
-      toDate = new Date(Long.MAX_VALUE);
+      toDate = new Date(EventPattern.MAX_TIME);
     } else {
       toDate = new Date(to);
     }
