@@ -195,9 +195,9 @@ public class ControllerTests
   }
 
 
-  protected EventResponse getInstances(ListInstancesRequestBuilder b) throws Exception
+  protected EventInstanceResponse getInstances(ListInstancesRequestBuilder b) throws Exception
   {
-    return authorizedOkResultResponse(HttpMethod.GET, instancesEndpoint, b, EventResponse.class);
+    return authorizedOkResultResponse(HttpMethod.GET, instancesEndpoint, b, EventInstanceResponse.class);
   }
 
   protected EventResponse deleteEvent(Event event) throws Exception

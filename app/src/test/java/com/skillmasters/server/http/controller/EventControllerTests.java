@@ -5,13 +5,17 @@ import com.skillmasters.server.common.requestbuilder.event.ListEventsRequestBuil
 import com.skillmasters.server.common.requestbuilder.event.ListInstancesRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.event.UpdateEventRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.pattern.CreatePatternRequestBuilder;
+import com.skillmasters.server.http.response.EventInstanceResponse;
 import com.skillmasters.server.http.response.EventResponse;
 import com.skillmasters.server.mock.model.EventPatternMock;
 import com.skillmasters.server.mock.response.EventPatternResponseMock;
 import com.skillmasters.server.model.Event;
 import com.skillmasters.server.model.EventPattern;
+import com.skillmasters.server.service.EventPatternService;
+import com.skillmasters.server.service.EventService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
@@ -19,6 +23,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.*;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -246,25 +252,38 @@ public class EventControllerTests extends ControllerTests
     )).andReturn();
   }
 
+  @PersistenceContext
+  EntityManager entityManager;
+
+  @Autowired
+  EventService eventService;
+
+  @Autowired
+  EventPatternService eventPatternService;
+
   @Test
   public void testInstancesSimple() throws Exception
   {
     Event event = insertEvent().getData().get(0);
 
     CreatePatternRequestBuilder createPatternBuilder = new CreatePatternRequestBuilder();
-
-    createPatternBuilder.rrule("FREQ=DAILY;INTERVAL=1");
+    eventService.getRepository().flush();
+    createPatternBuilder.rrule("FREQ=WEEKLY;BYDAY=WE");
     createPatternBuilder.startedAt(new GregorianCalendar(2019, Calendar.JULY, 1).getTimeInMillis());
     createPatternBuilder.endedAt(new GregorianCalendar(2019, Calendar.JULY, 31).getTimeInMillis());
     createPatternBuilder.duration(100000L);
 
     EventPatternResponseMock createResponse = insertPattern(event, createPatternBuilder);
+//    eventService.getRepository().flush();
+//    eventPatternService.getRepository().flush();
+    entityManager.flush();
+    entityManager.clear();
 
     ListInstancesRequestBuilder b = new ListInstancesRequestBuilder();
-    b.from(new GregorianCalendar(2018, Calendar.JULY, 1).getTimeInMillis());
-    b.to(new GregorianCalendar(2020, Calendar.JULY, 31).getTimeInMillis());
+    b.from(new GregorianCalendar(2019, Calendar.JULY, 1).getTimeInMillis());
+    b.to(new GregorianCalendar(2019, Calendar.JULY, 31).getTimeInMillis());
 
-    EventResponse resp = getInstances(b);
+    EventInstanceResponse resp = getInstances(b);
 
     assertThat(resp.getCount()).isEqualTo(5);
   }
