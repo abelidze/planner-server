@@ -252,30 +252,18 @@ public class EventControllerTests extends ControllerTests
     )).andReturn();
   }
 
-  @PersistenceContext
-  EntityManager entityManager;
-
-  @Autowired
-  EventService eventService;
-
-  @Autowired
-  EventPatternService eventPatternService;
-
   @Test
   public void testInstancesSimple() throws Exception
   {
     Event event = insertEvent().getData().get(0);
 
     CreatePatternRequestBuilder createPatternBuilder = new CreatePatternRequestBuilder();
-    eventService.getRepository().flush();
     createPatternBuilder.rrule("FREQ=WEEKLY;BYDAY=WE");
     createPatternBuilder.startedAt(new GregorianCalendar(2019, Calendar.JULY, 1).getTimeInMillis());
     createPatternBuilder.endedAt(new GregorianCalendar(2019, Calendar.JULY, 31).getTimeInMillis());
     createPatternBuilder.duration(100000L);
 
     EventPatternResponseMock createResponse = insertPattern(event, createPatternBuilder);
-//    eventService.getRepository().flush();
-//    eventPatternService.getRepository().flush();
     entityManager.flush();
     entityManager.clear();
 

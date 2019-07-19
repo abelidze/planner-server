@@ -10,7 +10,8 @@ import org.junit.runners.Suite;
     EventControllerTests.class,
     TaskControllerTests.class,
     EventPatternControllerTests.class,
-    PermissionControllerTests.class
+    PermissionControllerTests.class,
+    CalendarControllerTests.class
 })
 public class TestControllersSuite
 {
