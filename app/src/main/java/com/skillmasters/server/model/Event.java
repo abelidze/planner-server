@@ -37,10 +37,10 @@ public class Event implements IEntity
   @ApiModelProperty(value = "Event's name", example = "eventname")
   private String name;
 
-  @ApiModelProperty(value = "Description for event", example = "-")
+  @ApiModelProperty(value = "Description for event", example = "...")
   private String details;
 
-  @ApiModelProperty(value = "Event's status", example = "busy")
+  @ApiModelProperty(value = "Event's status", example = "TENTATIVE")
   private String status;
 
   @ApiModelProperty(value = "Event's location", example = "unknown")

@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.TimeZone;
+import java.text.SimpleDateFormat;
+import java.text.DateFormat;
 import java.io.IOException;
 
 import javax.servlet.ServletOutputStream;
@@ -18,6 +20,7 @@ import biweekly.component.VTodo;
 import biweekly.property.Status;
 import biweekly.property.DateStart;
 import biweekly.property.RelatedTo;
+import biweekly.property.RecurrenceRule;
 import biweekly.parameter.ICalParameters;
 import biweekly.util.Frequency;
 import biweekly.util.Recurrence;
@@ -147,20 +150,27 @@ public class CalendarController
       }
       pattern.setTimezone(tz.getID());
 
+      if (e.getRecurrenceRule() == null) {
+        if (e.getDateEnd() == null) {
+          pattern.setEndedAt(new Date(EventPattern.MAX_TIME));
+        } else {
+          pattern.setEndedAt(e.getDateEnd().getValue());
+        }
+      } else {
+        Recurrence recurrence = e.getRecurrenceRule().getValue();
+        if (recurrence.getUntil() == null) {
+          pattern.setEndedAt(new Date(EventPattern.MAX_TIME));
+        } else {
+          pattern.setEndedAt(recurrence.getUntil());
+          recurrence = new Recurrence.Builder(recurrence).until(null).build();
+        }
+        pattern.setRrule(scribe.writeText(new RecurrenceRule(recurrence), ctx));
+      }
+
       if (e.getDuration() == null) {
         pattern.setDuration(pattern.getEndedAt().getTime() - pattern.getStartedAt().getTime());
       } else {
         pattern.setDuration(e.getDuration().getValue().toMillis());
-      }
-
-      if (e.getDateEnd() == null) {
-        pattern.setEndedAt(new Date(EventPattern.MAX_TIME));
-      } else {
-        pattern.setEndedAt(e.getDateEnd().getValue());
-      }
-
-      if (e.getRecurrenceRule() != null) {
-        pattern.setRrule(scribe.writeText(e.getRecurrenceRule(), ctx));
       }
 
       pattern.setEvent(event);
@@ -220,8 +230,13 @@ public class CalendarController
     ical.setProductId("-//SkillMasters//PlannerApiServer 1.0//RU");
 
     // Cache timezone reference
+    TimeZone utcTimezone = TimeZone.getTimeZone("UTC");
     TimezoneInfo tzInfo = ical.getTimezoneInfo();
-    tzInfo.setDefaultTimezone(TimezoneAssignment.download(TimeZone.getTimeZone("UTC"), false));
+    tzInfo.setDefaultTimezone(TimezoneAssignment.download(utcTimezone, false));
+
+    // Date formatting for UNTIL
+    DateFormat df = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
+    df.setTimeZone(utcTimezone);
 
     // Export Events + Patterns + Tasks
     Iterable<Event> events = eventService.getByQuery( QEvent.event.ownerId.eq(user.getId()) );
@@ -261,8 +276,6 @@ public class CalendarController
         for (EventPattern pattern : patterns) {
           VEvent eventCopy = new VEvent(event);
           eventCopy.setDateStart(pattern.getStartedAt());
-          eventCopy.setDateEnd(pattern.getEndedAt());
-          eventCopy.setDuration( Duration.fromMillis(pattern.getDuration()) );
 
           TimeZone tz = TimeZone.getTimeZone(pattern.getTimezone());
           TimezoneAssignment tza = new TimezoneAssignment(tz, tz.getID());
@@ -270,8 +283,14 @@ public class CalendarController
           tzInfo.setTimezone(eventCopy.getDateEnd(), tza);
 
           String rrule = pattern.getRrule();
-          if (!Strings.isNullOrEmpty(rrule)) {
+          if (Strings.isNullOrEmpty(rrule)) {
+            eventCopy.setDateEnd(pattern.getEndedAt());
+          } else {
+            if (pattern.getEndedAt().getTime() < EventPattern.MAX_TIME) {
+              rrule += ";UNTIL=" + df.format(pattern.getEndedAt());
+            }
             eventCopy.setRecurrenceRule( scribe.parseText(rrule, null, new ICalParameters(), context) );
+            eventCopy.setDuration( Duration.fromMillis(pattern.getDuration()) );
           }
           ical.addEvent(eventCopy);
         }
