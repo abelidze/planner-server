@@ -62,7 +62,6 @@ public class CalendarControllerTests extends ControllerTests
         .header(FirebaseAuthenticationTokenFilter.TOKEN_HEADER, "tester")
         .contentType(MediaType.TEXT_PLAIN).content("privet ");
 
-
     MockHttpServletResponse response = mockMvc.perform(rb).andReturn().getResponse();
     assertThat(response.getStatus()).isNotEqualTo(200);
   }

@@ -275,4 +275,52 @@ public class EventControllerTests extends ControllerTests
 
     assertThat(resp.getCount()).isEqualTo(5);
   }
+
+  @Test
+  public void testInstanceFebruary29() throws Exception
+  {
+    Event event = insertEvent().getData().get(0);
+
+    CreatePatternRequestBuilder createPatternBuilder = new CreatePatternRequestBuilder();
+    createPatternBuilder.rrule("FREQ=YEARLY;BYMONTHDAY=29;BYMONTH=2");
+    createPatternBuilder.startedAt(new GregorianCalendar(2010, Calendar.FEBRUARY, 29).getTimeInMillis());
+    createPatternBuilder.endedAt(new GregorianCalendar(2020, Calendar.FEBRUARY, 29).getTimeInMillis());
+    createPatternBuilder.duration(604800000L);//7days
+
+    EventPatternResponseMock createResponse = insertPattern(event, createPatternBuilder);
+    entityManager.flush();
+    entityManager.clear();
+
+    ListInstancesRequestBuilder b = new ListInstancesRequestBuilder();
+    b.from(new GregorianCalendar(2010, Calendar.FEBRUARY, 1).getTimeInMillis());
+    b.to(new GregorianCalendar(2020, Calendar.FEBRUARY, 31).getTimeInMillis());
+
+    EventInstanceResponse resp = getInstances(b);
+
+    assertThat(resp.getCount()).isEqualTo(3);
+  }
+
+  @Test
+  public void testInstanceFebruary29AsLastMonth() throws Exception
+  {
+    Event event = insertEvent().getData().get(0);
+
+    CreatePatternRequestBuilder createPatternBuilder = new CreatePatternRequestBuilder();
+    createPatternBuilder.rrule("FREQ=YEARLY;BYMONTHDAY=-1;BYMONTH=2");
+    createPatternBuilder.startedAt(new GregorianCalendar(2010, Calendar.FEBRUARY, 29).getTimeInMillis());
+    createPatternBuilder.endedAt(new GregorianCalendar(2020, Calendar.FEBRUARY, 29).getTimeInMillis());
+    createPatternBuilder.duration(604800000L);//7days
+
+    EventPatternResponseMock createResponse = insertPattern(event, createPatternBuilder);
+    entityManager.flush();
+    entityManager.clear();
+
+    ListInstancesRequestBuilder b = new ListInstancesRequestBuilder();
+    b.from(new GregorianCalendar(2010, Calendar.FEBRUARY, 1).getTimeInMillis());
+    b.to(new GregorianCalendar(2020, Calendar.FEBRUARY, 31).getTimeInMillis());
+
+    EventInstanceResponse resp = getInstances(b);
+
+    assertThat(resp.getCount()).isEqualTo(10);
+  }
 }
