@@ -10,6 +10,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.skillmasters.server.common.requestbuilder.AppRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.event.CreateEventRequestBuilder;
+import com.skillmasters.server.common.requestbuilder.event.ListInstancesRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.pattern.CreatePatternRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.pattern.ListPatternsRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.pattern.UpdatePatternRequestBuilder;
@@ -72,6 +73,8 @@ public class ControllerTests
   protected static String userEndpoint = apiPrefix + "/user";
 
   protected static String exportEndpoint = apiPrefix + "/export";
+
+  protected static String instancesEndpoint = apiPrefix + "/events/instances";
 
   protected String testerId = "322";
 
@@ -169,6 +172,11 @@ public class ControllerTests
     return authorizedOkResultResponse(HttpMethod.POST, eventsEndpoint, createBuilder, EventResponse.class);
   }
 
+  protected EventResponse insertEvent(CreateEventRequestBuilder b) throws Exception
+  {
+    return authorizedOkResultResponse(HttpMethod.POST, eventsEndpoint, b, EventResponse.class);
+  }
+
   protected List<EventResponse> insertEvents(int amount) throws Exception
   {
     List<EventResponse> eventsList = new ArrayList<EventResponse>(amount);
@@ -184,6 +192,12 @@ public class ControllerTests
     EventResponse resp = authorizedOkResultResponse(HttpMethod.GET, eventsEndpoint,
         new AppRequestBuilder(), EventResponse.class);
     return resp.getData();
+  }
+
+
+  protected EventResponse getInstances(ListInstancesRequestBuilder b) throws Exception
+  {
+    return authorizedOkResultResponse(HttpMethod.GET, instancesEndpoint, b, EventResponse.class);
   }
 
   protected EventResponse deleteEvent(Event event) throws Exception

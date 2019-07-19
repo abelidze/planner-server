@@ -2,9 +2,14 @@ package com.skillmasters.server.http.controller;
 
 import com.skillmasters.server.common.requestbuilder.event.CreateEventRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.event.ListEventsRequestBuilder;
+import com.skillmasters.server.common.requestbuilder.event.ListInstancesRequestBuilder;
 import com.skillmasters.server.common.requestbuilder.event.UpdateEventRequestBuilder;
+import com.skillmasters.server.common.requestbuilder.pattern.CreatePatternRequestBuilder;
 import com.skillmasters.server.http.response.EventResponse;
+import com.skillmasters.server.mock.model.EventPatternMock;
+import com.skillmasters.server.mock.response.EventPatternResponseMock;
 import com.skillmasters.server.model.Event;
+import com.skillmasters.server.model.EventPattern;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -239,5 +244,28 @@ public class EventControllerTests extends ControllerTests
         eventsEndpoint+"/"+id,
         new ListEventsRequestBuilder()
     )).andReturn();
+  }
+
+  @Test
+  public void testInstancesSimple() throws Exception
+  {
+    Event event = insertEvent().getData().get(0);
+
+    CreatePatternRequestBuilder createPatternBuilder = new CreatePatternRequestBuilder();
+
+    createPatternBuilder.rrule("RRULE:FREQ=MONTHLY;BYDAY=WE");
+    createPatternBuilder.startedAt(new GregorianCalendar(2019, Calendar.JULY, 1).getTimeInMillis());
+    createPatternBuilder.endedAt(new GregorianCalendar(2019, Calendar.JULY, 31).getTimeInMillis());
+    createPatternBuilder.duration(100000L);
+
+    EventPatternResponseMock createResponse = insertPattern(event, createPatternBuilder);
+
+    ListInstancesRequestBuilder b = new ListInstancesRequestBuilder();
+    b.from(new GregorianCalendar(2019, Calendar.JULY, 1).getTimeInMillis());
+    b.to(new GregorianCalendar(2019, Calendar.JULY, 31).getTimeInMillis());
+
+    EventResponse resp = getInstances(b);
+
+    assertThat(resp.getCount()).isEqualTo(4);
   }
 }
