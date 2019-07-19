@@ -95,6 +95,14 @@ public class EventPattern implements IEntity
     return endedAt == null || startedAt == null || !endedAt.before(startedAt);
   }
 
+  public void setEndedAt(Date ended)
+  {
+    if (ended.getTime() > EventPattern.MAX_TIME) {
+      ended = new Date(EventPattern.MAX_TIME);
+    }
+    endedAt = ended;
+  }
+
   @ApiModelProperty(readOnly = true)
   public Long getEventId()
   {

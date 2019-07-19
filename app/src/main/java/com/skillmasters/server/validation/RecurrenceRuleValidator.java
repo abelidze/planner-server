@@ -6,6 +6,7 @@ import biweekly.parameter.ICalParameters;
 import biweekly.io.scribe.property.RecurrenceRuleScribe;
 import biweekly.io.ParseContext;
 
+import com.google.common.base.Strings;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -32,7 +33,7 @@ public class RecurrenceRuleValidator implements ConstraintValidator<RecurrenceRu
   @Override
   public boolean isValid(String ruleStr, ConstraintValidatorContext ctx)
   {
-    if (ruleStr == null || scribe == null || context == null) {
+    if (Strings.isNullOrEmpty(ruleStr) || scribe == null || context == null) {
       // ctx.disableDefaultConstraintViolation();
       return true;
     }
