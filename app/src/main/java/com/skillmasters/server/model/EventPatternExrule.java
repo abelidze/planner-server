@@ -11,6 +11,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.skillmasters.server.validation.RecurrenceRule;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -31,7 +32,8 @@ public class EventPatternExrule
   @JsonIgnore
   private EventPattern pattern;
 
-  @NotNull
+  @NotNull(message = "Field rule for exrule can't be null")
+  @RecurrenceRule(message = "Field rule for exrule is not valid")
   @Column(nullable = false)
   @ApiModelProperty(example = "FREQ=WEEKLY;INTERVAL=2;BYDAY=TU,TH")
   private String rule;

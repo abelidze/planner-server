@@ -15,6 +15,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.skillmasters.server.validation.RecurrenceRule;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -47,6 +48,7 @@ public class EventPattern implements IEntity
   @ApiModelProperty(value = "Timezone to work in", example = "UTC")
   private String timezone = "UTC";
 
+  @RecurrenceRule(message = "Field rrule is not valid")
   @Pattern(regexp = "|^((?!UNTIL[\\s=]+).)*$", message = "UNTIL is auto-generated and can't be setted manually")
   @ApiModelProperty(value = "iCal's RRULE string", example = "FREQ=DAILY;INTERVAL=1")
   private String rrule;

@@ -253,7 +253,7 @@ public class EventControllerTests extends ControllerTests
 
     CreatePatternRequestBuilder createPatternBuilder = new CreatePatternRequestBuilder();
 
-    createPatternBuilder.rrule("RRULE:FREQ=MONTHLY;BYDAY=WE");
+    createPatternBuilder.rrule("FREQ=MONTHLY;BYDAY=WE");
     createPatternBuilder.startedAt(new GregorianCalendar(2019, Calendar.JULY, 1).getTimeInMillis());
     createPatternBuilder.endedAt(new GregorianCalendar(2019, Calendar.JULY, 31).getTimeInMillis());
     createPatternBuilder.duration(100000L);
@@ -266,6 +266,6 @@ public class EventControllerTests extends ControllerTests
 
     EventResponse resp = getInstances(b);
 
-    assertThat(resp.getCount()).isEqualTo(4);
+    assertThat(resp.getCount()).isEqualTo(5);
   }
 }
