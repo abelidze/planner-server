@@ -71,8 +71,8 @@ public class EventController
     @AuthenticationPrincipal User user,
     @ApiParam(value = "Array of event's id")
     @RequestParam(value="id", defaultValue="") List<Long> id,
-    @ApiParam(value = "Return only new started instances")
-    @RequestParam(value="new_only", defaultValue="false") Boolean newOnly,
+    // @ApiParam(value = "Return only new started instances")
+    // @RequestParam(value="new_only", defaultValue="false") Boolean newOnly,
     @ApiParam(value = "Owner's unique id")
     @RequestParam(value="owner_id", required=false) String ownerId,
     @ApiParam(value = "Start of requesting range")
@@ -131,12 +131,12 @@ public class EventController
           RecurrenceRule rrule = scribe.parseText(rruleStr, null, new ICalParameters(), context);
           DateIterator dateIt = rrule.getDateIterator(start, timezone);
 
-          Date advanceDate;
-          if (newOnly == true) {
-            advanceDate = fromDate;
-          } else {
-            advanceDate = new Date(fromDate.getTime() - pattern.getDuration());
-          }
+          Date advanceDate = new Date(fromDate.getTime() - pattern.getDuration());
+          // if (newOnly == true) {
+          //   advanceDate = fromDate;
+          // } else {
+          //   advanceDate = new Date(fromDate.getTime() - pattern.getDuration());
+          // }
           if (start.before(advanceDate)) {
             dateIt.advanceTo(advanceDate);
           }
