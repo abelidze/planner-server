@@ -149,7 +149,7 @@ public class CalendarController
       }
 
       if (e.getDateEnd() == null) {
-        pattern.setEndedAt(new Date(Long.MAX_VALUE));
+        pattern.setEndedAt(new Date(EventPattern.MAX_TIME));
       } else {
         pattern.setEndedAt(e.getDateEnd().getValue());
       }
