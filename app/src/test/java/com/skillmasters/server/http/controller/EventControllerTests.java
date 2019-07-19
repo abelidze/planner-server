@@ -108,7 +108,7 @@ public class EventControllerTests extends ControllerTests
     Date end = new Date();
 
     testGetEventsByFromToHelper(0L, start.getTime(), 0);
-    testGetEventsByFromToHelper(end.getTime()+10000, Long.MAX_VALUE, 0);
+    testGetEventsByFromToHelper(end.getTime()+10000, end.getTime()+1000000, 0);
     testGetEventsByFromToHelper(start.getTime()-10000, end.getTime()+10000, 2);
   }
 
@@ -253,7 +253,7 @@ public class EventControllerTests extends ControllerTests
 
     CreatePatternRequestBuilder createPatternBuilder = new CreatePatternRequestBuilder();
 
-    createPatternBuilder.rrule("FREQ=MONTHLY;BYDAY=WE");
+    createPatternBuilder.rrule("FREQ=DAILY;INTERVAL=1");
     createPatternBuilder.startedAt(new GregorianCalendar(2019, Calendar.JULY, 1).getTimeInMillis());
     createPatternBuilder.endedAt(new GregorianCalendar(2019, Calendar.JULY, 31).getTimeInMillis());
     createPatternBuilder.duration(100000L);
@@ -261,8 +261,8 @@ public class EventControllerTests extends ControllerTests
     EventPatternResponseMock createResponse = insertPattern(event, createPatternBuilder);
 
     ListInstancesRequestBuilder b = new ListInstancesRequestBuilder();
-    b.from(new GregorianCalendar(2019, Calendar.JULY, 1).getTimeInMillis());
-    b.to(new GregorianCalendar(2019, Calendar.JULY, 31).getTimeInMillis());
+    b.from(new GregorianCalendar(2018, Calendar.JULY, 1).getTimeInMillis());
+    b.to(new GregorianCalendar(2020, Calendar.JULY, 31).getTimeInMillis());
 
     EventResponse resp = getInstances(b);
 

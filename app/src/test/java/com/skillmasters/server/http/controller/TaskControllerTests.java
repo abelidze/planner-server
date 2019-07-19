@@ -219,7 +219,7 @@ public class TaskControllerTests extends ControllerTests
     Date end = new Date();
 
     testGetCreatedFromToHelper(0L, start.getTime(), 0);
-    testGetCreatedFromToHelper(end.getTime()+10000, Long.MAX_VALUE, 0);
+    testGetCreatedFromToHelper(end.getTime()+10000, end.getTime()+1000000, 0);
     testGetCreatedFromToHelper(start.getTime()-10000, end.getTime()+10000, 2);
   }
 
