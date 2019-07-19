@@ -255,17 +255,9 @@ public class CalendarController
         event.setLastModified(e.getUpdatedAt());
       }
 
-      List<EventPattern> patterns = e.getPatterns();
-      List<Task> tasks = e.getTasks();
-      boolean hasPatterns = (patterns != null && patterns.size() > 0);
-      boolean hasTasks = (tasks != null && tasks.size() > 0);
-      if (!hasPatterns && !hasTasks) {
-        ical.addEvent(event);
-        continue;
-      }
-
       // Export Patterns
-      if (hasPatterns) {
+      List<EventPattern> patterns = e.getPatterns();
+      if (patterns != null && patterns.size() > 0) {
         for (EventPattern pattern : patterns) {
           VEvent eventCopy = new VEvent(event);
           eventCopy.setDateStart(pattern.getStartedAt());
@@ -283,10 +275,13 @@ public class CalendarController
           }
           ical.addEvent(eventCopy);
         }
+      } else {
+        ical.addEvent(event);
       }
 
       // Export Tasks, TODO: contacts and attendee support
-      if (hasTasks) {
+      List<Task> tasks = e.getTasks();
+      if (tasks != null && tasks.size() > 0) {
         for (Task task : tasks) {
           VTodo todo = new VTodo();
           todo.addRelatedTo(uid);

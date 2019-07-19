@@ -138,7 +138,9 @@ public class EventPatternController
     }
 
     pattern.setEvent(entity);
-    return new EventPatternResponse().success( patternService.save(pattern) );
+    eventService.save(entity);
+    patternService.save(pattern);
+    return new EventPatternResponse().success(pattern);
   }
 
   @ApiImplicitParams(

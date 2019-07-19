@@ -92,12 +92,6 @@ public class TaskControllerTests extends ControllerTests
   {
     List<TaskMock> tasks = insertTasks(10);
 
-    entityManager.flush();
-    entityManager.clear();
-    for (Event e : getAllEvents()) {
-      assertThat(e.getTasks().size()).isNotEqualTo(0);
-    }
-
     for (TaskMock task : tasks) {
       ListTasksRequestBuilder b = new ListTasksRequestBuilder();
       b.eventId(task.getEvent_id());

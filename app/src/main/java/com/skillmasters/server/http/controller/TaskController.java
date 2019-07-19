@@ -158,7 +158,9 @@ public class TaskController
       return new TaskResponse().error(404, "Event not found");
     }
     task.setEvent(entity);
-    return new TaskResponse().success( taskService.save(task) );
+    eventService.save(entity);
+    taskService.save(task);
+    return new TaskResponse().success(task);
   }
 
   @ApiImplicitParams(

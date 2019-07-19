@@ -62,10 +62,12 @@ public class CalendarControllerTests extends ControllerTests
     assertThat(getAllTasks().size()).isEqualTo(1);
     assertThat(getAllPatterns().size()).isEqualTo(1);
 
+    entityManager.clear();
     String icalStr = export("tester").write();
     assertThat(icalStr).isNotEmpty();
 
     for (EventResponse er : events) {
+      assertThat(er.getData().get(0).getTasks().size()).isEqualTo(0);
       deleteEvent(er.getData().get(0));
     }
     entityManager.flush();
@@ -75,12 +77,13 @@ public class CalendarControllerTests extends ControllerTests
     assertThat(getAllTasks().size()).isEqualTo(0);
     assertThat(getAllPatterns().size()).isEqualTo(0);
 
+    entityManager.clear();
     importCal(icalStr, "tester");
     entityManager.flush();
     entityManager.clear();
-    assertThat(getAllEvents().size()).isEqualTo(20);
-    assertThat(getAllTasks().size()).isEqualTo(1);
     assertThat(getAllPatterns().size()).isEqualTo(1);
+    assertThat(getAllTasks().size()).isEqualTo(1);
+    assertThat(getAllEvents().size()).isEqualTo(20);
   }
 
   @Test
