@@ -35,6 +35,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.annotations.*;
 
+import com.skillmasters.server.misc.BadRequestException;
 import com.skillmasters.server.http.response.ObjectResponse;
 import com.skillmasters.server.service.EventPatternService;
 import com.skillmasters.server.service.EventService;
@@ -81,6 +82,10 @@ public class CalendarController
 
   public void calendarImport(User user, ICalendar ical)
   {
+    if (ical == null) {
+      throw new BadRequestException("Invalid iCalendar data, can't import");
+    }
+
     // Deal with timezones
     TimezoneInfo tzInfo = ical.getTimezoneInfo();
     WriteContext ctx = new WriteContext(ICalVersion.V2_0, tzInfo, tzInfo.getDefaultTimezone());
