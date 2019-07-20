@@ -65,6 +65,9 @@ public class EventController
   @PersistenceContext
   EntityManager entityManager;
 
+  private final TimeZone utcTimezone = TimeZone.getTimeZone("UTC");
+  private final DateFormat df = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
+
   @ApiOperation(value = "Get a list of available events instances", response = EventInstanceResponse.class)
   @GetMapping("/events/instances")
   public EventInstanceResponse retrieveInstances(
@@ -104,9 +107,7 @@ public class EventController
       toDate = new Date(to);
     }
 
-    TimeZone utcTimezone = TimeZone.getTimeZone("UTC");
     TimeZone timezone = utcTimezone;
-    DateFormat df = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
     df.setTimeZone(utcTimezone);
 
     Date eventDate;

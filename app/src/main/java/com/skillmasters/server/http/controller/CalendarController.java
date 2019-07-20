@@ -65,6 +65,9 @@ public class CalendarController
   @Autowired
   ParseContext context;
 
+  private final TimeZone utcTimezone = TimeZone.getTimeZone("UTC");
+  private final DateFormat df = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
+
   @ApiOperation(value = "Import iCal calendar for current user from string", response = ObjectResponse.class)
   @PostMapping("/import/raw")
   public ObjectResponse importFromString(@AuthenticationPrincipal User user, @RequestBody String str) throws IOException
@@ -230,12 +233,10 @@ public class CalendarController
     ical.setProductId("-//SkillMasters//PlannerApiServer 1.0//RU");
 
     // Cache timezone reference
-    TimeZone utcTimezone = TimeZone.getTimeZone("UTC");
     TimezoneInfo tzInfo = ical.getTimezoneInfo();
     tzInfo.setDefaultTimezone(TimezoneAssignment.download(utcTimezone, false));
 
     // Date formatting for UNTIL
-    DateFormat df = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
     df.setTimeZone(utcTimezone);
 
     // Export Events + Patterns + Tasks
