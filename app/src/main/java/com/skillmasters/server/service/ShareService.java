@@ -70,7 +70,7 @@ public class ShareService
 
   private String generateToken()
   {
-    char[] alphabet = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
+    char[] alphabet = "0123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ".toCharArray();
     return NanoIdUtils.randomNanoId(NanoIdUtils.DEFAULT_NUMBER_GENERATOR, alphabet, 8);
     // String uuid = UUID.randomUUID().toString();
     // return Hashing.sha256().hashString(uuid, StandardCharsets.UTF_8).toString();
