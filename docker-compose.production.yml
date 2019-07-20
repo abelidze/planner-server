@@ -35,6 +35,6 @@ services:
       - "8080"
     volumes:
       - ./app:/srv:rw
-    command: sh -c "gradle clean bootJar ; java -jar -Dspring.profiles.active=prod /srv/build/libs/server-0.0.1.jar"
+    command: sh -c "gradle clean bootJar ; java -jar -Dspring.profiles.active=prod /srv/build/libs/server-1.0.0.jar"
     depends_on:
       - db

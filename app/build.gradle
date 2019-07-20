@@ -13,7 +13,7 @@ plugins {
 }
 
 group = 'com.skillmasters'
-version = '0.0.1'
+version = '1.0.0'
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
 
@@ -28,11 +28,6 @@ repositories {
     jcenter()
     maven { url 'https://jitpack.io' }
 }
-
-// compileJava {
-//     options.encoding = 'UTF-8'
-//     options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
-// }
 
 dependencies {
     compile 'com.querydsl:querydsl-core:4.2.1'
@@ -78,6 +73,11 @@ dependencies {
     runtimeOnly 'org.postgresql:postgresql:42.2.6'
 
 }
+
+// compileJava {
+//     options.encoding = 'UTF-8'
+//     options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+// }
 
 // bootRun {
 //   args = ["--spring.profiles.active=prod"]
