@@ -297,6 +297,7 @@ public class EventController
 
     if (updatedFrom != null) {
       where = qEvent.updatedAt.goe(new Date(updatedFrom)).and(where);
+      query.orderBy(qEvent.updatedAt.asc());
     }
 
     if (updatedTo != null) {

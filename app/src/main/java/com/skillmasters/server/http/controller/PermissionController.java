@@ -4,12 +4,15 @@ import java.util.List;
 import java.util.Date;
 import java.util.ArrayList;
 import javax.validation.constraints.NotNull;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 
-import com.querydsl.core.types.dsl.BooleanExpression;
 import com.google.api.client.util.Strings;
 import com.google.firebase.auth.UserRecord;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQuery;
 
 import org.springframework.context.annotation.Lazy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +49,9 @@ public class PermissionController
 
   @Autowired
   private PermissionService permissionService;
+
+  @PersistenceContext
+  private EntityManager entityManager;
 
   @Lazy
   @Autowired
@@ -226,37 +232,42 @@ public class PermissionController
     @RequestParam(value="count", defaultValue="100") int count
   ) {
     QPermission qPermission = QPermission.permission;
-    BooleanExpression query = null;
+    JPAQuery query = new JPAQuery(entityManager);
+    query.from(qPermission);
+
+    BooleanExpression where = null;
     if (mine == true) {
-      query = qPermission.ownerId.eq(user.getId());
+      where = qPermission.ownerId.eq(user.getId());
     } else {
-      query = qPermission.userId.eq(user.getId());
+      where = qPermission.userId.eq(user.getId());
     }
 
     if (id.size() > 0) {
-      query = qPermission.id.in(id).and(query);
+      where = qPermission.id.in(id).and(where);
     }
 
     if (createdFrom != null) {
-      query = qPermission.createdAt.goe(new Date(createdFrom)).and(query);
+      where = qPermission.createdAt.goe(new Date(createdFrom)).and(where);
     }
 
     if (createdTo != null) {
-      query = qPermission.createdAt.loe(new Date(createdTo)).and(query);
+      where = qPermission.createdAt.loe(new Date(createdTo)).and(where);
     }
 
     if (updatedFrom != null) {
-      query = qPermission.updatedAt.goe(new Date(updatedFrom)).and(query);
+      where = qPermission.updatedAt.goe(new Date(updatedFrom)).and(where);
+      query.orderBy(qPermission.updatedAt.asc());
     }
 
     if (updatedTo != null) {
-      query = qPermission.updatedAt.loe(new Date(updatedTo)).and(query);
+      where = qPermission.updatedAt.loe(new Date(updatedTo)).and(where);
     }
 
     if (entityType != null) {
-      query = qPermission.name.like("%" + entityType.name()).and(query);
+      where = qPermission.name.like("%" + entityType.name()).and(where);
     }
 
+    query.where(where);
     return new PermissionResponse().success( permissionService.getByQuery(query, new OffsetPageRequest(offset, count)) );
   }
 

@@ -75,59 +75,8 @@ public class TaskController
     @ApiParam(value = "Count of tasks to retrieve")
     @RequestParam(value="count", defaultValue="100") int count
   ) {
-    QTask qTask = QTask.task;
-    QPermission qPermission = QPermission.permission;
-    JPAQuery query = new JPAQuery(entityManager);
-    query.from(qTask);
-
-    String userId = user.getId();
-    BooleanExpression where = qTask.event.ownerId.eq(userId)
-        .or(qTask.id.stringValue().eq(qPermission.entityId))
-        .or(qTask.event.ownerId.eq(qPermission.entityId))
-        .or(qTask.event.id.stringValue().eq(qPermission.entityId).and(qPermission.name.eq("READ_EVENT")));
-
-    BooleanExpression hasPermission = permissionService.getHasPermissionQuery(userId, "READ_TASK")
-        .or(permissionService.getHasPermissionQuery(userId, "READ_EVENT"));
-    query.leftJoin(qPermission).on(hasPermission);
-    query.groupBy(qTask.id);
-
-    if (id.size() > 0) {
-      where = qTask.id.in(id).and(where);
-    }
-
-    if (eventId != null) {
-      where = qTask.event.id.eq(eventId).and(where);
-    }
-
-    if (parentId != null) {
-      where = qTask.parentId.eq(parentId).and(where);
-    }
-
-    if (status != null) {
-      where = qTask.status.eq(status).and(where);
-    }
-
-    if (deadlineTo != null) {
-      where = qTask.deadlineAt.goe(new Date(deadlineTo)).and(where);
-    }
-
-    if (createdFrom != null) {
-      where = qTask.createdAt.goe(new Date(createdFrom)).and(where);
-    }
-
-    if (createdTo != null) {
-      where = qTask.createdAt.loe(new Date(createdTo)).and(where);
-    }
-
-    if (updatedFrom != null) {
-      where = qTask.updatedAt.goe(new Date(updatedFrom)).and(where);
-    }
-
-    if (updatedTo != null) {
-      where = qTask.updatedAt.loe(new Date(updatedTo)).and(where);
-    }
-
-    query.where(where);
+    JPAQuery query = generateGetQuery(user, id, eventId, parentId, status, deadlineTo,
+                                      createdFrom, createdTo, updatedFrom, updatedTo);
     return new TaskResponse().success( taskService.getByQuery(query, new OffsetPageRequest(offset, count)) );
   }
 
@@ -200,5 +149,74 @@ public class TaskController
     }
     taskService.delete(entity);
     return new TaskResponse().success();
+  }
+
+  private JPAQuery generateGetQuery(
+    User user,
+    List<Long> id,
+    Long eventId,
+    Long parentId,
+    String status,
+    Long deadlineTo,
+    Long createdFrom,
+    Long createdTo,
+    Long updatedFrom,
+    Long updatedTo
+  ) {
+    QTask qTask = QTask.task;
+    QPermission qPermission = QPermission.permission;
+    JPAQuery query = new JPAQuery(entityManager);
+    query.from(qTask);
+
+    String userId = user.getId();
+    BooleanExpression where = qTask.event.ownerId.eq(userId)
+        .or(qTask.id.stringValue().eq(qPermission.entityId))
+        .or(qTask.event.ownerId.eq(qPermission.entityId))
+        .or(qTask.event.id.stringValue().eq(qPermission.entityId).and(qPermission.name.eq("READ_EVENT")));
+
+    BooleanExpression hasPermission = permissionService.getHasPermissionQuery(userId, "READ_TASK")
+        .or(permissionService.getHasPermissionQuery(userId, "READ_EVENT"));
+    query.leftJoin(qPermission).on(hasPermission);
+    query.groupBy(qTask.id);
+
+    if (id.size() > 0) {
+      where = qTask.id.in(id).and(where);
+    }
+
+    if (eventId != null) {
+      where = qTask.event.id.eq(eventId).and(where);
+    }
+
+    if (parentId != null) {
+      where = qTask.parentId.eq(parentId).and(where);
+    }
+
+    if (status != null) {
+      where = qTask.status.eq(status).and(where);
+    }
+
+    if (deadlineTo != null) {
+      where = qTask.deadlineAt.goe(new Date(deadlineTo)).and(where);
+    }
+
+    if (createdFrom != null) {
+      where = qTask.createdAt.goe(new Date(createdFrom)).and(where);
+    }
+
+    if (createdTo != null) {
+      where = qTask.createdAt.loe(new Date(createdTo)).and(where);
+    }
+
+    if (updatedFrom != null) {
+      where = qTask.updatedAt.goe(new Date(updatedFrom)).and(where);
+      query.orderBy(qTask.updatedAt.asc());
+    }
+
+    if (updatedTo != null) {
+      where = qTask.updatedAt.loe(new Date(updatedTo)).and(where);
+    }
+
+    query.where(where);
+    return query;
   }
 }

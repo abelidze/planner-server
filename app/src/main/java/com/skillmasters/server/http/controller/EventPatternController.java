@@ -227,6 +227,7 @@ public class EventPatternController
 
     if (updatedFrom != null) {
       where = qPattern.updatedAt.goe(new Date(updatedFrom)).and(where);
+      query.orderBy(qPattern.updatedAt.asc());
     }
 
     if (updatedTo != null) {
