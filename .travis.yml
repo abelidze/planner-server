@@ -1,0 +1,17 @@
+sudo: true
+
+webhooks: https://fathomless-fjord-24024.herokuapp.com/notify
+
+git:
+  depth: 2
+
+language: java
+jdk: openjdk8
+before_install:
+  - openssl aes-256-cbc -K $encrypted_e664fa697fe4_key -iv $encrypted_e664fa697fe4_iv
+    -in service_account.json.enc -out app/src/test/resources/service_account.json -d
+  - chmod +x app/gradlew
+
+script:
+  - cd app
+  - ./gradlew clean check

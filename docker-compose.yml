@@ -5,7 +5,6 @@ services:
     restart: always
     image: nginx:alpine
     ports:
-      - "443:443"
       - "80:80"
     volumes:
       - ./nginx/nginx.default.conf:/etc/nginx/conf.d/default.conf:ro

@@ -1,32 +1,123 @@
 package com.skillmasters.server.model;
 
-// import lombok.Data;
+import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import java.util.ArrayList;
+import java.util.TimeZone;
+import java.util.Date;
+import java.util.List;
+import javax.persistence.*;
+import javax.validation.constraints.*;
 
-// @Data
+import org.hibernate.annotations.Check;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.skillmasters.server.validation.RecurrenceRule;
+
+import io.swagger.annotations.ApiModelProperty;
+
+@Data
 @Entity
-class EventPattern
+@Table(name = "patterns")
+@Check(constraints = "ended_at >= started_at")
+@SequenceGenerator(name = "patternId", sequenceName = "pattern_seq", allocationSize = 1)
+public class EventPattern implements IEntity
 {
-  private @Id @GeneratedValue Long id;
-  private Long eventId;
-  private String type;
-  private String year;
-  private String weekday;
-  private String month;
-  private String day;
-  private String hour;
-  private String minute;
-  private Long duration;
-  // private Date startedAt;
-  // private Date endedAt;
-  // private Date createdAt;
-  // private Date updatedAt;
+  public static final long MAX_TIME = 253402300799000L;
 
-  EventPattern(Long eventId)
+  @Id
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "patternId")
+  @ApiModelProperty(value = "Pattern's unique id", readOnly = true)
+  private Long id;
+
+  @ManyToOne(fetch = FetchType.EAGER)
+  @JoinColumn(name = "event_id", nullable = false)
+  @OnDelete(action = OnDeleteAction.CASCADE)
+  @JsonIgnore
+  private Event event;
+
+  @NotNull(message = "Field duration can't be null")
+  @Min(value = 0, message = "Duration can't be less then 0")
+  @Column(nullable = false)
+  @ApiModelProperty(value = "Duration of a single event's instance")
+  private Long duration = 0L;
+
+  @NotNull(message = "Field timezone can't be null")
+  @Column(nullable = false)
+  @ApiModelProperty(value = "Timezone to work in", example = "UTC")
+  private String timezone = "UTC";
+
+  @RecurrenceRule(message = "Field rrule is not valid")
+  @Pattern(regexp = "|^((?!UNTIL[\\s=]+).)*$", message = "UNTIL is auto-generated and can't be setted manually")
+  @ApiModelProperty(value = "iCal's RRULE string", example = "FREQ=DAILY;INTERVAL=1")
+  private String rrule;
+
+  @Deprecated
+  @ApiModelProperty(example = "FREQ=WEEKLY;INTERVAL=2;BYDAY=TU,TH")
+  private String exrule;
+
+  @NotNull(message = "Exrules can't be null")
+  @OneToMany(mappedBy = "pattern", cascade = CascadeType.ALL)
+  @ApiModelProperty(value = "Array of iCal's EXRULE")
+  private List<EventPatternExrule> exrules = new ArrayList<>();
+
+  @NotNull(message = "Field started_at can't be null")
+  @Column(name = "started_at")
+  @Temporal(TemporalType.TIMESTAMP)
+  @ApiModelProperty(value = "Start of the first event's instance", example = "1556712345000")
+  private Date startedAt = new Date();
+
+  @NotNull(message = "Field ended_at can't be null")
+  @Column(name = "ended_at")
+  @Temporal(TemporalType.TIMESTAMP)
+  @ApiModelProperty(value = "Timestamp until that event can occur", example = "1556712345000")
+  private Date endedAt = new Date(EventPattern.MAX_TIME);
+
+  @CreationTimestamp
+  @ApiModelProperty(value = "Creation timestamp", readOnly = true, example = "1556712345000")
+  private Date createdAt;
+
+  @UpdateTimestamp
+  @ApiModelProperty(value = "Update timestamp", readOnly = true, example = "1556712345000")
+  private Date updatedAt;
+
+  public EventPattern()
   {
-    this.eventId = eventId;
+    //
+  }
+
+  @AssertTrue(message = "Field ended_at must be greater or equal to started_at")
+  private boolean isRangeValid()
+  {
+    return endedAt == null || startedAt == null || !endedAt.before(startedAt);
+  }
+
+  public void setEndedAt(Date ended)
+  {
+    if (ended.getTime() > EventPattern.MAX_TIME) {
+      ended = new Date(EventPattern.MAX_TIME);
+    }
+    endedAt = ended;
+  }
+
+  @ApiModelProperty(readOnly = true)
+  public Long getEventId()
+  {
+    return event.getId();
+  }
+
+  @JsonIgnore
+  public String getOwnerId()
+  {
+    return event.getOwnerId();
+  }
+
+  @JsonIgnore
+  public String getEntityName()
+  {
+    return "PATTERN";
   }
 }
