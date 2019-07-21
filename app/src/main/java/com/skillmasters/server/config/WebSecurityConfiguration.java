@@ -3,13 +3,17 @@ package com.skillmasters.server;
 import java.util.Arrays;
 
 import java.io.InputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 
+import com.google.common.base.Strings;
 import com.google.auth.oauth2.GoogleCredentials;
+import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.FirebaseAuth;
 
+import org.springframework.boot.system.ApplicationHome;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
@@ -30,6 +34,8 @@ import com.skillmasters.server.http.middleware.security.FirebaseAuthenticationPr
 @EnableWebSecurity
 public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter
 {
+  private static final String SERVICE_ACCOUNT_PATH = "service_account.json";
+
   @Autowired
   private FirebaseAuthenticationProvider authenticationProvider;
 
@@ -51,12 +57,32 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter
   public FirebaseAuth firebaseAuth() throws IOException
   {
     if (FirebaseApp.getApps().size() == 0) {
-      ClassLoader loader = getClass().getClassLoader();
-      InputStream serviceAccount = loader.getResourceAsStream("service_account.json");
+      GoogleCredentials credentials = null;
+
+      if (System.getenv("GOOGLE_APPLICATION_CREDENTIALS") == null) {
+        ClassLoader loader = getClass().getClassLoader();
+        InputStream serviceAccount = loader.getResourceAsStream(SERVICE_ACCOUNT_PATH);
+        if (serviceAccount == null) {
+          String path = new ApplicationHome(ServerApplication.class).getDir() + "/" + SERVICE_ACCOUNT_PATH;
+          serviceAccount = new FileInputStream(path);
+        }
+        credentials = GoogleCredentials.fromStream(serviceAccount);
+      } else {
+        credentials = GoogleCredentials.getApplicationDefault();
+      }
+
+      String projectId = null;
+      if (credentials instanceof ServiceAccountCredentials) {
+        projectId = ((ServiceAccountCredentials) credentials).getProjectId();
+      }
+
+      if (Strings.isNullOrEmpty(projectId)) {
+        projectId = System.getenv("GCLOUD_PROJECT");
+      }
 
       FirebaseOptions options = new FirebaseOptions.Builder()
-          .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-          .setDatabaseUrl("https://test-calendar-241815.firebaseio.com")
+          .setCredentials(credentials)
+          .setDatabaseUrl("https://" + projectId + ".firebaseio.com")
           .build();
 
       FirebaseApp.initializeApp(options);
