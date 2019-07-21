@@ -13,7 +13,7 @@ Content-Type: application/json и application/x-www-form-urlencoded <br />
 ### Аутентификация
 - Для авторизации используется Firebase Authentication. <br />
 0) Сперва необходимо зарегистрировать ваше приложение. Пишем [zeroicq](https://github.com/ZeroICQ).
-1) [Установка (Step 3+)](https://firebase.google.com/docs/android/setup)
+1) [Установка (Step 3+)](https://firebase.google.com/docs/android/setup#add-config-file)
 2) [настройка UI](https://firebase.google.com/docs/auth/android/firebaseui).
 3) От Firebase получаем JWT-токен. Его необходимо добавлять в header каждого запроса к API: <br />
 `X-Firebase-Auth: <jwt_token>`
