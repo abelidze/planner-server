@@ -8,7 +8,8 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - /srv/pgdata:/var/lib/postgresql/data
+      - ./postgres/pgdata:/var/lib/postgresql/data
+      # - reserved for config
     environment:
       POSTGRES_DB: postgres
       POSTGRES_USER: postgres
