@@ -1,14 +1,14 @@
 version: '3.4'
 
 services:
-  db:
+  database:
     restart: always
     image: postgres:11.4-alpine
     container_name: planner-db
     ports:
       - "9050:5432"
     volumes:
-      - ./postgres/pgdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
       # - reserved for config
     environment:
       POSTGRES_DB: postgres
@@ -21,7 +21,7 @@ services:
     restart: always
     image: nginx:alpine
     ports:
-      - "9040:80"
+      - "9040:9040"
     volumes:
       - ./nginx/nginx.prod.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
@@ -40,8 +40,14 @@ services:
       - ./app:/srv:rw
     command: sh -c "chmod -R 777 /srv ; gradle clean bootJar ; java -Dserver.port=9041 -jar -Dspring.profiles.active=prod /srv/build/libs/server-1.0.0.jar"
     depends_on:
-      - db
+      - database
 
 volumes:
   gradle-cache:
     external: false
+  pgdata:
+    external: false
+
+networks:
+  default:
+    driver: bridge
